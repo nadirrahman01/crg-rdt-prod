@@ -506,3 +506,53 @@ async function createDocument(data) {
     
     return doc;
 }
+
+// Process and add images - THIS WAS MISSING!
+async function addImages(files) {
+    const imageParagraphs = [];
+    
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        try {
+            console.log(`Processing image ${i + 1}: ${file.name}`);
+            const arrayBuffer = await file.arrayBuffer();
+            
+            // Remove file extension from name for cleaner caption
+            const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+            
+            imageParagraphs.push(
+                new docx.Paragraph({
+                    children: [
+                        new docx.ImageRun({
+                            data: arrayBuffer,
+                            transformation: {
+                                width: 600,
+                                height: 450
+                            }
+                        })
+                    ],
+                    spacing: { before: 200, after: 100 },
+                    alignment: docx.AlignmentType.CENTER
+                }),
+                new docx.Paragraph({
+                    children: [
+                        new docx.TextRun({
+                            text: `Figure ${i + 1}: ${fileNameWithoutExt}`,
+                            italics: true,
+                            size: 18, // 9pt
+                            font: "Book Antiqua"
+                        })
+                    ],
+                    spacing: { after: 300 },
+                    alignment: docx.AlignmentType.CENTER
+                })
+            );
+        } catch (error) {
+            console.error(`Error processing image ${file.name}:`, error);
+        }
+    }
+    
+    return imageParagraphs;
+}
+
