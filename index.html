@@ -3,61 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Research Documentation Tool</title>
+    <title>Cordoba Research Group - Documentation Tool</title>
     <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>Research Documentation</h1>
+        <h1>Cordoba Research Group<br><span style="font-size: 0.8em;">Research Documentation Tool</span></h1>
         
         <form id="researchForm">
+            <!-- Note Type -->
+            <label for="noteType">Type of Note:</label>
+            <select id="noteType" required>
+                <option value="">Select note type...</option>
+                <option value="General Note">General Note</option>
+                <option value="Equity Research">Equity Research</option>
+                <option value="Macro Research">Macro Research</option>
+                <option value="Fixed Income Research">Fixed Income Research</option>
+                <option value="Commodity Insights">Commodity Insights</option>
+            </select>
+            
+            <!-- Title -->
             <label for="title">Title:</label>
             <input type="text" id="title" required placeholder="Enter research title...">
             
-            <label for="content">Research Content:</label>
-            <textarea id="content" rows="10" required placeholder="Enter your research content..."></textarea>
+            <!-- Topic -->
+            <label for="topic">Topic:</label>
+            <input type="text" id="topic" required placeholder="Enter topic...">
             
-            <label for="imageUpload">Upload Images/Graphs:</label>
+            <!-- Primary Author -->
+            <label for="authorLastName">Primary Author - Last Name:</label>
+            <input type="text" id="authorLastName" required placeholder="e.g., Rahman">
+            
+            <label for="authorFirstName">Primary Author - First Name:</label>
+            <input type="text" id="authorFirstName" required placeholder="e.g., Nadir">
+            
+            <label for="authorPhone">Primary Author - Phone:</label>
+            <input type="text" id="authorPhone" required placeholder="e.g., 44-7398344190">
+            
+            <!-- Co-Authors Section -->
+            <div id="coAuthorsSection">
+                <label>Co-Authors (Optional):</label>
+                <div id="coAuthorsList"></div>
+                <button type="button" id="addCoAuthor" class="secondary-btn">+ Add Co-Author</button>
+            </div>
+            
+            <!-- Analysis and Commentary -->
+            <label for="analysis">Analysis and Commentary:</label>
+            <textarea id="analysis" rows="8" required placeholder="Enter your analysis and commentary..."></textarea>
+            
+            <!-- Key Takeaways -->
+            <label for="keyTakeaways">Key Takeaways:</label>
+            <textarea id="keyTakeaways" rows="6" required placeholder="Enter key takeaways (use bullet points with - or *)..."></textarea>
+            
+            <!-- Content -->
+            <label for="content">Content:</label>
+            <textarea id="content" rows="10" required placeholder="Enter detailed content..."></textarea>
+            
+            <!-- Image Upload -->
+            <label for="imageUpload">Upload Images/Graphs (Optional):</label>
             <input type="file" id="imageUpload" multiple accept="image/*">
             
             <button type="submit">Generate Word Document</button>
         </form>
         
         <div id="message" class="message"></div>
-        
-        <!-- Debug info -->
-        <div id="debug" style="margin-top: 20px; padding: 10px; background: #f0f0f0; font-size: 12px; display: none;">
-            <strong>Debug Info:</strong>
-            <div id="debugContent"></div>
-        </div>
     </div>
     
-    <!-- Try these alternative CDN links -->
+    <!-- External Libraries -->
     <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    
-    <!-- Fallback: Use jsdelivr CDN -->
-    <!-- 
-    <script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    -->
-    
-    <!-- Check if libraries loaded -->
-    <script>
-        window.addEventListener('load', function() {
-            const debugDiv = document.getElementById('debugContent');
-            debugDiv.innerHTML = `
-                docx loaded: ${typeof docx !== 'undefined'}<br>
-                FileSaver loaded: ${typeof saveAs !== 'undefined'}
-            `;
-            document.getElementById('debug').style.display = 'block';
-            
-            if (typeof docx === 'undefined' || typeof saveAs === 'undefined') {
-                document.getElementById('message').className = 'message error';
-                document.getElementById('message').textContent = '✗ Required libraries failed to load. Please refresh the page.';
-            }
-        });
-    </script>
     
     <!-- Your JavaScript -->
     <script src="assets/app.js"></script>
