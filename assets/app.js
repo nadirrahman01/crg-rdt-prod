@@ -338,14 +338,6 @@ async function createDocument(data) {
                             after: 150
                         }
                     }
-                },
-                heading2: {
-                    run: {
-                        font: "Book Antiqua",
-                        size: 24,
-                        bold: true,
-                        color: "000000" // Black color (not blue)
-                    }
                 }
             }
         },
@@ -458,13 +450,18 @@ async function createDocument(data) {
                     spacing: { after: 300 }
                 }),
                 
-                // KEY TAKEAWAYS FIRST (moved before Analysis)
+                // KEY TAKEAWAYS FIRST (BOLD)
                 new docx.Paragraph({
-                    text: "Key Takeaways",
-                    bold: true,
-                    size: 24,
-                    spacing: { after: 200 },
-                    color: "000000"
+                    children: [
+                        new docx.TextRun({
+                            text: "Key Takeaways",
+                            bold: true,
+                            size: 24,
+                            font: "Book Antiqua",
+                            color: "000000"
+                        })
+                    ],
+                    spacing: { after: 200 }
                 }),
                 ...takeawayBullets,
                 
@@ -472,27 +469,37 @@ async function createDocument(data) {
                     spacing: { after: 300 }
                 }),
                 
-                // Analysis and Commentary (now after Key Takeaways)
+                // Analysis and Commentary (BOLD)
                 new docx.Paragraph({
-                    text: "Analysis and Commentary",
-                    bold: true,
-                    size: 24, // 12pt
-                    spacing: { after: 200 },
-                    color: "000000"
+                    children: [
+                        new docx.TextRun({
+                            text: "Analysis and Commentary",
+                            bold: true,
+                            size: 24,
+                            font: "Book Antiqua",
+                            color: "000000"
+                        })
+                    ],
+                    spacing: { after: 200 }
                 }),
                 ...analysisParagraphs,
                 
-                // CONTENT SECTION REMOVED - Content now merged into Analysis
+                // Additional content flows here
                 ...contentParagraphs,
                 
-                // Images
+                // Images - Figures and Charts (BOLD)
                 ...(imageParagraphs.length > 0 ? [
                     new docx.Paragraph({
-                        text: "Figures and Charts",
-                        bold: true,
-                        size: 24,
-                        spacing: { before: 400, after: 200 },
-                        color: "000000"
+                        children: [
+                            new docx.TextRun({
+                                text: "Figures and Charts",
+                                bold: true,
+                                size: 24,
+                                font: "Book Antiqua",
+                                color: "000000"
+                            })
+                        ],
+                        spacing: { before: 400, after: 200 }
                     }),
                     ...imageParagraphs
                 ] : [])
@@ -514,6 +521,9 @@ async function addImages(files) {
             console.log(`Processing image ${i + 1}: ${file.name}`);
             const arrayBuffer = await file.arrayBuffer();
             
+            // Remove file extension from name for cleaner caption
+            const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+            
             imageParagraphs.push(
                 new docx.Paragraph({
                     children: [
@@ -529,11 +539,16 @@ async function addImages(files) {
                     alignment: docx.AlignmentType.CENTER
                 }),
                 new docx.Paragraph({
-                    text: `Figure ${i + 1}: ${file.name}`,
-                    italics: true,
+                    children: [
+                        new docx.TextRun({
+                            text: `Figure ${i + 1}: ${fileNameWithoutExt}`,
+                            italics: true,
+                            size: 18,
+                            font: "Book Antiqua"
+                        })
+                    ],
                     spacing: { after: 300 },
-                    alignment: docx.AlignmentType.CENTER,
-                    size: 18 // 9pt
+                    alignment: docx.AlignmentType.CENTER
                 })
             );
         } catch (error) {
