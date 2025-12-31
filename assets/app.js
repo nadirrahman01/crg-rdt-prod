@@ -188,37 +188,114 @@ async function createDocument(data) {
     // Process images
     const imageParagraphs = await addImages(imageFiles);
     
-    // Build author section (right-aligned)
-    const authorSection = [
-        new docx.Paragraph({
-            text: `${authorLastName}, ${authorFirstName}`,
-            alignment: docx.AlignmentType.RIGHT,
-            spacing: { after: 50 }
-        }),
-        new docx.Paragraph({
-            text: `(${authorPhone})`,
-            alignment: docx.AlignmentType.RIGHT,
-            spacing: { after: 100 }
-        })
-    ];
-    
-    // Add co-authors
-    coAuthors.forEach(coAuthor => {
-        authorSection.push(
-            new docx.Paragraph({
-                text: `${coAuthor.lastName}, ${coAuthor.firstName}`,
-                alignment: docx.AlignmentType.RIGHT,
-                spacing: { after: 50 }
+    // Create table for title, topic, and authors (to align left and right)
+    const infoTable = new docx.Table({
+        width: {
+            size: 100,
+            type: docx.WidthType.PERCENTAGE
+        },
+        borders: {
+            top: { style: docx.BorderStyle.NONE },
+            bottom: { style: docx.BorderStyle.NONE },
+            left: { style: docx.BorderStyle.NONE },
+            right: { style: docx.BorderStyle.NONE },
+            insideHorizontal: { style: docx.BorderStyle.NONE },
+            insideVertical: { style: docx.BorderStyle.NONE }
+        },
+        rows: [
+            // Row 1: Title (left) and Primary Author (right)
+            new docx.TableRow({
+                children: [
+                    new docx.TableCell({
+                        children: [
+                            new docx.Paragraph({
+                                text: title,
+                                bold: true,
+                                size: 28, // 14pt
+                                spacing: { after: 100 }
+                            })
+                        ],
+                        width: {
+                            size: 60,
+                            type: docx.WidthType.PERCENTAGE
+                        },
+                        verticalAlign: docx.VerticalAlign.TOP
+                    }),
+                    new docx.TableCell({
+                        children: [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `${authorLastName.toUpperCase()}, ${authorFirstName.toUpperCase()} (${authorPhone})`,
+                                        bold: true,
+                                        size: 28 // 14pt
+                                    })
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 100 }
+                            })
+                        ],
+                        width: {
+                            size: 40,
+                            type: docx.WidthType.PERCENTAGE
+                        },
+                        verticalAlign: docx.VerticalAlign.TOP
+                    })
+                ]
             }),
-            new docx.Paragraph({
-                text: `(${coAuthor.phone})`,
-                alignment: docx.AlignmentType.RIGHT,
-                spacing: { after: 100 }
+            // Row 2: Topic (left) and Co-Authors (right)
+            new docx.TableRow({
+                children: [
+                    new docx.TableCell({
+                        children: [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: "TOPIC: ",
+                                        bold: true,
+                                        size: 28
+                                    }),
+                                    new docx.TextRun({
+                                        text: topic,
+                                        bold: true,
+                                        size: 28
+                                    })
+                                ],
+                                spacing: { after: 200 }
+                            })
+                        ],
+                        width: {
+                            size: 60,
+                            type: docx.WidthType.PERCENTAGE
+                        },
+                        verticalAlign: docx.VerticalAlign.TOP
+                    }),
+                    new docx.TableCell({
+                        children: coAuthors.map(coAuthor => 
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: `${coAuthor.lastName.toUpperCase()}, ${coAuthor.firstName.toUpperCase()} (${coAuthor.phone})`,
+                                        bold: true,
+                                        size: 28
+                                    })
+                                ],
+                                alignment: docx.AlignmentType.RIGHT,
+                                spacing: { after: 100 }
+                            })
+                        ),
+                        width: {
+                            size: 40,
+                            type: docx.WidthType.PERCENTAGE
+                        },
+                        verticalAlign: docx.VerticalAlign.TOP
+                    })
+                ]
             })
-        );
+        ]
     });
     
-    // Create document
+    // Create document with LANDSCAPE orientation
     const doc = new docx.Document({
         styles: {
             default: {
@@ -238,6 +315,12 @@ async function createDocument(data) {
                         right: 1440,
                         bottom: 1440,
                         left: 1440
+                    },
+                    // LANDSCAPE ORIENTATION
+                    pageSize: {
+                        orientation: docx.PageOrientation.LANDSCAPE,
+                        width: 15840,  // A4 landscape width (11 inches)
+                        height: 12240  // A4 landscape height (8.5 inches)
                     }
                 }
             },
@@ -245,9 +328,15 @@ async function createDocument(data) {
                 default: new docx.Header({
                     children: [
                         new docx.Paragraph({
-                            text: `Cordoba Research Group | ${noteType} | ${dateTimeString}`,
-                            alignment: docx.AlignmentType.LEFT,
-                            spacing: { after: 200 },
+                            children: [
+                                new docx.TextRun({
+                                    text: `Cordoba Research Group | ${noteType} | ${dateTimeString}`,
+                                    size: 16, // 8pt
+                                    font: "Book Antiqua"
+                                })
+                            ],
+                            alignment: docx.AlignmentType.RIGHT,
+                            spacing: { after: 100 },
                             border: {
                                 bottom: {
                                     color: "000000",
@@ -272,37 +361,46 @@ async function createDocument(data) {
                                     size: 6
                                 }
                             },
-                            spacing: { before: 100 }
+                            spacing: { before: 100, after: 100 }
                         }),
                         new docx.Paragraph({
-                            alignment: docx.AlignmentType.CENTER,
                             children: [
                                 new docx.TextRun({
                                     text: "Cordoba Research Group Internal Information",
-                                    size: 20
+                                    size: 16, // 8pt
+                                    font: "Book Antiqua",
+                                    italics: true
                                 }),
                                 new docx.TextRun({
-                                    text: "\t\t",
+                                    text: "\t\t\t\t\t\t"
                                 }),
                                 new docx.TextRun({
                                     children: ["Page ", docx.PageNumber.CURRENT, " of ", docx.PageNumber.TOTAL_PAGES],
-                                    size: 20
+                                    size: 16,
+                                    font: "Book Antiqua",
+                                    italics: true
                                 })
+                            ],
+                            alignment: docx.AlignmentType.JUSTIFIED,
+                            tabStops: [
+                                {
+                                    type: docx.TabStopType.CENTER,
+                                    position: docx.TabStopPosition.CENTER
+                                },
+                                {
+                                    type: docx.TabStopType.RIGHT,
+                                    position: docx.TabStopPosition.MAX
+                                }
                             ]
                         })
                     ]
                 })
             },
             children: [
-                // Title (Size 14, Bold, Left-aligned)
-                new docx.Paragraph({
-                    text: title,
-                    bold: true,
-                    size: 28, // 14pt = 28 half-points
-                    spacing: { after: 100 }
-                }),
+                // Info table (Title + Topic on left, Authors on right)
+                infoTable,
                 
-                // Horizontal line
+                // Horizontal line after info section
                 new docx.Paragraph({
                     border: {
                         bottom: {
@@ -312,36 +410,7 @@ async function createDocument(data) {
                             size: 6
                         }
                     },
-                    spacing: { after: 200 }
-                }),
-                
-                // Topic label and value (Size 14)
-                new docx.Paragraph({
-                    text: "Topic:",
-                    bold: true,
-                    size: 28,
-                    spacing: { after: 100 }
-                }),
-                new docx.Paragraph({
-                    text: topic,
-                    size: 20,
-                    spacing: { after: 200 }
-                }),
-                
-                // Author section (right side)
-                ...authorSection,
-                
-                // Horizontal line
-                new docx.Paragraph({
-                    border: {
-                        bottom: {
-                            color: "000000",
-                            space: 1,
-                            style: docx.BorderStyle.SINGLE,
-                            size: 6
-                        }
-                    },
-                    spacing: { after: 300, before: 100 }
+                    spacing: { after: 300 }
                 }),
                 
                 // Analysis and Commentary
@@ -416,8 +485,8 @@ async function addImages(files) {
                         new docx.ImageRun({
                             data: arrayBuffer,
                             transformation: {
-                                width: 500,
-                                height: 375
+                                width: 600,
+                                height: 450
                             }
                         })
                     ],
