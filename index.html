@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Research Documentation Tool</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Research Documentation</h1>
+        
+        <form id="researchForm">
+            <label>Title:</label>
+            <input type="text" id="title" required>
+            
+            <label>Research Content:</label>
+            <textarea id="content" rows="10" required></textarea>
+            
+            <label>Upload Images/Graphs:</label>
+            <input type="file" id="imageUpload" multiple accept="image/*">
+            
+            <button type="submit">Generate Word Document</button>
+        </form>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
