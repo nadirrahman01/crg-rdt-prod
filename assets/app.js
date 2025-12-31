@@ -14,9 +14,21 @@ document.getElementById('researchForm').addEventListener('submit', async functio
     messageDiv.textContent = '';
     
     try {
+        // Check if libraries are loaded
+        if (typeof docx === 'undefined') {
+            throw new Error('docx library not loaded');
+        }
+        if (typeof saveAs === 'undefined') {
+            throw new Error('FileSaver library not loaded');
+        }
+        
         const title = document.getElementById('title').value;
         const content = document.getElementById('content').value;
         const imageFiles = document.getElementById('imageUpload').files;
+        
+        console.log('Title:', title);
+        console.log('Content length:', content.length);
+        console.log('Number of images:', imageFiles.length);
         
         // Create paragraphs from content (split by line breaks)
         const contentParagraphs = content.split('\n').filter(line => line.trim()).map(line => 
@@ -29,60 +41,54 @@ document.getElementById('researchForm').addEventListener('submit', async functio
         // Process images
         const imageParagraphs = await addImages(imageFiles);
         
-        // Create Word document
+        console.log('Creating document...');
+        
+        // Create Word document with simpler structure
         const doc = new docx.Document({
             sections: [{
-                properties: {
-                    page: {
-                        margin: {
-                            top: 1440,    // 1 inch = 1440 twentieths of a point
-                            right: 1440,
-                            bottom: 1440,
-                            left: 1440,
-                        }
-                    }
-                },
                 children: [
                     // Title
                     new docx.Paragraph({
                         text: title,
                         heading: docx.HeadingLevel.HEADING_1,
-                        spacing: { after: 400 },
-                        alignment: docx.AlignmentType.CENTER
+                        spacing: { after: 400 }
                     }),
                     
                     // Content
                     ...contentParagraphs,
                     
-                    // Images section
-                    ...(imageParagraphs.length > 0 ? [
-                        new docx.Paragraph({
-                            text: "Figures and Graphs",
-                            heading: docx.HeadingLevel.HEADING_2,
-                            spacing: { before: 400, after: 200 }
-                        }),
-                        ...imageParagraphs
-                    ] : [])
+                    // Images
+                    ...imageParagraphs
                 ]
             }]
         });
         
+        console.log('Generating blob...');
+        
         // Generate and download
         const blob = await docx.Packer.toBlob(doc);
+        
+        console.log('Blob created, size:', blob.size);
+        
         const fileName = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_research.docx`;
         saveAs(blob, fileName);
+        
+        console.log('Download initiated');
         
         // Show success message
         messageDiv.className = 'message success';
         messageDiv.textContent = `✓ Document "${fileName}" generated successfully!`;
         
         // Reset form
-        document.getElementById('researchForm').reset();
+        setTimeout(() => {
+            document.getElementById('researchForm').reset();
+        }, 1000);
         
     } catch (error) {
-        console.error('Error generating document:', error);
+        console.error('Detailed error:', error);
+        console.error('Error stack:', error.stack);
         messageDiv.className = 'message error';
-        messageDiv.textContent = '✗ Error generating document. Please try again.';
+        messageDiv.textContent = `✗ Error: ${error.message}. Check console for details.`;
     } finally {
         // Reset button
         button.disabled = false;
@@ -99,7 +105,11 @@ async function addImages(files) {
         const file = files[i];
         
         try {
+            console.log(`Processing image ${i + 1}: ${file.name}`);
+            
             const arrayBuffer = await file.arrayBuffer();
+            
+            console.log(`Image ${i + 1} loaded, size:`, arrayBuffer.byteLength);
             
             // Add image with caption
             imageParagraphs.push(
@@ -113,35 +123,19 @@ async function addImages(files) {
                             }
                         })
                     ],
-                    spacing: { before: 200, after: 100 },
-                    alignment: docx.AlignmentType.CENTER
+                    spacing: { before: 200, after: 100 }
                 }),
                 new docx.Paragraph({
                     text: `Figure ${i + 1}: ${file.name}`,
                     italics: true,
-                    spacing: { after: 300 },
-                    alignment: docx.AlignmentType.CENTER
+                    spacing: { after: 300 }
                 })
             );
         } catch (error) {
             console.error(`Error processing image ${file.name}:`, error);
+            // Continue with other images even if one fails
         }
     }
     
     return imageParagraphs;
 }
-
-// Optional: Add character counter
-document.getElementById('content').addEventListener('input', function(e) {
-    const charCount = e.target.value.length;
-    let counter = document.querySelector('.char-counter');
-    
-    if (!counter) {
-        counter = document.createElement('div');
-        counter.className = 'char-counter';
-        e.target.parentNode.insertBefore(counter, e.target.nextSibling);
-    }
-    
-    counter.textContent = `${charCount} characters`;
-});
-
