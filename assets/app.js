@@ -450,15 +450,14 @@ async function createDocument(data) {
                     spacing: { after: 300 }
                 }),
                 
-                // KEY TAKEAWAYS FIRST (BOLD)
+                // KEY TAKEAWAYS HEADING - NOW PROPERLY BOLD
                 new docx.Paragraph({
                     children: [
                         new docx.TextRun({
                             text: "Key Takeaways",
                             bold: true,
-                            size: 24,
-                            font: "Book Antiqua",
-                            color: "000000"
+                            size: 24, // 12pt
+                            font: "Book Antiqua"
                         })
                     ],
                     spacing: { after: 200 }
@@ -469,15 +468,14 @@ async function createDocument(data) {
                     spacing: { after: 300 }
                 }),
                 
-                // Analysis and Commentary (BOLD)
+                // ANALYSIS AND COMMENTARY HEADING - NOW PROPERLY BOLD
                 new docx.Paragraph({
                     children: [
                         new docx.TextRun({
                             text: "Analysis and Commentary",
                             bold: true,
-                            size: 24,
-                            font: "Book Antiqua",
-                            color: "000000"
+                            size: 24, // 12pt
+                            font: "Book Antiqua"
                         })
                     ],
                     spacing: { after: 200 }
@@ -487,16 +485,15 @@ async function createDocument(data) {
                 // Additional content flows here
                 ...contentParagraphs,
                 
-                // Images - Figures and Charts (BOLD)
+                // FIGURES AND CHARTS HEADING - NOW PROPERLY BOLD
                 ...(imageParagraphs.length > 0 ? [
                     new docx.Paragraph({
                         children: [
                             new docx.TextRun({
                                 text: "Figures and Charts",
                                 bold: true,
-                                size: 24,
-                                font: "Book Antiqua",
-                                color: "000000"
+                                size: 24, // 12pt
+                                font: "Book Antiqua"
                             })
                         ],
                         spacing: { before: 400, after: 200 }
@@ -508,53 +505,4 @@ async function createDocument(data) {
     });
     
     return doc;
-}
-
-// Process and add images
-async function addImages(files) {
-    const imageParagraphs = [];
-    
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
-        try {
-            console.log(`Processing image ${i + 1}: ${file.name}`);
-            const arrayBuffer = await file.arrayBuffer();
-            
-            // Remove file extension from name for cleaner caption
-            const fileNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
-            
-            imageParagraphs.push(
-                new docx.Paragraph({
-                    children: [
-                        new docx.ImageRun({
-                            data: arrayBuffer,
-                            transformation: {
-                                width: 600,
-                                height: 450
-                            }
-                        })
-                    ],
-                    spacing: { before: 200, after: 100 },
-                    alignment: docx.AlignmentType.CENTER
-                }),
-                new docx.Paragraph({
-                    children: [
-                        new docx.TextRun({
-                            text: `Figure ${i + 1}: ${fileNameWithoutExt}`,
-                            italics: true,
-                            size: 18,
-                            font: "Book Antiqua"
-                        })
-                    ],
-                    spacing: { after: 300 },
-                    alignment: docx.AlignmentType.CENTER
-                })
-            );
-        } catch (error) {
-            console.error(`Error processing image ${file.name}:`, error);
-        }
-    }
-    
-    return imageParagraphs;
 }
