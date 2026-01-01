@@ -1,86 +1,123 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cordoba Research Group - Documentation Tool</title>
-    <link rel="stylesheet" href="assets/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cordoba Research Group - Documentation Tool</title>
+  <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Cordoba Research Group<br><span style="font-size: 0.8em;">Research Documentation Tool</span></h1>
-        
-        <form id="researchForm">
-            <!-- Note Type -->
-            <label for="noteType">Type of Note:</label>
-            <select id="noteType" required>
-                <option value="">Select note type...</option>
-                <option value="General Note">General Note</option>
-                <option value="Equity Research">Equity Research</option>
-                <option value="Macro Research">Macro Research</option>
-                <option value="Fixed Income Research">Fixed Income Research</option>
-                <option value="Commodity Insights">Commodity Insights</option>
-            </select>
-            
-            <!-- Title -->
-            <label for="title">Title:</label>
-            <input type="text" id="title" required placeholder="Enter research title...">
-            
-            <!-- Topic -->
-            <label for="topic">Topic:</label>
-            <input type="text" id="topic" required placeholder="Enter topic...">
-            
-            <!-- Primary Author -->
-            <label for="authorLastName">Primary Author - Last Name:</label>
-            <input type="text" id="authorLastName" required placeholder="e.g., Rahman">
-            
-            <label for="authorFirstName">Primary Author - First Name:</label>
-            <input type="text" id="authorFirstName" required placeholder="e.g., Nadir">
-            
-            <label for="authorPhone">Primary Author - Phone:</label>
-            <input type="text" id="authorPhone" required placeholder="e.g., 44-7398344190">
-            
-            <!-- Co-Authors Section -->
-            <div id="coAuthorsSection">
-                <label>Co-Authors (Optional):</label>
-                <div id="coAuthorsList"></div>
-                <button type="button" id="addCoAuthor" class="secondary-btn">+ Add Co-Author</button>
-            </div>
-            
-            <!-- Key Takeaways -->
-            <label for="keyTakeaways">Key Takeaways:</label>
-            <textarea id="keyTakeaways" rows="6" required placeholder="Enter key takeaways (use bullet points with - or *)..."></textarea>
-            
-            <!-- Analysis and Commentary -->
-            <label for="analysis">Analysis and Commentary:</label>
-            <textarea id="analysis" rows="8" required placeholder="Enter your analysis and commentary..."></textarea>
-            
-            <!-- Additional Content -->
-            <label for="content">Additional Content (Optional):</label>
-            <textarea id="content" rows="10" placeholder="Enter any additional detailed content..."></textarea>
-            
-            <!-- The Cordoba View - NEW -->
-            <label for="cordobaView">The Cordoba View (Optional):</label>
-            <textarea id="cordobaView" rows="6" placeholder="Enter Cordoba's perspective and recommendations..."></textarea>
-            
-            <!-- Image Upload -->
-            <label for="imageUpload">Upload Images/Graphs (Optional):</label>
-            <p style="font-size: 0.9em; color: #64748b; margin-top: -10px; margin-bottom: 10px;">
-                <em>Note: The filename will be used as the figure caption in the document. Name your files accordingly (e.g., "SP500_Performance_2024.png" will appear as "Figure 1: SP500_Performance_2024").</em>
-            </p>
-            <input type="file" id="imageUpload" multiple accept="image/*">
-            
-            <button type="submit">Generate Word Document</button>
-        </form>
-        
-        <div id="message" class="message"></div>
-    </div>
-    
-    <!-- External Libraries -->
-    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
-    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    
-    <!-- Your JavaScript -->
-    <script src="assets/app.js"></script>
+  <div class="container">
+    <h1>Cordoba Research Group<br><span style="font-size: 0.8em;">Research Documentation Tool</span></h1>
+
+    <form id="researchForm">
+      <!-- Note Type -->
+      <label for="noteType">Type of Note:</label>
+      <select id="noteType" required>
+        <option value="">Select note type...</option>
+        <option value="General Note">General Note</option>
+        <option value="Equity Research">Equity Research</option>
+        <option value="Macro Research">Macro Research</option>
+        <option value="Fixed Income Research">Fixed Income Research</option>
+        <option value="Commodity Insights">Commodity Insights</option>
+      </select>
+
+      <!-- Title -->
+      <label for="title">Title:</label>
+      <input type="text" id="title" required placeholder="Enter research title...">
+
+      <!-- Topic -->
+      <label for="topic">Topic:</label>
+      <input type="text" id="topic" required placeholder="Enter topic...">
+
+      <!-- Primary Author -->
+      <label for="authorLastName">Primary Author - Last Name:</label>
+      <input type="text" id="authorLastName" required placeholder="e.g., Rahman">
+
+      <label for="authorFirstName">Primary Author - First Name:</label>
+      <input type="text" id="authorFirstName" required placeholder="e.g., Nadir">
+
+      <label for="authorPhone">Primary Author - Phone:</label>
+      <input type="text" id="authorPhone" required placeholder="e.g., 44-7398344190">
+
+      <!-- Co-Authors Section -->
+      <div id="coAuthorsSection">
+        <label>Co-Authors (Optional):</label>
+        <div id="coAuthorsList"></div>
+        <button type="button" id="addCoAuthor" class="secondary-btn">+ Add Co-Author</button>
+      </div>
+
+      <!-- Equity Research: Model & Valuation Attachments (NEW) -->
+      <div id="equitySection" class="equity-section" style="display:none;">
+        <div class="equity-header">
+          <div class="equity-title">Equity Research — Financial Model Pack</div>
+          <div class="equity-subtitle">Attach your DCF / Excel model, and capture the key valuation assumptions so the note is auditable.</div>
+        </div>
+
+        <label for="ticker">Ticker / Company:</label>
+        <input type="text" id="ticker" placeholder="e.g., MSFT (Microsoft)">
+
+        <label for="modelType">Model Type:</label>
+        <select id="modelType">
+          <option value="">Select model type...</option>
+          <option value="DCF">DCF</option>
+          <option value="Comps / Multiples">Comps / Multiples</option>
+          <option value="SOTP">SOTP</option>
+          <option value="LBO (if relevant)">LBO (if relevant)</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <label for="modelFiles">Upload Model Files (Excel / PDF) (Optional):</label>
+        <p style="font-size: 0.9em; color: #64748b; margin-top: -10px; margin-bottom: 10px;">
+          <em>Tip: Upload the Excel model (.xlsx/.xlsm) and any exported summary tabs as PDF if you have them.</em>
+        </p>
+        <input type="file" id="modelFiles" multiple accept=".xlsx,.xlsm,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/pdf">
+
+        <label for="valuationSummary">Valuation Summary (paste key outputs) (Optional):</label>
+        <textarea id="valuationSummary" rows="6" placeholder="Example: Base-case FV per share, current price, implied upside/downside, and 2–3 lines on the main driver(s)."></textarea>
+
+        <label for="keyAssumptions">Key Assumptions (one per line) (Optional):</label>
+        <textarea id="keyAssumptions" rows="7" placeholder="Example:\nWACC: 8.5%\nTerminal growth: 2.0%\nRevenue CAGR (5y): 7%\nEBIT margin (exit): 28%\nTax rate: 19%\nNet debt: £X\nShares: X"></textarea>
+
+        <label for="scenarioNotes">Scenario / Sensitivity Notes (Optional):</label>
+        <textarea id="scenarioNotes" rows="5" placeholder="Example: What breaks the thesis? What is the bear/base/bull driver? Any sensitivity highlights (WACC / g / margin)?"></textarea>
+      </div>
+
+      <!-- Key Takeaways -->
+      <label for="keyTakeaways">Key Takeaways:</label>
+      <textarea id="keyTakeaways" rows="6" required placeholder="Enter key takeaways (use bullet points with - or *)..."></textarea>
+
+      <!-- Analysis and Commentary -->
+      <label for="analysis">Analysis and Commentary:</label>
+      <textarea id="analysis" rows="8" required placeholder="Enter your analysis and commentary..."></textarea>
+
+      <!-- Additional Content -->
+      <label for="content">Additional Content (Optional):</label>
+      <textarea id="content" rows="10" placeholder="Enter any additional detailed content..."></textarea>
+
+      <!-- The Cordoba View -->
+      <label for="cordobaView">The Cordoba View (Optional):</label>
+      <textarea id="cordobaView" rows="6" placeholder="Enter Cordoba's perspective and recommendations..."></textarea>
+
+      <!-- Image Upload -->
+      <label for="imageUpload">Upload Images/Graphs (Optional):</label>
+      <p style="font-size: 0.9em; color: #64748b; margin-top: -10px; margin-bottom: 10px;">
+        <em>Note: The filename will be used as the figure caption in the document. Name your files accordingly (e.g., "SP500_Performance_2024.png" will appear as "Figure 1: SP500_Performance_2024").</em>
+      </p>
+      <input type="file" id="imageUpload" multiple accept="image/*">
+
+      <button type="submit">Generate Word Document</button>
+    </form>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <!-- External Libraries -->
+  <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+  <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <!-- Your JavaScript -->
+  <script src="assets/app.js"></script>
 </body>
 </html>
