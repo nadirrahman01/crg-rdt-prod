@@ -2,7 +2,6 @@
 
 console.log('app.js loaded successfully');
 
-// ====== DOM-safe boot ======
 window.addEventListener('DOMContentLoaded', () => {
 
   // ================================
@@ -29,7 +28,6 @@ window.addEventListener('DOMContentLoaded', () => {
       coAuthorsList.appendChild(coAuthorDiv);
     });
 
-    // Delegate remove clicks (more reliable than inline onclick)
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.remove-coauthor');
       if (!btn) return;
@@ -40,24 +38,20 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ================================
-  // Equity Research section toggle (NEW)
+  // Equity Research section toggle
   // ================================
   const noteTypeEl = document.getElementById('noteType');
   const equitySectionEl = document.getElementById('equitySection');
 
   function toggleEquitySection() {
     if (!noteTypeEl || !equitySectionEl) return;
-
     const isEquity = noteTypeEl.value === 'Equity Research';
     equitySectionEl.style.display = isEquity ? 'block' : 'none';
-
-    // helpful debug
-    console.log('[Equity toggle]', 'noteType=', noteTypeEl.value, '=> display', equitySectionEl.style.display);
   }
 
   if (noteTypeEl && equitySectionEl) {
     noteTypeEl.addEventListener('change', toggleEquitySection);
-    toggleEquitySection(); // initial state
+    toggleEquitySection();
   } else {
     console.warn('Equity toggle not wired. Missing #noteType or #equitySection in index.html');
   }
@@ -80,7 +74,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ================================
-  // Process and add images
+  // Images
   // ================================
   async function addImages(files) {
     const imageParagraphs = [];
@@ -129,6 +123,29 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Create a clickable hyperlink run for external URLs
+  function hyperlinkParagraph(label, url) {
+    const safeUrl = (url || "").trim();
+    if (!safeUrl) return null;
+
+    return new docx.Paragraph({
+      children: [
+        new docx.TextRun({ text: label, bold: true }),
+        new docx.TextRun({ text: " " }),
+        new docx.ExternalHyperlink({
+          children: [
+            new docx.TextRun({
+              text: safeUrl,
+              style: "Hyperlink"
+            })
+          ],
+          link: safeUrl
+        })
+      ],
+      spacing: { after: 120 }
+    });
+  }
+
   // ================================
   // Create Word Document
   // ================================
@@ -139,8 +156,9 @@ window.addEventListener('DOMContentLoaded', () => {
       coAuthors,
       analysis, keyTakeaways, content, cordobaView,
       imageFiles, dateTimeString,
+
       // equity fields
-      ticker, modelType, valuationSummary, keyAssumptions, scenarioNotes, modelFiles
+      ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink
     } = data;
 
     const takeawayLines = (keyTakeaways || "").split('\n');
@@ -228,66 +246,104 @@ window.addEventListener('DOMContentLoaded', () => {
       })
     ];
 
-    // Equity section in DOC
+    // ================================
+    // Equity block (NO title heading)
+    // ================================
     if (noteType === "Equity Research") {
       const attachedModelNames = (modelFiles && modelFiles.length) ? Array.from(modelFiles).map(f => f.name) : [];
 
+      // Ticker/Company line (optional)
+      if ((ticker || "").trim()) {
+        documentChildren.push(
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({ text: "Ticker / Company: ", bold: true }),
+              new docx.TextRun({ text: ticker.trim() })
+            ],
+            spacing: { after: 150 }
+          })
+        );
+      }
+
+      // Model link (recommended; clickable)
+      const modelLinkPara = hyperlinkParagraph("Model link:", modelLink);
+      if (modelLinkPara) documentChildren.push(modelLinkPara);
+
+      // Attached model files heading (12pt)
       documentChildren.push(
         new docx.Paragraph({
-          children: [new docx.TextRun({ text: "Equity Research — Financial Model Pack", bold: true, size: 24, font: "Book Antiqua" })],
-          spacing: { after: 200 }
+          children: [
+            new docx.TextRun({
+              text: "Attached model files:",
+              bold: true,
+              size: 24, // 12pt
+              font: "Book Antiqua"
+            })
+          ],
+          spacing: { after: 120 }
         })
       );
 
-      if ((ticker || "").trim()) {
-        documentChildren.push(new docx.Paragraph({
-          children: [new docx.TextRun({ text: "Ticker / Company: ", bold: true }), new docx.TextRun({ text: ticker.trim() })],
-          spacing: { after: 120 }
-        }));
-      }
-
-      if ((modelType || "").trim()) {
-        documentChildren.push(new docx.Paragraph({
-          children: [new docx.TextRun({ text: "Model Type: ", bold: true }), new docx.TextRun({ text: modelType.trim() })],
-          spacing: { after: 150 }
-        }));
-      }
-
-      documentChildren.push(new docx.Paragraph({
-        children: [new docx.TextRun({ text: "Attached model files:", bold: true })],
-        spacing: { after: 120 }
-      }));
-
       if (attachedModelNames.length) {
         attachedModelNames.forEach(name => {
-          documentChildren.push(new docx.Paragraph({ text: name, bullet: { level: 0 }, spacing: { after: 80 } }));
+          documentChildren.push(
+            new docx.Paragraph({
+              text: name,
+              bullet: { level: 0 },
+              spacing: { after: 80 }
+            })
+          );
         });
       } else {
         documentChildren.push(new docx.Paragraph({ text: "None uploaded", spacing: { after: 120 } }));
       }
 
+      // Valuation Summary (optional)
       if ((valuationSummary || "").trim()) {
         documentChildren.push(
-          new docx.Paragraph({ children: [new docx.TextRun({ text: "Valuation Summary", bold: true })], spacing: { before: 120, after: 100 } }),
+          new docx.Paragraph({
+            children: [new docx.TextRun({ text: "Valuation Summary", bold: true })],
+            spacing: { before: 120, after: 100 }
+          }),
           ...linesToParagraphs(valuationSummary, 120)
         );
       }
 
+      // Key Assumptions heading (12pt) + bullets
       if ((keyAssumptions || "").trim()) {
-        documentChildren.push(new docx.Paragraph({ children: [new docx.TextRun({ text: "Key Assumptions", bold: true })], spacing: { before: 120, after: 100 } }));
+        documentChildren.push(
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({
+                text: "Key Assumptions",
+                bold: true,
+                size: 24, // 12pt
+                font: "Book Antiqua"
+              })
+            ],
+            spacing: { before: 120, after: 100 }
+          })
+        );
+
         keyAssumptions.split('\n').forEach(line => {
           if (!line.trim()) return;
-          documentChildren.push(new docx.Paragraph({
-            text: line.replace(/^[-*•]\s*/, '').trim(),
-            bullet: { level: 0 },
-            spacing: { after: 80 }
-          }));
+          documentChildren.push(
+            new docx.Paragraph({
+              text: line.replace(/^[-*•]\s*/, '').trim(),
+              bullet: { level: 0 },
+              spacing: { after: 80 }
+            })
+          );
         });
       }
 
+      // Scenario notes (optional)
       if ((scenarioNotes || "").trim()) {
         documentChildren.push(
-          new docx.Paragraph({ children: [new docx.TextRun({ text: "Scenario / Sensitivity Notes", bold: true })], spacing: { before: 120, after: 100 } }),
+          new docx.Paragraph({
+            children: [new docx.TextRun({ text: "Scenario / Sensitivity Notes", bold: true })],
+            spacing: { before: 120, after: 100 }
+          }),
           ...linesToParagraphs(scenarioNotes, 120)
         );
       }
@@ -426,11 +482,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // Equity fields
       const ticker = document.getElementById('ticker') ? document.getElementById('ticker').value : "";
-      const modelType = document.getElementById('modelType') ? document.getElementById('modelType').value : "";
       const valuationSummary = document.getElementById('valuationSummary') ? document.getElementById('valuationSummary').value : "";
       const keyAssumptions = document.getElementById('keyAssumptions') ? document.getElementById('keyAssumptions').value : "";
       const scenarioNotes = document.getElementById('scenarioNotes') ? document.getElementById('scenarioNotes').value : "";
       const modelFiles = document.getElementById('modelFiles') ? document.getElementById('modelFiles').files : null;
+      const modelLink = document.getElementById('modelLink') ? document.getElementById('modelLink').value : "";
 
       const now = new Date();
       const dateTimeString = formatDateTime(now);
@@ -449,7 +505,8 @@ window.addEventListener('DOMContentLoaded', () => {
         coAuthors,
         analysis, keyTakeaways, content, cordobaView,
         imageFiles, dateTimeString,
-        ticker, modelType, valuationSummary, keyAssumptions, scenarioNotes, modelFiles
+
+        ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink
       });
 
       const blob = await docx.Packer.toBlob(doc);
