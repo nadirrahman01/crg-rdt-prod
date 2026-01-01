@@ -549,7 +549,7 @@ window.addEventListener("DOMContentLoaded", () => {
               new docx.Paragraph({
                 children: [
                   new docx.TextRun({
-                    text: `Cordoba Research Group | ${noteType} | ${dateTimeString}`,
+                    text: `Cordoba Research Group | ${noteType} | Published on ${dateTimeString}`,
                     size: 16,
                     font: "Book Antiqua"
                   })
