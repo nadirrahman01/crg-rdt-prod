@@ -350,7 +350,6 @@ window.addEventListener('DOMContentLoaded', () => {
           new docx.Paragraph({
             children: [new docx.TextRun({ text: "Scenario / Sensitivity Notes", bold: true })],
             spacing: { before: 120, after: 100 }
-            size: 24, // 12pt
           }),
           ...linesToParagraphs(scenarioNotes, 120)
         );
