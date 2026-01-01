@@ -17,7 +17,6 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --radius: 8px;
 
-  /* NEW: subtle section accent */
   --section-bg: rgba(26, 54, 93, 0.04);
 }
 
@@ -66,10 +65,7 @@ label {
 }
 
 /* ========== Form Styles ========== */
-form {
-  display: flex;
-  flex-direction: column;
-}
+form { display: flex; flex-direction: column; }
 
 input[type="text"],
 textarea,
@@ -104,15 +100,9 @@ select:focus {
 
 input[type="text"]:hover,
 textarea:hover,
-select:hover {
-  border-color: var(--secondary-color);
-}
+select:hover { border-color: var(--secondary-color); }
 
-textarea {
-  resize: vertical;
-  min-height: 120px;
-  line-height: 1.6;
-}
+textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
 
 /* ========== Co-Authors Section ========== */
 #coAuthorsSection {
@@ -167,7 +157,7 @@ textarea {
 
 .secondary-btn:hover { background-color: #475569; }
 
-/* ========== NEW: Equity Section Styles ========== */
+/* ========== Equity Section Styles ========== */
 .equity-section {
   margin-top: 22px;
   padding: 20px;
@@ -232,9 +222,7 @@ input[type="file"]::file-selector-button {
   transition: background-color 0.3s ease;
 }
 
-input[type="file"]::file-selector-button:hover {
-  background-color: var(--primary-hover);
-}
+input[type="file"]::file-selector-button:hover { background-color: var(--primary-hover); }
 
 /* ========== Button Styles ========== */
 button[type="submit"] {
@@ -326,7 +314,6 @@ button[type="submit"]:disabled {
   h1 { font-size: 1.3rem; }
 }
 
-/* ========== Accessibility ========== */
 *:focus-visible {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
