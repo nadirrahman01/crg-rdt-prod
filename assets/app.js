@@ -1,5 +1,4 @@
 // assets/app.js
-
 console.log('app.js loaded successfully');
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -57,7 +56,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ================================
-  // Format date and time
+  // Date/time formatting
   // ================================
   function formatDateTime(date) {
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -74,7 +73,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ================================
-  // Images
+  // Add images to Word (user uploads)
   // ================================
   async function addImages(files) {
     const imageParagraphs = [];
@@ -147,6 +146,138 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // ================================
+  // Price chart (Stooq -> Chart.js -> Word image)
+  // ================================
+  let priceChart = null;
+  let priceChartImageBytes = null;
+
+  const chartStatus = document.getElementById("chartStatus");
+  const fetchChartBtn = document.getElementById("fetchPriceChart");
+  const chartRangeEl = document.getElementById("chartRange");
+  const priceChartCanvas = document.getElementById("priceChart");
+
+  function stooqSymbolFromTicker(ticker) {
+    // Stooq format: lowercase; for US equities usually ".us"
+    // If user already includes a suffix (e.g., "7203.jp"), keep it.
+    const t = (ticker || "").trim();
+    if (!t) return null;
+
+    if (t.includes(".")) return t.toLowerCase();
+    return `${t.toLowerCase()}.us`;
+  }
+
+  function computeStartDate(range) {
+    const now = new Date();
+    const d = new Date(now);
+    if (range === "6mo") d.setMonth(d.getMonth() - 6);
+    else if (range === "1y") d.setFullYear(d.getFullYear() - 1);
+    else if (range === "2y") d.setFullYear(d.getFullYear() - 2);
+    else if (range === "5y") d.setFullYear(d.getFullYear() - 5);
+    else d.setFullYear(d.getFullYear() - 1);
+    return d;
+  }
+
+  async function fetchStooqDaily(symbol) {
+    const url = `https://stooq.com/q/d/l/?s=${encodeURIComponent(symbol)}&i=d`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Could not fetch price data.");
+
+    const text = await res.text();
+    const lines = text.trim().split("\n");
+    if (lines.length < 5) throw new Error("Not enough data returned. Check ticker.");
+
+    const rows = lines.slice(1).map(line => line.split(","));
+    const out = rows
+      .map(r => ({ date: r[0], close: Number(r[4]) }))
+      .filter(x => x.date && Number.isFinite(x.close));
+
+    if (!out.length) throw new Error("No usable price data.");
+    return out;
+  }
+
+  function renderChart({ labels, values, title }) {
+    if (!priceChartCanvas || typeof Chart === "undefined") return;
+
+    if (priceChart) {
+      priceChart.destroy();
+      priceChart = null;
+    }
+
+    priceChart = new Chart(priceChartCanvas, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: title,
+          data: values,
+          pointRadius: 0,
+          borderWidth: 2,
+          tension: 0.18
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { intersect: false, mode: "index" }
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 6 } },
+          y: { ticks: { maxTicksLimit: 6 } }
+        }
+      }
+    });
+  }
+
+  function canvasToPngBytes(canvas) {
+    const dataUrl = canvas.toDataURL("image/png");
+    const b64 = dataUrl.split(",")[1];
+    return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  }
+
+  async function buildPriceChart() {
+    try {
+      const tickerVal = (document.getElementById("ticker")?.value || "").trim();
+      if (!tickerVal) throw new Error("Enter a ticker first.");
+
+      const range = chartRangeEl ? chartRangeEl.value : "6mo";
+      const symbol = stooqSymbolFromTicker(tickerVal);
+      if (!symbol) throw new Error("Invalid ticker.");
+
+      if (chartStatus) chartStatus.textContent = "Fetching price data…";
+
+      const data = await fetchStooqDaily(symbol);
+
+      const start = computeStartDate(range);
+      const filtered = data.filter(x => new Date(x.date) >= start);
+      if (filtered.length < 10) throw new Error("Not enough data for selected range.");
+
+      const labels = filtered.map(x => x.date);
+      const values = filtered.map(x => x.close);
+
+      renderChart({
+        labels,
+        values,
+        title: `${tickerVal.toUpperCase()} Close`
+      });
+
+      // wait a tick so chart paints
+      await new Promise(r => setTimeout(r, 150));
+      priceChartImageBytes = canvasToPngBytes(priceChartCanvas);
+
+      if (chartStatus) chartStatus.textContent = `✓ Chart ready (${range.toUpperCase()})`;
+    } catch (e) {
+      priceChartImageBytes = null;
+      if (chartStatus) chartStatus.textContent = `✗ ${e.message}`;
+    }
+  }
+
+  if (fetchChartBtn) {
+    fetchChartBtn.addEventListener("click", buildPriceChart);
+  }
+
+  // ================================
   // Create Word Document
   // ================================
   async function createDocument(data) {
@@ -158,7 +289,9 @@ window.addEventListener('DOMContentLoaded', () => {
       imageFiles, dateTimeString,
 
       // equity fields
-      ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink
+      ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink,
+      // chart image bytes
+      priceChartImageBytes
     } = data;
 
     const takeawayLines = (keyTakeaways || "").split('\n');
@@ -174,6 +307,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const imageParagraphs = await addImages(imageFiles);
 
+    // title/topic/authors table
     const infoTable = new docx.Table({
       width: { size: 100, type: docx.WidthType.PERCENTAGE },
       borders: {
@@ -247,12 +381,11 @@ window.addEventListener('DOMContentLoaded', () => {
     ];
 
     // ================================
-    // Equity block (NO title heading)
+    // Equity block (no extra heading)
     // ================================
     if (noteType === "Equity Research") {
       const attachedModelNames = (modelFiles && modelFiles.length) ? Array.from(modelFiles).map(f => f.name) : [];
 
-      // Ticker/Company line (optional)
       if ((ticker || "").trim()) {
         documentChildren.push(
           new docx.Paragraph({
@@ -265,9 +398,35 @@ window.addEventListener('DOMContentLoaded', () => {
         );
       }
 
-      // Model link (recommended; clickable)
       const modelLinkPara = hyperlinkParagraph("Model link:", modelLink);
       if (modelLinkPara) documentChildren.push(modelLinkPara);
+
+      // Price Chart (if fetched)
+      if (priceChartImageBytes) {
+        documentChildren.push(
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({
+                text: "Price Chart",
+                bold: true,
+                size: 24, // 12pt
+                font: "Book Antiqua"
+              })
+            ],
+            spacing: { before: 120, after: 120 }
+          }),
+          new docx.Paragraph({
+            children: [
+              new docx.ImageRun({
+                data: priceChartImageBytes,
+                transformation: { width: 650, height: 300 }
+              })
+            ],
+            alignment: docx.AlignmentType.CENTER,
+            spacing: { after: 200 }
+          })
+        );
+      }
 
       // Attached model files heading (12pt)
       documentChildren.push(
@@ -276,7 +435,7 @@ window.addEventListener('DOMContentLoaded', () => {
             new docx.TextRun({
               text: "Attached model files:",
               bold: true,
-              size: 24, // 12pt
+              size: 24,
               font: "Book Antiqua"
             })
           ],
@@ -298,7 +457,7 @@ window.addEventListener('DOMContentLoaded', () => {
         documentChildren.push(new docx.Paragraph({ text: "None uploaded", spacing: { after: 120 } }));
       }
 
-      // Valuation Summary (optional)
+      // Valuation Summary (12pt)
       if ((valuationSummary || "").trim()) {
         documentChildren.push(
           new docx.Paragraph({
@@ -306,7 +465,7 @@ window.addEventListener('DOMContentLoaded', () => {
               new docx.TextRun({
                 text: "Valuation Summary",
                 bold: true,
-                size: 24,          // 12pt
+                size: 24,
                 font: "Book Antiqua"
               })
             ],
@@ -324,7 +483,7 @@ window.addEventListener('DOMContentLoaded', () => {
               new docx.TextRun({
                 text: "Key Assumptions",
                 bold: true,
-                size: 24, // 12pt
+                size: 24,
                 font: "Book Antiqua"
               })
             ],
@@ -348,7 +507,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if ((scenarioNotes || "").trim()) {
         documentChildren.push(
           new docx.Paragraph({
-            children: [new docx.TextRun({ text: "Scenario / Sensitivity Notes", bold: true })],
+            children: [new docx.TextRun({ text: "Scenario / Sensitivity Notes", bold: true, size: 24, font: "Book Antiqua" })],
             spacing: { before: 120, after: 100 }
           }),
           ...linesToParagraphs(scenarioNotes, 120)
@@ -434,7 +593,7 @@ window.addEventListener('DOMContentLoaded', () => {
               new docx.Paragraph({
                 children: [
                   new docx.TextRun({ text: "\t" }),
-                  new docx.TextRun({ text: "Cordoba Research Group Internal Information", size: 16, font: "Book Antiqua", italics: true }),
+                  new docx.TextRun({ text: "Cordoba Research Group", size: 16, font: "Book Antiqua", italics: true }),
                   new docx.TextRun({ text: "\t" }),
                   new docx.TextRun({ children: ["Page ", docx.PageNumber.CURRENT, " of ", docx.PageNumber.TOTAL_PAGES], size: 16, font: "Book Antiqua", italics: true })
                 ],
@@ -513,7 +672,10 @@ window.addEventListener('DOMContentLoaded', () => {
         analysis, keyTakeaways, content, cordobaView,
         imageFiles, dateTimeString,
 
-        ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink
+        ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink,
+
+        // chart image bytes if user fetched it
+        priceChartImageBytes
       });
 
       const blob = await docx.Packer.toBlob(doc);
@@ -532,6 +694,12 @@ window.addEventListener('DOMContentLoaded', () => {
           document.getElementById('coAuthorsList').innerHTML = '';
           coAuthorCount = 0;
           toggleEquitySection();
+
+          // reset chart state
+          priceChartImageBytes = null;
+          if (chartStatus) chartStatus.textContent = "";
+          if (priceChart) { priceChart.destroy(); priceChart = null; }
+
           messageDiv.className = 'message';
           messageDiv.textContent = '';
         }
