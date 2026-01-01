@@ -11,7 +11,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
-        <!-- Optional: replace with your logo -->
+        <!-- Optional logo -->
         <!-- <img src="assets/logo.png" class="brand-logo" alt="Cordoba Research Group" /> -->
         <div class="brand-text">
           <div class="brand-name">Cordoba Research Group</div>
@@ -32,12 +32,11 @@
       <div class="panel-header">
         <h1 class="panel-title">Create a Research Note</h1>
         <p class="panel-desc">
-          Fill in the fields below. Preview updates live. Export to Word or PDF without changing the underlying structure.
+          Fill in the fields below. Preview updates live. Export to Word or PDF without breaking the note format.
         </p>
       </div>
 
       <form id="researchForm" class="form">
-        <!-- Note Type -->
         <div class="field">
           <label for="noteType">Type of Note</label>
           <select id="noteType" required>
@@ -50,7 +49,6 @@
           </select>
         </div>
 
-        <!-- Auto Doc ID -->
         <div class="field">
           <label for="documentId">Document ID (auto-generated)</label>
           <div class="inline">
@@ -60,19 +58,16 @@
           <div class="hint">Format: CRG-[TYPE]-YYYY-MM-### (sequence stored locally in your browser)</div>
         </div>
 
-        <!-- Title -->
         <div class="field">
           <label for="title">Title</label>
           <input type="text" id="title" required placeholder="Enter research title..." />
         </div>
 
-        <!-- Topic -->
         <div class="field">
           <label for="topic">Topic</label>
           <input type="text" id="topic" required placeholder="Enter topic..." />
         </div>
 
-        <!-- Primary Author -->
         <div class="grid-2">
           <div class="field">
             <label for="authorLastName">Primary Author — Last Name</label>
@@ -94,19 +89,21 @@
           <div class="block-head">
             <div>
               <div class="block-title">Co-Authors (optional)</div>
-              <div class="block-sub">Add as many as needed. These will appear aligned on the right in the Word output.</div>
+              <div class="block-sub">
+                If you add a co-author, all fields are required (same as the original behaviour).
+              </div>
             </div>
             <button type="button" id="addCoAuthor" class="btn btn-secondary">+ Add Co-Author</button>
           </div>
           <div id="coAuthorsList" class="stack"></div>
         </div>
 
-        <!-- House style toggles -->
+        <!-- House style -->
         <div class="block">
           <div class="block-head">
             <div>
               <div class="block-title">House Style</div>
-              <div class="block-sub">Optional output tweaks. Does not change your content, only spacing and caption sizing.</div>
+              <div class="block-sub">Only affects spacing/captions. Content remains unchanged.</div>
             </div>
           </div>
 
@@ -132,9 +129,9 @@
             id="keyTakeaways"
             rows="6"
             required
-            placeholder="Paste takeaways here. Use '-' or '*', or just paste plain lines and click Convert to bullets..."
+            placeholder="Enter key takeaways (use bullet points with - or *)..."
           ></textarea>
-          <div class="hint">Tip: one takeaway per line works best.</div>
+          <div class="hint">Original behaviour preserved: empty lines remain empty lines in Word.</div>
         </div>
 
         <!-- Analysis -->
@@ -144,21 +141,21 @@
             id="analysis"
             rows="8"
             required
-            placeholder="Write analysis here. Use double line breaks to start a new paragraph..."
+            placeholder="Enter your analysis and commentary..."
           ></textarea>
-          <div class="hint">Smart paragraphing: double line breaks become new paragraphs; single line breaks stay within the paragraph.</div>
+          <div class="hint">
+            Smart paragraphing applied (double line breaks = new paragraph), while still preserving intentional blank lines.
+          </div>
         </div>
 
-        <!-- Additional Content -->
         <div class="field">
           <label for="content">Additional Content (optional)</label>
-          <textarea id="content" rows="8" placeholder="Any extra detail, appendices, or extended discussion..."></textarea>
+          <textarea id="content" rows="8" placeholder="Enter any additional detailed content..."></textarea>
         </div>
 
-        <!-- Cordoba View -->
         <div class="field">
           <label for="cordobaView">The Cordoba View (optional)</label>
-          <textarea id="cordobaView" rows="6" placeholder="Cordoba’s perspective, positioning, recommendations..."></textarea>
+          <textarea id="cordobaView" rows="6" placeholder="Enter Cordoba's perspective and recommendations..."></textarea>
         </div>
 
         <!-- Sources -->
@@ -166,7 +163,7 @@
           <div class="block-head">
             <div>
               <div class="block-title">Sources (optional)</div>
-              <div class="block-sub">Add citations to strengthen institutional quality. Exports into Word as a numbered list.</div>
+              <div class="block-sub">Exports into Word as a numbered list.</div>
             </div>
             <button type="button" id="addSource" class="btn btn-secondary">+ Add Source</button>
           </div>
@@ -177,8 +174,7 @@
         <div class="field">
           <label for="imageUpload">Upload Images / Graphs (optional)</label>
           <p class="hint">
-            Caption uses the filename. Example: <span class="mono">SP500_Performance_2024.png</span> becomes
-            <span class="mono">Figure 1: SP500_Performance_2024</span>
+            Filename becomes caption. Example: <span class="mono">SP500_Performance_2024.png</span> → <span class="mono">Figure 1: SP500_Performance_2024</span>
           </p>
           <input type="file" id="imageUpload" multiple accept="image/*" />
         </div>
@@ -192,20 +188,18 @@
       </form>
     </section>
 
-    <!-- RIGHT: LIVE PREVIEW -->
+    <!-- RIGHT: PREVIEW -->
     <aside class="panel panel-preview">
       <div class="panel-header">
         <h2 class="panel-title">Live Preview</h2>
-        <p class="panel-desc">This mirrors the Word structure (title block, headings, figures list, sources).</p>
+        <p class="panel-desc">Mirrors the Word layout structure.</p>
       </div>
 
-      <div id="preview" class="preview">
-        <!-- Injected by JS -->
-      </div>
+      <div id="preview" class="preview"></div>
 
       <div class="preview-foot">
         <div class="preview-foot-row">
-          <span class="muted">Header format:</span>
+          <span class="muted">Header:</span>
           <span class="mono" id="previewHeaderLine">Cordoba Research Group | — | —</span>
         </div>
         <div class="preview-foot-row">
@@ -220,7 +214,6 @@
   <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
   <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
-  <!-- App -->
   <script src="assets/app.js"></script>
 </body>
 </html>
