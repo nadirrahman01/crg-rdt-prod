@@ -1,4 +1,6 @@
 // assets/app.js
+// NOTE: Only additions made (no removals). Adds: target price + current price + vol + range return + upside, and exports stats into the Word doc.
+
 console.log("app.js loaded successfully");
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -146,14 +148,25 @@ window.addEventListener("DOMContentLoaded", () => {
   // ================================
   // Price chart (Stooq -> Chart.js -> Word image)
   // FIX: Stooq has no CORS. Use r.jina.ai proxy.
+  // + NEW: compute stats (current price, vol, range return, upside to target)
   // ================================
   let priceChart = null;
   let priceChartImageBytes = null;
+
+  // NEW: equity stats cache for UI + Word export
+  let equityStats = {
+    currentPrice: null,
+    realisedVolAnn: null,
+    rangeReturn: null
+  };
 
   const chartStatus = document.getElementById("chartStatus");
   const fetchChartBtn = document.getElementById("fetchPriceChart");
   const chartRangeEl = document.getElementById("chartRange");
   const priceChartCanvas = document.getElementById("priceChart");
+
+  // NEW: target + stat UI elements (safe if they don't exist yet)
+  const targetPriceEl = document.getElementById("targetPrice");
 
   function stooqSymbolFromTicker(ticker) {
     const t = (ticker || "").trim();
@@ -243,6 +256,56 @@ window.addEventListener("DOMContentLoaded", () => {
     return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
   }
 
+  // ================================
+  // NEW: stats helpers
+  // ================================
+  function pct(x) { return `${(x * 100).toFixed(1)}%`; }
+
+  function safeNum(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function computeDailyReturns(closes) {
+    const rets = [];
+    for (let i = 1; i < closes.length; i++) {
+      const prev = closes[i - 1];
+      const cur = closes[i];
+      if (prev > 0 && Number.isFinite(prev) && Number.isFinite(cur)) {
+        rets.push((cur / prev) - 1);
+      }
+    }
+    return rets;
+  }
+
+  function stddev(arr) {
+    if (!arr.length) return null;
+    const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+    const v = arr.reduce((a, b) => a + (b - mean) ** 2, 0) / (arr.length - 1 || 1);
+    return Math.sqrt(v);
+  }
+
+  function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function computeUpsideToTarget(currentPrice, targetPrice) {
+    if (!currentPrice || !targetPrice) return null;
+    return (targetPrice / currentPrice) - 1;
+  }
+
+  function updateUpsideDisplay() {
+    const current = equityStats.currentPrice;
+    const target = safeNum(targetPriceEl?.value);
+    const up = computeUpsideToTarget(current, target);
+    setText("upsideToTarget", up === null ? "—" : pct(up));
+  }
+
+  if (targetPriceEl) {
+    targetPriceEl.addEventListener("input", updateUpsideDisplay);
+  }
+
   async function buildPriceChart() {
     try {
       const tickerVal = (document.getElementById("ticker")?.value || "").trim();
@@ -269,12 +332,44 @@ window.addEventListener("DOMContentLoaded", () => {
         title: `${tickerVal.toUpperCase()} Close`
       });
 
+      // wait a tick so chart paints
       await new Promise(r => setTimeout(r, 150));
       priceChartImageBytes = canvasToPngBytes(priceChartCanvas);
+
+      // ================================
+      // NEW: compute and display stats
+      // ================================
+      const closes = values;
+      const currentPrice = closes[closes.length - 1];
+      const startPrice = closes[0];
+
+      const rangeReturn = (startPrice && currentPrice) ? (currentPrice / startPrice) - 1 : null;
+
+      const dailyRets = computeDailyReturns(closes);
+      const volDaily = stddev(dailyRets);
+      const realisedVolAnn = (volDaily !== null) ? volDaily * Math.sqrt(252) : null;
+
+      equityStats.currentPrice = currentPrice;
+      equityStats.rangeReturn = rangeReturn;
+      equityStats.realisedVolAnn = realisedVolAnn;
+
+      setText("currentPrice", currentPrice ? currentPrice.toFixed(2) : "—");
+      setText("rangeReturn", rangeReturn === null ? "—" : pct(rangeReturn));
+      setText("realisedVol", realisedVolAnn === null ? "—" : pct(realisedVolAnn));
+
+      updateUpsideDisplay();
 
       if (chartStatus) chartStatus.textContent = `✓ Chart ready (${range.toUpperCase()})`;
     } catch (e) {
       priceChartImageBytes = null;
+
+      // NEW: reset stats display
+      equityStats = { currentPrice: null, realisedVolAnn: null, rangeReturn: null };
+      setText("currentPrice", "—");
+      setText("rangeReturn", "—");
+      setText("realisedVol", "—");
+      setText("upsideToTarget", "—");
+
       if (chartStatus) chartStatus.textContent = `✗ ${e.message}`;
     }
   }
@@ -293,7 +388,11 @@ window.addEventListener("DOMContentLoaded", () => {
       imageFiles, dateTimeString,
 
       ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink,
-      priceChartImageBytes
+      priceChartImageBytes,
+
+      // NEW
+      targetPrice,
+      equityStats
     } = data;
 
     const takeawayLines = (keyTakeaways || "").split("\n");
@@ -423,6 +522,62 @@ window.addEventListener("DOMContentLoaded", () => {
             spacing: { after: 200 }
           })
         );
+      }
+
+      // NEW: Market stats block (only if chart fetched)
+      if (equityStats && equityStats.currentPrice) {
+        const tp = (targetPrice || "").trim();
+        const tpNum = safeNum(tp);
+        const upside = computeUpsideToTarget(equityStats.currentPrice, tpNum);
+
+        documentChildren.push(
+          new docx.Paragraph({
+            children: [new docx.TextRun({ text: "Market Stats", bold: true, size: 24, font: "Book Antiqua" })],
+            spacing: { before: 80, after: 100 }
+          }),
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({ text: "Current price: ", bold: true }),
+              new docx.TextRun({ text: equityStats.currentPrice.toFixed(2) })
+            ],
+            spacing: { after: 80 }
+          }),
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({ text: "Volatility (ann.): ", bold: true }),
+              new docx.TextRun({ text: equityStats.realisedVolAnn == null ? "—" : pct(equityStats.realisedVolAnn) })
+            ],
+            spacing: { after: 80 }
+          }),
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({ text: "Return (range): ", bold: true }),
+              new docx.TextRun({ text: equityStats.rangeReturn == null ? "—" : pct(equityStats.rangeReturn) })
+            ],
+            spacing: { after: 80 }
+          })
+        );
+
+        if (tpNum) {
+          documentChildren.push(
+            new docx.Paragraph({
+              children: [
+                new docx.TextRun({ text: "Target price: ", bold: true }),
+                new docx.TextRun({ text: tpNum.toFixed(2) })
+              ],
+              spacing: { after: 80 }
+            }),
+            new docx.Paragraph({
+              children: [
+                new docx.TextRun({ text: "Upside to target: ", bold: true }),
+                new docx.TextRun({ text: upside == null ? "—" : pct(upside) })
+              ],
+              spacing: { after: 120 }
+            })
+          );
+        } else {
+          documentChildren.push(new docx.Paragraph({ spacing: { after: 80 } }));
+        }
       }
 
       documentChildren.push(
@@ -641,6 +796,9 @@ window.addEventListener("DOMContentLoaded", () => {
       const modelFiles = document.getElementById("modelFiles") ? document.getElementById("modelFiles").files : null;
       const modelLink = document.getElementById("modelLink") ? document.getElementById("modelLink").value : "";
 
+      // NEW
+      const targetPrice = document.getElementById("targetPrice") ? document.getElementById("targetPrice").value : "";
+
       const now = new Date();
       const dateTimeString = formatDateTime(now);
 
@@ -659,7 +817,11 @@ window.addEventListener("DOMContentLoaded", () => {
         analysis, keyTakeaways, content, cordobaView,
         imageFiles, dateTimeString,
         ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink,
-        priceChartImageBytes
+        priceChartImageBytes,
+
+        // NEW
+        targetPrice,
+        equityStats
       });
 
       const blob = await docx.Packer.toBlob(doc);
