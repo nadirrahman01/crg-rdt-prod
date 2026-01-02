@@ -1,6 +1,5 @@
 // assets/app.js
-// FIXED: Restores correct structure, keeps everything you already have,
-// and makes the Word export render the Price Chart + Market Stats in TWO COLUMNS (like your screenshot).
+// NOTE: Only additions made (no removals). Adds: target price + current price + vol + range return + upside, and exports stats into the Word doc.
 
 console.log("app.js loaded successfully");
 
@@ -149,12 +148,12 @@ window.addEventListener("DOMContentLoaded", () => {
   // ================================
   // Price chart (Stooq -> Chart.js -> Word image)
   // FIX: Stooq has no CORS. Use r.jina.ai proxy.
-  // + stats (current price, vol, range return, upside)
+  // + NEW: compute stats (current price, vol, range return, upside to target)
   // ================================
   let priceChart = null;
   let priceChartImageBytes = null;
 
-  // equity stats cache for UI + Word export
+  // NEW: equity stats cache for UI + Word export
   let equityStats = {
     currentPrice: null,
     realisedVolAnn: null,
@@ -166,7 +165,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const chartRangeEl = document.getElementById("chartRange");
   const priceChartCanvas = document.getElementById("priceChart");
 
-  // target input (optional)
+  // NEW: target + stat UI elements (safe if they don't exist yet)
   const targetPriceEl = document.getElementById("targetPrice");
 
   function stooqSymbolFromTicker(ticker) {
@@ -258,7 +257,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // ================================
-  // Stats helpers
+  // NEW: stats helpers
   // ================================
   function pct(x) { return `${(x * 100).toFixed(1)}%`; }
 
@@ -333,10 +332,13 @@ window.addEventListener("DOMContentLoaded", () => {
         title: `${tickerVal.toUpperCase()} Close`
       });
 
+      // wait a tick so chart paints
       await new Promise(r => setTimeout(r, 150));
       priceChartImageBytes = canvasToPngBytes(priceChartCanvas);
 
-      // compute and display stats
+      // ================================
+      // NEW: compute and display stats
+      // ================================
       const closes = values;
       const currentPrice = closes[closes.length - 1];
       const startPrice = closes[0];
@@ -361,6 +363,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       priceChartImageBytes = null;
 
+      // NEW: reset stats display
       equityStats = { currentPrice: null, realisedVolAnn: null, rangeReturn: null };
       setText("currentPrice", "—");
       setText("rangeReturn", "—");
@@ -506,140 +509,77 @@ window.addEventListener("DOMContentLoaded", () => {
       const modelLinkPara = hyperlinkParagraph("Model link:", modelLink);
       if (modelLinkPara) documentChildren.push(modelLinkPara);
 
-      // ================================
-      // Price chart + Market stats (2-column layout)
-      // IMPORTANT: FIXED layout to stop stacking
-      // ================================
+      // Price chart in doc (if fetched)
       if (priceChartImageBytes) {
-        const statsParas = [];
-
-        statsParas.push(
-          new docx.Paragraph({
-            children: [new docx.TextRun({ text: "Market Stats", bold: true, size: 24, font: "Book Antiqua" })],
-            spacing: { after: 120 }
-          })
-        );
-
-        if (equityStats && equityStats.currentPrice != null) {
-          const tpRaw = (targetPrice || "").trim();
-          const tpNum = safeNum(tpRaw);
-          const upside = computeUpsideToTarget(equityStats.currentPrice, tpNum);
-
-          statsParas.push(
-            new docx.Paragraph({
-              children: [
-                new docx.TextRun({ text: "Current price: ", bold: true }),
-                new docx.TextRun({ text: equityStats.currentPrice.toFixed(2) })
-              ],
-              spacing: { after: 80 }
-            }),
-            new docx.Paragraph({
-              children: [
-                new docx.TextRun({ text: "Volatility (ann.): ", bold: true }),
-                new docx.TextRun({ text: equityStats.realisedVolAnn == null ? "—" : pct(equityStats.realisedVolAnn) })
-              ],
-              spacing: { after: 80 }
-            }),
-            new docx.Paragraph({
-              children: [
-                new docx.TextRun({ text: "Return (range): ", bold: true }),
-                new docx.TextRun({ text: equityStats.rangeReturn == null ? "—" : pct(equityStats.rangeReturn) })
-              ],
-              spacing: { after: 120 }
-            })
-          );
-
-          if (tpNum != null) {
-            statsParas.push(
-              new docx.Paragraph({
-                children: [
-                  new docx.TextRun({ text: "Target price: ", bold: true }),
-                  new docx.TextRun({ text: tpNum.toFixed(2) })
-                ],
-                spacing: { after: 80 }
-              }),
-              new docx.Paragraph({
-                children: [
-                  new docx.TextRun({ text: "Upside to target: ", bold: true }),
-                  new docx.TextRun({ text: upside == null ? "—" : pct(upside) })
-                ],
-                spacing: { after: 80 }
-              })
-            );
-          }
-        } else {
-          statsParas.push(
-            new docx.Paragraph({
-              children: [
-                new docx.TextRun({
-                  text: "Fetch chart to populate stats.",
-                  italics: true,
-                  size: 20,
-                  font: "Book Antiqua"
-                })
-              ],
-              spacing: { after: 80 }
-            })
-          );
-        }
-
         documentChildren.push(
           new docx.Paragraph({
             children: [new docx.TextRun({ text: "Price Chart", bold: true, size: 24, font: "Book Antiqua" })],
             spacing: { before: 120, after: 120 }
           }),
-
-          new docx.Table({
-            // This is what stops Word stacking the right column underneath
-            layout: docx.TableLayoutType.FIXED,
-            width: { size: 100, type: docx.WidthType.PERCENTAGE },
-            borders: {
-              top: { style: docx.BorderStyle.NONE },
-              bottom: { style: docx.BorderStyle.NONE },
-              left: { style: docx.BorderStyle.NONE },
-              right: { style: docx.BorderStyle.NONE },
-              insideHorizontal: { style: docx.BorderStyle.NONE },
-              insideVertical: { style: docx.BorderStyle.NONE }
-            },
-            rows: [
-              new docx.TableRow({
-                children: [
-                  // LEFT: chart
-                  new docx.TableCell({
-                    width: { size: 70, type: docx.WidthType.PERCENTAGE },
-                    verticalAlign: docx.VerticalAlign.TOP,
-                    margins: { top: 0, bottom: 0, left: 0, right: 200 },
-                    children: [
-                      new docx.Paragraph({
-                        children: [
-                          new docx.ImageRun({
-                            data: priceChartImageBytes,
-                            // Slightly smaller so it never forces wrapping
-                            transformation: { width: 560, height: 260 }
-                          })
-                        ],
-                        alignment: docx.AlignmentType.LEFT
-                      })
-                    ]
-                  }),
-
-                  // RIGHT: stats
-                  new docx.TableCell({
-                    width: { size: 30, type: docx.WidthType.PERCENTAGE },
-                    verticalAlign: docx.VerticalAlign.TOP,
-                    margins: { top: 0, bottom: 0, left: 200, right: 0 },
-                    children: statsParas
-                  })
-                ]
-              })
-            ]
-          }),
-
-          new docx.Paragraph({ spacing: { after: 250 } })
+          new docx.Paragraph({
+            children: [new docx.ImageRun({ data: priceChartImageBytes, transformation: { width: 550, height: 200 } })],
+            alignment: docx.AlignmentType.CENTER,
+            spacing: { after: 200 }
+          })
         );
       }
 
-      // Keep your existing equity sections (not removed)
+      // NEW: Market stats block (only if chart fetched)
+      if (equityStats && equityStats.currentPrice) {
+        const tp = (targetPrice || "").trim();
+        const tpNum = safeNum(tp);
+        const upside = computeUpsideToTarget(equityStats.currentPrice, tpNum);
+
+        documentChildren.push(
+          new docx.Paragraph({
+            children: [new docx.TextRun({ text: "Market Stats", bold: true, size: 24, font: "Book Antiqua" })],
+            spacing: { before: 80, after: 100 }
+          }),
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({ text: "Current price: ", bold: true }),
+              new docx.TextRun({ text: equityStats.currentPrice.toFixed(2) })
+            ],
+            spacing: { after: 80 }
+          }),
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({ text: "Volatility (ann.): ", bold: true }),
+              new docx.TextRun({ text: equityStats.realisedVolAnn == null ? "—" : pct(equityStats.realisedVolAnn) })
+            ],
+            spacing: { after: 80 }
+          }),
+          new docx.Paragraph({
+            children: [
+              new docx.TextRun({ text: "Return (range): ", bold: true }),
+              new docx.TextRun({ text: equityStats.rangeReturn == null ? "—" : pct(equityStats.rangeReturn) })
+            ],
+            spacing: { after: 80 }
+          })
+        );
+
+        if (tpNum) {
+          documentChildren.push(
+            new docx.Paragraph({
+              children: [
+                new docx.TextRun({ text: "Target price: ", bold: true }),
+                new docx.TextRun({ text: tpNum.toFixed(2) })
+              ],
+              spacing: { after: 80 }
+            }),
+            new docx.Paragraph({
+              children: [
+                new docx.TextRun({ text: "+/- to target: ", bold: true }),
+                new docx.TextRun({ text: upside == null ? "—" : pct(upside) })
+              ],
+              spacing: { after: 120 }
+            })
+          );
+        } else {
+          documentChildren.push(new docx.Paragraph({ spacing: { after: 80 } }));
+        }
+      }
+
       documentChildren.push(
         new docx.Paragraph({
           children: [new docx.TextRun({ text: "Attached model files:", bold: true, size: 24, font: "Book Antiqua" })],
@@ -701,7 +641,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ================================
-    // Main sections (BACK OUTSIDE equity block)
+    // Main sections
     // ================================
     documentChildren.push(
       new docx.Paragraph({
@@ -740,7 +680,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     // ================================
-    // DOC: header + FOOTER
+    // DOC: header + FOOTER restored
     // ================================
     const doc = new docx.Document({
       styles: {
@@ -856,6 +796,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const modelFiles = document.getElementById("modelFiles") ? document.getElementById("modelFiles").files : null;
       const modelLink = document.getElementById("modelLink") ? document.getElementById("modelLink").value : "";
 
+      // NEW
       const targetPrice = document.getElementById("targetPrice") ? document.getElementById("targetPrice").value : "";
 
       const now = new Date();
@@ -878,6 +819,7 @@ window.addEventListener("DOMContentLoaded", () => {
         ticker, valuationSummary, keyAssumptions, scenarioNotes, modelFiles, modelLink,
         priceChartImageBytes,
 
+        // NEW
         targetPrice,
         equityStats
       });
