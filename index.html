@@ -1,5 +1,6 @@
 <!-- index.html -->
-<!-- NOTE: Only additions made (no removals). Adds target price + stats boxes under the price chart panel. -->
+<!-- NOTE: Only additions made (no removals). Adds target price + stats boxes under the price chart panel,
+     and adds CRG Rating selector with an info popover (Equity Research only). -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -72,6 +73,31 @@
 
         <label for="ticker">Ticker / Company</label>
         <input type="text" id="ticker" placeholder="e.g., MSFT (Microsoft)">
+
+        <!-- NEW: CRG Rating (Equity Research) -->
+        <div class="rating-row">
+          <label for="crgRating" class="rating-label">
+            CRG Rating
+            <span class="info-badge" tabindex="0" aria-label="Rating definitions">i</span>
+            <span class="info-pop">
+              <strong>Outperform (O)</strong>: Expected to materially outperform sector average over 12 months.<br><br>
+              <strong>Sector Perform (SP)</strong>: Returns expected to be in line with sector average over 12 months.<br><br>
+              <strong>Underperform (U)</strong>: Returns expected to be materially below sector average over 12 months.<br><br>
+              <strong>Restricted (R)</strong>: CRG policy precludes certain types of communications, including an investment recommendation, when CRG is acting as an advisor in certain merger or other strategic transactions and in certain other circumstances.<br><br>
+              <strong>Not Rated (NR)</strong>: The rating, price targets and estimates have been removed due to applicable legal, regulatory or policy constraints which may include when CRG is acting in an advisory capacity involving the company.
+            </span>
+          </label>
+
+          <select id="crgRating" class="crg-rating-select">
+            <option value="" selected>Select rating...</option>
+            <option value="Outperform (O)">Outperform (O)</option>
+            <option value="Sector Perform (SP)">Sector Perform (SP)</option>
+            <option value="Underperform (U)">Underperform (U)</option>
+            <option value="Restricted (R)">Restricted (R)</option>
+            <option value="Not Rated (NR)">Not Rated (NR)</option>
+          </select>
+        </div>
+        <!-- /NEW -->
 
         <!-- Price Chart Panel (existing) -->
         <div class="chart-panel">
