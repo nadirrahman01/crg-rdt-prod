@@ -509,136 +509,128 @@ window.addEventListener("DOMContentLoaded", () => {
       const modelLinkPara = hyperlinkParagraph("Model link:", modelLink);
       if (modelLinkPara) documentChildren.push(modelLinkPara);
 
-      // Price chart in doc (if fetched)
-      if (priceChartImageBytes) {
-        documentChildren.push(
-          new docx.Paragraph({
-            children: [new docx.TextRun({ text: "Price Chart", bold: true, size: 24, font: "Book Antiqua" })],
-            spacing: { before: 120, after: 120 }
-          }),
-          new docx.Paragraph({
-            children: [new docx.ImageRun({ data: priceChartImageBytes, transformation: { width: 650, height: 300 } })],
-            alignment: docx.AlignmentType.CENTER,
-            spacing: { after: 200 }
-          })
-        );
-      }
+// ================================
+// Price chart + Market stats (2-column layout)
+// ================================
+if (priceChartImageBytes) {
+  // Build stats paragraphs (right column)
+  const statsParas = [];
 
-      // NEW: Market stats block (only if chart fetched)
-      if (equityStats && equityStats.currentPrice) {
-        const tp = (targetPrice || "").trim();
-        const tpNum = safeNum(tp);
-        const upside = computeUpsideToTarget(equityStats.currentPrice, tpNum);
+  statsParas.push(
+    new docx.Paragraph({
+      children: [new docx.TextRun({ text: "Market Stats", bold: true, size: 24, font: "Book Antiqua" })],
+      spacing: { after: 120 }
+    })
+  );
 
-        documentChildren.push(
-          new docx.Paragraph({
-            children: [new docx.TextRun({ text: "Market Stats", bold: true, size: 24, font: "Book Antiqua" })],
-            spacing: { before: 80, after: 100 }
-          }),
-          new docx.Paragraph({
-            children: [
-              new docx.TextRun({ text: "Current price: ", bold: true }),
-              new docx.TextRun({ text: equityStats.currentPrice.toFixed(2) })
-            ],
-            spacing: { after: 80 }
-          }),
-          new docx.Paragraph({
-            children: [
-              new docx.TextRun({ text: "Volatility (ann.): ", bold: true }),
-              new docx.TextRun({ text: equityStats.realisedVolAnn == null ? "—" : pct(equityStats.realisedVolAnn) })
-            ],
-            spacing: { after: 80 }
-          }),
-          new docx.Paragraph({
-            children: [
-              new docx.TextRun({ text: "Return (range): ", bold: true }),
-              new docx.TextRun({ text: equityStats.rangeReturn == null ? "—" : pct(equityStats.rangeReturn) })
-            ],
-            spacing: { after: 80 }
-          })
-        );
+  // Only show stats if we actually have them
+  if (equityStats && equityStats.currentPrice != null) {
+    const tp = (targetPrice || "").trim();
+    const tpNum = safeNum(tp);
+    const upside = computeUpsideToTarget(equityStats.currentPrice, tpNum);
 
-        if (tpNum) {
-          documentChildren.push(
-            new docx.Paragraph({
-              children: [
-                new docx.TextRun({ text: "Target price: ", bold: true }),
-                new docx.TextRun({ text: tpNum.toFixed(2) })
-              ],
-              spacing: { after: 80 }
-            }),
-            new docx.Paragraph({
-              children: [
-                new docx.TextRun({ text: "Upside to target: ", bold: true }),
-                new docx.TextRun({ text: upside == null ? "—" : pct(upside) })
-              ],
-              spacing: { after: 120 }
-            })
-          );
-        } else {
-          documentChildren.push(new docx.Paragraph({ spacing: { after: 80 } }));
-        }
-      }
+    statsParas.push(
+      new docx.Paragraph({
+        children: [
+          new docx.TextRun({ text: "Current price: ", bold: true }),
+          new docx.TextRun({ text: equityStats.currentPrice.toFixed(2) })
+        ],
+        spacing: { after: 80 }
+      }),
+      new docx.Paragraph({
+        children: [
+          new docx.TextRun({ text: "Volatility (ann.): ", bold: true }),
+          new docx.TextRun({ text: equityStats.realisedVolAnn == null ? "—" : pct(equityStats.realisedVolAnn) })
+        ],
+        spacing: { after: 80 }
+      }),
+      new docx.Paragraph({
+        children: [
+          new docx.TextRun({ text: "Return (range): ", bold: true }),
+          new docx.TextRun({ text: equityStats.rangeReturn == null ? "—" : pct(equityStats.rangeReturn) })
+        ],
+        spacing: { after: 120 }
+      })
+    );
 
-      documentChildren.push(
+    if (tpNum) {
+      statsParas.push(
         new docx.Paragraph({
-          children: [new docx.TextRun({ text: "Attached model files:", bold: true, size: 24, font: "Book Antiqua" })],
-          spacing: { after: 120 }
+          children: [
+            new docx.TextRun({ text: "Target price: ", bold: true }),
+            new docx.TextRun({ text: tpNum.toFixed(2) })
+          ],
+          spacing: { after: 80 }
+        }),
+        new docx.Paragraph({
+          children: [
+            new docx.TextRun({ text: "Upside to target: ", bold: true }),
+            new docx.TextRun({ text: upside == null ? "—" : pct(upside) })
+          ],
+          spacing: { after: 80 }
         })
       );
-
-      if (attachedModelNames.length) {
-        attachedModelNames.forEach(name => {
-          documentChildren.push(
-            new docx.Paragraph({ text: name, bullet: { level: 0 }, spacing: { after: 80 } })
-          );
-        });
-      } else {
-        documentChildren.push(new docx.Paragraph({ text: "None uploaded", spacing: { after: 120 } }));
-      }
-
-      if ((valuationSummary || "").trim()) {
-        documentChildren.push(
-          new docx.Paragraph({
-            children: [new docx.TextRun({ text: "Valuation Summary", bold: true, size: 24, font: "Book Antiqua" })],
-            spacing: { before: 120, after: 100 }
-          }),
-          ...linesToParagraphs(valuationSummary, 120)
-        );
-      }
-
-      if ((keyAssumptions || "").trim()) {
-        documentChildren.push(
-          new docx.Paragraph({
-            children: [new docx.TextRun({ text: "Key Assumptions", bold: true, size: 24, font: "Book Antiqua" })],
-            spacing: { before: 120, after: 100 }
-          })
-        );
-
-        keyAssumptions.split("\n").forEach(line => {
-          if (!line.trim()) return;
-          documentChildren.push(
-            new docx.Paragraph({
-              text: line.replace(/^[-*•]\s*/, "").trim(),
-              bullet: { level: 0 },
-              spacing: { after: 80 }
-            })
-          );
-        });
-      }
-
-      if ((scenarioNotes || "").trim()) {
-        documentChildren.push(
-          new docx.Paragraph({
-            children: [new docx.TextRun({ text: "Scenario / Sensitivity Notes", bold: true, size: 24, font: "Book Antiqua" })],
-            spacing: { before: 120, after: 100 }
-          }),
-          ...linesToParagraphs(scenarioNotes, 120)
-        );
-      }
-
-      documentChildren.push(new docx.Paragraph({ spacing: { after: 250 } }));
     }
+  } else {
+    statsParas.push(
+      new docx.Paragraph({
+        children: [new docx.TextRun({ text: "Fetch chart to populate stats.", italics: true, size: 20, font: "Book Antiqua" })],
+        spacing: { after: 80 }
+      })
+    );
+  }
+
+  // Add heading + 2-col table
+  documentChildren.push(
+    new docx.Paragraph({
+      children: [new docx.TextRun({ text: "Price Chart", bold: true, size: 24, font: "Book Antiqua" })],
+      spacing: { before: 120, after: 120 }
+    }),
+
+    new docx.Table({
+      width: { size: 100, type: docx.WidthType.PERCENTAGE },
+      borders: {
+        top: { style: docx.BorderStyle.NONE },
+        bottom: { style: docx.BorderStyle.NONE },
+        left: { style: docx.BorderStyle.NONE },
+        right: { style: docx.BorderStyle.NONE },
+        insideHorizontal: { style: docx.BorderStyle.NONE },
+        insideVertical: { style: docx.BorderStyle.NONE }
+      },
+      rows: [
+        new docx.TableRow({
+          children: [
+            // LEFT: chart
+            new docx.TableCell({
+              width: { size: 70, type: docx.WidthType.PERCENTAGE },
+              verticalAlign: docx.VerticalAlign.TOP,
+              children: [
+                new docx.Paragraph({
+                  children: [
+                    new docx.ImageRun({
+                      data: priceChartImageBytes,
+                      transformation: { width: 620, height: 300 }
+                    })
+                  ],
+                  alignment: docx.AlignmentType.CENTER
+                })
+              ]
+            }),
+
+            // RIGHT: stats
+            new docx.TableCell({
+              width: { size: 30, type: docx.WidthType.PERCENTAGE },
+              verticalAlign: docx.VerticalAlign.TOP,
+              children: statsParas
+            })
+          ]
+        })
+      ]
+    }),
+
+    new docx.Paragraph({ spacing: { after: 250 } })
+  );
+}
 
     // ================================
     // Main sections
