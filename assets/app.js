@@ -3,6 +3,7 @@
 // AND adds: CRG Rating selector export into Word doc.
 // AND adds: optional phones (outputs "(N/A)"), and other UX additions.
 // AND adds: Email to CRG Research button that opens a prefilled email (user attaches the doc manually).
+// AND adds: Phone country code selector + auto hyphen formatting (CC-XXXXXXXX...) for primary + coauthors.
 
 console.log("app.js loaded successfully");
 
@@ -33,6 +34,35 @@ window.addEventListener("DOMContentLoaded", () => {
       // NEW: make phone optional even though HTML string has required
       const phoneInput = coAuthorDiv.querySelector(".coauthor-phone");
       if (phoneInput) phoneInput.required = false;
+
+      // ================================
+      // NEW: inject CC dropdown for co-author + wire formatting (NO REMOVALS)
+      // ================================
+      if (phoneInput) {
+        const ccSelect = document.createElement("select");
+        ccSelect.className = "country-code coauthor-cc";
+        ccSelect.setAttribute("aria-label", "Co-author country code");
+        ccSelect.innerHTML = `
+          <option value="44" selected>+44 (UK)</option>
+          <option value="1">+1 (US/CA)</option>
+          <option value="353">+353 (IE)</option>
+          <option value="971">+971 (UAE)</option>
+          <option value="966">+966 (KSA)</option>
+          <option value="92">+92 (PK)</option>
+          <option value="91">+91 (IN)</option>
+          <option value="880">+880 (BD)</option>
+        `;
+
+        // insert CC select before phone input
+        phoneInput.parentNode.insertBefore(ccSelect, phoneInput);
+
+        // hint mobile keyboards
+        phoneInput.setAttribute("inputmode", "numeric");
+        phoneInput.setAttribute("autocomplete", "tel");
+
+        // wire formatting
+        wirePhoneInput(phoneInput, ccSelect);
+      }
     });
 
     document.addEventListener("click", (e) => {
@@ -83,108 +113,151 @@ window.addEventListener("DOMContentLoaded", () => {
     return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
   }
 
-// ================================
-// NEW: Email to CRG (prefilled mailto)
-// Note: browsers cannot auto-attach files for security reasons.
-// User will attach the downloaded Word doc manually.
-// ================================
-const emailToCrgBtn = document.getElementById("emailToCrgBtn");
+  // ================================
+  // NEW: Phone formatting (CC-XXXXXXXX...)
+  // ================================
+  function digitsOnly(v) {
+    return (v || "").toString().replace(/\D/g, "");
+  }
 
-function formatDateShort(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+  function formatPhoneWithCountryCode(raw, ccDigits) {
+    const cc = digitsOnly(ccDigits || "");
+    let d = digitsOnly(raw);
 
-// IMPORTANT FIX:
-// - Avoid URLSearchParams (it turns spaces into "+")
-// - Use encodeURIComponent directly
-// - Force CRLF for clean line breaks in email clients
-function buildMailto(to, cc, subject, body) {
-  const crlfBody = (body || "").replace(/\n/g, "\r\n");
+    // if user typed the country code into the phone box, remove it
+    if (cc && d.startsWith(cc)) d = d.slice(cc.length);
 
-  const parts = [];
-  if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
-  parts.push(`subject=${encodeURIComponent(subject || "")}`);
-  parts.push(`body=${encodeURIComponent(crlfBody)}`);
+    if (!cc && !d) return "";
+    if (!cc) return d;
 
-  return `mailto:${encodeURIComponent(to)}?${parts.join("&")}`;
-}
+    return d ? `${cc}-${d}` : `${cc}-`;
+  }
 
-function ccForNoteType(noteTypeRaw) {
-  const t = (noteTypeRaw || "").toLowerCase();
+  function wirePhoneInput(phoneInputEl, ccSelectEl) {
+    if (!phoneInputEl || !ccSelectEl) return;
 
-  if (t.includes("equity")) return "tommaso@cordobarg.com";
-  if (t.includes("macro") || t.includes("market")) return "tim@cordobarg.com";
-  if (t.includes("commodity")) return "uhayd@cordobarg.com";
+    const reformat = () => {
+      const cc = ccSelectEl.value;
+      phoneInputEl.value = formatPhoneWithCountryCode(phoneInputEl.value, cc);
+    };
 
-  return "";
-}
+    phoneInputEl.addEventListener("input", reformat);
+    ccSelectEl.addEventListener("change", reformat);
 
-function buildCrgEmailPayload() {
-  const noteType = (document.getElementById("noteType")?.value || "Research Note").trim();
-  const title = (document.getElementById("title")?.value || "").trim();
-  const topic = (document.getElementById("topic")?.value || "").trim();
+    reformat();
+  }
 
-  const authorFirstName = (document.getElementById("authorFirstName")?.value || "").trim();
-  const authorLastName = (document.getElementById("authorLastName")?.value || "").trim();
+  // NEW: Primary author wiring
+  const authorPhoneInput = document.getElementById("authorPhone");
+  const authorCcSelect = document.getElementById("authorCountryCode");
+  if (authorPhoneInput) {
+    authorPhoneInput.setAttribute("inputmode", "numeric");
+    authorPhoneInput.setAttribute("autocomplete", "tel");
+  }
+  wirePhoneInput(authorPhoneInput, authorCcSelect);
 
-  const ticker = (document.getElementById("ticker")?.value || "").trim();
-  const crgRating = (document.getElementById("crgRating")?.value || "").trim();
-  const targetPrice = (document.getElementById("targetPrice")?.value || "").trim();
+  // ================================
+  // NEW: Email to CRG (prefilled mailto)
+  // Note: browsers cannot auto-attach files for security reasons.
+  // User will attach the downloaded Word doc manually.
+  // ================================
+  const emailToCrgBtn = document.getElementById("emailToCrgBtn");
 
-  const now = new Date();
-  const dateShort = formatDateShort(now);
-  const dateLong = formatDateTime(now);
+  function formatDateShort(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
 
-  // Subject line
-  const subjectParts = [
-    noteType || "Research Note",
-    dateShort,
-    title ? `— ${title}` : ""
-  ].filter(Boolean);
+  // IMPORTANT FIX:
+  // - Avoid URLSearchParams (it turns spaces into "+")
+  // - Use encodeURIComponent directly
+  // - Force CRLF for clean line breaks in email clients
+  function buildMailto(to, cc, subject, body) {
+    const crlfBody = (body || "").replace(/\n/g, "\r\n");
 
-  const subject = subjectParts.join(" ");
-  const authorLine = [authorFirstName, authorLastName].filter(Boolean).join(" ").trim();
+    const parts = [];
+    if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
+    parts.push(`subject=${encodeURIComponent(subject || "")}`);
+    parts.push(`body=${encodeURIComponent(crlfBody)}`);
 
-  // Email body with proper spacing
-  const paragraphs = [];
+    return `mailto:${encodeURIComponent(to)}?${parts.join("&")}`;
+  }
 
-  paragraphs.push("Hi CRG Research,");
-  paragraphs.push("Please find my most recent note attached.");
+  function ccForNoteType(noteTypeRaw) {
+    const t = (noteTypeRaw || "").toLowerCase();
 
-  const metaLines = [
-    `Note type: ${noteType || "N/A"}`,
-    title ? `Title: ${title}` : null,
-    topic ? `Topic: ${topic}` : null,
-    ticker ? `Ticker (Stooq): ${ticker}` : null,
-    crgRating ? `CRG Rating: ${crgRating}` : null,
-    targetPrice ? `Target Price: ${targetPrice}` : null,
-    `Generated: ${dateLong}`
-  ].filter(Boolean);
+    if (t.includes("equity")) return "tommaso@cordobarg.com";
+    if (t.includes("macro") || t.includes("market")) return "tim@cordobarg.com";
+    if (t.includes("commodity")) return "uhayd@cordobarg.com";
 
-  paragraphs.push(metaLines.join("\n"));
+    return "";
+  }
 
-  paragraphs.push("Best,");
-  paragraphs.push(authorLine || "");
+  function buildCrgEmailPayload() {
+    const noteType = (document.getElementById("noteType")?.value || "Research Note").trim();
+    const title = (document.getElementById("title")?.value || "").trim();
+    const topic = (document.getElementById("topic")?.value || "").trim();
 
-  const body = paragraphs.join("\n\n"); // double line breaks = clean spacing
-  const cc = ccForNoteType(noteType);
+    const authorFirstName = (document.getElementById("authorFirstName")?.value || "").trim();
+    const authorLastName = (document.getElementById("authorLastName")?.value || "").trim();
 
-  return { subject, body, cc };
-}
+    const ticker = (document.getElementById("ticker")?.value || "").trim();
+    const crgRating = (document.getElementById("crgRating")?.value || "").trim();
+    const targetPrice = (document.getElementById("targetPrice")?.value || "").trim();
 
-if (emailToCrgBtn) {
-  emailToCrgBtn.addEventListener("click", () => {
-    const { subject, body, cc } = buildCrgEmailPayload();
+    const now = new Date();
+    const dateShort = formatDateShort(now);
+    const dateLong = formatDateTime(now);
 
-    const to = "research@cordobarg.com";
-    const mailto = buildMailto(to, cc, subject, body);
+    // Subject line
+    const subjectParts = [
+      noteType || "Research Note",
+      dateShort,
+      title ? `— ${title}` : ""
+    ].filter(Boolean);
 
-    window.location.href = mailto;
-  });
-}
+    const subject = subjectParts.join(" ");
+    const authorLine = [authorFirstName, authorLastName].filter(Boolean).join(" ").trim();
+
+    // Email body with proper spacing
+    const paragraphs = [];
+
+    paragraphs.push("Hi CRG Research,");
+    paragraphs.push("Please find my most recent note attached.");
+
+    const metaLines = [
+      `Note type: ${noteType || "N/A"}`,
+      title ? `Title: ${title}` : null,
+      topic ? `Topic: ${topic}` : null,
+      ticker ? `Ticker (Stooq): ${ticker}` : null,
+      crgRating ? `CRG Rating: ${crgRating}` : null,
+      targetPrice ? `Target Price: ${targetPrice}` : null,
+      `Generated: ${dateLong}`
+    ].filter(Boolean);
+
+    paragraphs.push(metaLines.join("\n"));
+
+    paragraphs.push("Best,");
+    paragraphs.push(authorLine || "");
+
+    const body = paragraphs.join("\n\n"); // double line breaks = clean spacing
+    const cc = ccForNoteType(noteType);
+
+    return { subject, body, cc };
+  }
+
+  if (emailToCrgBtn) {
+    emailToCrgBtn.addEventListener("click", () => {
+      const { subject, body, cc } = buildCrgEmailPayload();
+
+      const to = "research@cordobarg.com";
+      const mailto = buildMailto(to, cc, subject, body);
+
+      window.location.href = mailto;
+    });
+  }
 
   // ================================
   // NEW: optional field helpers
