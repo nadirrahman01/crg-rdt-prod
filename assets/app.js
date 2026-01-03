@@ -560,7 +560,7 @@ if (emailToCrgBtn) {
               children: [
                 new docx.Paragraph({
                   children: [new docx.TextRun({
-                    text: `${authorLastName.toUpperCase()}, ${authorFirstName.toUpperCase()} (${authorPhoneSafe || authorPhone})`,
+                    text: `${authorLastName.toUpperCase()}, ${authorFirstName.toUpperCase()} ${authorPhoneSafe}`,
                     bold: true,
                     size: 28
                   })],
