@@ -2,6 +2,7 @@
 // NOTE: Only additions made (no removals). Adds: target price + current price + vol + range return + upside,
 // AND adds: CRG Rating selector export into Word doc.
 // AND adds: optional phones (outputs "(N/A)"), and other UX additions.
+// AND adds: Email to CRG Research button that opens a prefilled email (user attaches the doc manually).
 
 console.log("app.js loaded successfully");
 
@@ -80,6 +81,79 @@ window.addEventListener("DOMContentLoaded", () => {
     hours = hours % 12 || 12;
 
     return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
+  }
+
+  // ================================
+  // NEW: Email to CRG (prefilled mailto)
+  // Note: browsers cannot auto-attach files for security reasons.
+  // User will attach the downloaded Word doc manually.
+  // ================================
+  const emailToCrgBtn = document.getElementById("emailToCrgBtn");
+
+  function formatDateShort(date) {
+    // e.g., 2026-01-02
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function buildCrgEmailPayload() {
+    const noteType = (document.getElementById("noteType")?.value || "Research Note").trim();
+    const title = (document.getElementById("title")?.value || "").trim();
+    const topic = (document.getElementById("topic")?.value || "").trim();
+
+    const authorFirstName = (document.getElementById("authorFirstName")?.value || "").trim();
+    const authorLastName = (document.getElementById("authorLastName")?.value || "").trim();
+
+    const ticker = (document.getElementById("ticker")?.value || "").trim();
+    const crgRating = (document.getElementById("crgRating")?.value || "").trim();
+    const targetPrice = (document.getElementById("targetPrice")?.value || "").trim();
+
+    const now = new Date();
+    const dateShort = formatDateShort(now);
+    const dateLong = formatDateTime(now);
+
+    const subjectParts = [
+      noteType || "Research Note",
+      dateShort,
+      title ? `— ${title}` : ""
+    ].filter(Boolean);
+
+    const subject = subjectParts.join(" ");
+
+    const authorLine = [authorFirstName, authorLastName].filter(Boolean).join(" ").trim();
+
+    const bodyLines = [
+      "Hi CRG Research,",
+      "",
+      "Please find my most recent note attached.",
+      "",
+      `Note type: ${noteType || "(N/A)"}`,
+      title ? `Title: ${title}` : null,
+      topic ? `Topic: ${topic}` : null,
+      ticker ? `Ticker (Stooq): ${ticker}` : null,
+      crgRating ? `CRG Rating: ${crgRating}` : null,
+      targetPrice ? `Target Price: ${targetPrice}` : null,
+      `Generated: ${dateLong}`,
+      "",
+      "Best,",
+      authorLine || ""
+    ].filter(Boolean);
+
+    const body = bodyLines.join("\n");
+    return { subject, body };
+  }
+
+  if (emailToCrgBtn) {
+    emailToCrgBtn.addEventListener("click", () => {
+      const { subject, body } = buildCrgEmailPayload();
+
+      const to = "research@cordobarg.com";
+      const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      window.location.href = mailto;
+    });
   }
 
   // ================================
