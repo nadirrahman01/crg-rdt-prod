@@ -3,7 +3,7 @@
      and adds CRG Rating selector with an info popover (Equity Research only).
      AND adds: tool guidance info box + form novalidate.
      AND adds: Email to CRG Research button (prefilled mailto; user attaches doc manually).
-     AND adds: Phone country code selector + auto hyphen formatting (CC-XXXXXXXX...) -->
+     NEW: Phone input upgraded with country code select + formatted typing (keeps hidden #authorPhone). -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -65,26 +65,44 @@
       <label for="authorFirstName">Primary Author — First Name</label>
       <input type="text" id="authorFirstName" required placeholder="e.g., Nadir">
 
-      <label for="authorPhone">Primary Author — Phone <span class="panel-muted">(Optional)</span></label>
+      <!-- NEW: Phone UI (country code + number) -->
+      <label for="authorPhoneNational">Primary Author — Phone <span class="panel-muted">(Optional)</span></label>
 
-      <!-- NEW: Country code selector (keeps existing authorPhone input) -->
-      <div class="phone-row">
-        <select id="authorCountryCode" class="country-code" aria-label="Primary author country code">
-          <option value="44" selected>+44 (UK)</option>
-          <option value="1">+1 (US/CA)</option>
-          <option value="39">+39 (IT)</option>
-          <option value="353">+353 (IE)</option>
-          <option value="971">+971 (UAE)</option>
-          <option value="966">+966 (KSA)</option>
-          <option value="92">+92 (PK)</option>
-          <option value="91">+91 (IN)</option>
-          <option value="880">+880 (BD)</option>
+      <div class="phone-row" id="authorPhoneRow">
+        <select id="authorPhoneCountry" class="phone-country" aria-label="Country code">
+          <option value="44" selected>🇬🇧 +44 (UK)</option>
+          <option value="1">🇺🇸 +1 (US)</option>
+          <option value="353">🇮🇪 +353 (IE)</option>
+          <option value="33">🇫🇷 +33 (FR)</option>
+          <option value="49">🇩🇪 +49 (DE)</option>
+          <option value="31">🇳🇱 +31 (NL)</option>
+          <option value="34">🇪🇸 +34 (ES)</option>
+          <option value="39">🇮🇹 +39 (IT)</option>
+          <option value="971">🇦🇪 +971 (AE)</option>
+          <option value="966">🇸🇦 +966 (SA)</option>
+          <option value="92">🇵🇰 +92 (PK)</option>
+          <option value="880">🇧🇩 +880 (BD)</option>
+          <option value="91">🇮🇳 +91 (IN)</option>
+          <option value="234">🇳🇬 +234 (NG)</option>
+          <option value="254">🇰🇪 +254 (KE)</option>
+          <option value="27">🇿🇦 +27 (ZA)</option>
+          <option value="995">🇬🇪 +995 (GE)</option>
+          <option value="">Other</option>
         </select>
-      </div>
-      <!-- /NEW -->
 
-      <!-- Existing input kept; ONLY added attributes -->
-      <input type="text" id="authorPhone" required placeholder="e.g., 44-7398344190" inputmode="numeric" autocomplete="tel">
+        <input
+          type="text"
+          id="authorPhoneNational"
+          class="phone-number"
+          inputmode="numeric"
+          autocomplete="tel-national"
+          placeholder="e.g., 7398 344 190"
+        >
+      </div>
+
+      <!-- KEEP existing hidden field (so the rest of your code still works) -->
+      <input type="text" id="authorPhone" required placeholder="e.g., 44-7398344190" style="display:none;">
+      <!-- /NEW -->
 
       <!-- Co-Authors Section -->
       <div id="coAuthorsSection" class="panel">
