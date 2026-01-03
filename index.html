@@ -1,7 +1,8 @@
 <!-- index.html -->
 <!-- NOTE: Only additions made (no removals). Adds target price + stats boxes under the price chart panel,
      and adds CRG Rating selector with an info popover (Equity Research only).
-     AND adds: tool guidance info box + form novalidate. -->
+     AND adds: tool guidance info box + form novalidate.
+     AND adds: Email to CRG Research button (prefilled mailto; user attaches doc manually). -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -96,11 +97,11 @@
             CRG Rating
             <span class="info-badge" tabindex="0" aria-label="Rating definitions">i</span>
                <span class="info-pop">
-                 <strong>Outperform (O)</strong>: expected to materially outperform the sector average over a 12-month horizon.<br><br>
-                 <strong>Sector Perform (SP)</strong>: expected to perform broadly in line with the sector average over a 12-month horizon.<br><br>
-                 <strong>Underperform (U)</strong>: expected to materially underperform the sector average over a 12-month horizon.<br><br>
-                 <strong>Restricted (R)</strong>: assigned where CRG precludes the expression of an investment view due to Shariah considerations or ethical constraints. This includes companies whose activities, capital structure, or revenue mix are not aligned with Shariah-compliant or responsible investment principles.<br><br>
-                 <strong>Not Rated (NR)</strong>: no formal rating has been assigned. This may reflect limited data availability, early-stage analysis, insufficient conviction, or the fact that the research is intended to be exploratory or thematic rather than a security-specific investment view.
+                 Outperform (O): expected to materially outperform the sector average over a 12-month horizon.<br><br>
+                 Sector Perform (SP): expected to perform broadly in line with the sector average over a 12-month horizon.<br><br>
+                 Underperform (U): expected to materially underperform the sector average over a 12-month horizon.<br><br>
+                 Restricted (R): assigned where CRG precludes the expression of an investment view due to Shariah considerations or ethical constraints. This includes companies whose activities, capital structure, or revenue mix are not aligned with Shariah-compliant or responsible investment principles.<br><br>
+                 Not Rated (NR): no formal rating has been assigned. This may reflect limited data availability, early-stage analysis, insufficient conviction, or the fact that the research is intended to be exploratory or thematic rather than a security-specific investment view.
                </span>
           </label>
 
@@ -211,7 +212,19 @@ Shares: X"></textarea>
       </p>
       <input type="file" id="imageUpload" multiple accept="image/*">
 
-      <button type="submit" class="btn btn-primary">Generate Word Document</button>
+      <!-- NEW: Button row (keeps original submit button; adds Email button) -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Generate Word Document</button>
+        <button type="button" id="emailToCrgBtn" class="btn btn-secondary">Email to CRG Research</button>
+      </div>
+      <!-- /NEW -->
+
+      <!-- NEW: small helper line (optional) -->
+      <div class="help-text" style="margin-top: 10px;">
+        <em>Email opens prefilled — attach the downloaded .docx before sending.</em>
+      </div>
+      <!-- /NEW -->
+
     </form>
 
     <div id="message" class="message"></div>
