@@ -1,12 +1,3 @@
-// assets/app.js
-// NOTE: Only additions made (no removals). Adds: target price + current price + vol + range return + upside,
-// AND adds: CRG Rating selector export into Word doc.
-// AND adds: optional phones (outputs "N/A"), and other UX additions.
-// AND adds: Email to CRG Research button that opens a prefilled email (user attaches the doc manually).
-// NEW: Country code dropdown + smaller left box + phone formatting while typing.
-// NEW: Fix double brackets ((N/A)) -> (N/A) by returning "N/A" (no brackets) from naIfBlank.
-// NEW: Adds completion meter, attachment summary strip, and reset form button with confirm.
-
 console.log("app.js loaded successfully");
 
 window.addEventListener("DOMContentLoaded", () => {
