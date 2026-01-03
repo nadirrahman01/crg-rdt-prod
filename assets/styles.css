@@ -405,7 +405,6 @@ input[type="file"]::file-selector-button{
   .chart-range{ width: 100% !important; }
 }
 
-/* assets/styles.css */
 /* NOTE: Only additions made (no removals). Adds metrics grid/cards for Current Price, Vol, Return, Upside */
 
 .metrics-grid{
@@ -571,4 +570,29 @@ input[type="file"]::file-selector-button{
   font-size: 13px;
   color: rgba(11,14,20,.72);
   line-height: 1.55;
+}
+
+/* =========================
+   NEW: action buttons row
+   ========================= */
+.form-actions{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+/* keep existing button styling intact */
+.form-actions .btn{
+  margin-top: 0 !important;
+}
+
+@media (max-width: 768px){
+  .form-actions{
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-actions .btn{
+    width: 100%;
+  }
 }
