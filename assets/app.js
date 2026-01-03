@@ -83,7 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
     return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
   }
 
-  // ================================
+// ================================
 // NEW: Email to CRG (prefilled mailto)
 // Note: browsers cannot auto-attach files for security reasons.
 // User will attach the downloaded Word doc manually.
@@ -91,32 +91,33 @@ window.addEventListener("DOMContentLoaded", () => {
 const emailToCrgBtn = document.getElementById("emailToCrgBtn");
 
 function formatDateShort(date) {
-  // e.g., 2026-01-02
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
 
-// NEW: make line breaks render properly in more email clients
+// IMPORTANT FIX:
+// - Avoid URLSearchParams (it turns spaces into "+")
+// - Use encodeURIComponent directly
+// - Force CRLF for clean line breaks in email clients
 function buildMailto(to, cc, subject, body) {
-  // Many clients behave better with CRLF (%0D%0A) than LF (%0A)
   const crlfBody = (body || "").replace(/\n/g, "\r\n");
-  const params = new URLSearchParams();
-  if (cc) params.set("cc", cc);
-  params.set("subject", subject || "");
-  params.set("body", crlfBody);
-  return `mailto:${encodeURIComponent(to)}?${params.toString()}`;
+
+  const parts = [];
+  if (cc) parts.push(`cc=${encodeURIComponent(cc)}`);
+  parts.push(`subject=${encodeURIComponent(subject || "")}`);
+  parts.push(`body=${encodeURIComponent(crlfBody)}`);
+
+  return `mailto:${encodeURIComponent(to)}?${parts.join("&")}`;
 }
 
 function ccForNoteType(noteTypeRaw) {
   const t = (noteTypeRaw || "").toLowerCase();
 
   if (t.includes("equity")) return "tommaso@cordobarg.com";
-
   if (t.includes("macro") || t.includes("market")) return "tim@cordobarg.com";
-
-  if (t.includes("commodity")) return "uhayd@cordobarg.com".toLowerCase();
+  if (t.includes("commodity")) return "uhayd@cordobarg.com";
 
   return "";
 }
@@ -137,6 +138,7 @@ function buildCrgEmailPayload() {
   const dateShort = formatDateShort(now);
   const dateLong = formatDateTime(now);
 
+  // Subject line
   const subjectParts = [
     noteType || "Research Note",
     dateShort,
@@ -146,6 +148,7 @@ function buildCrgEmailPayload() {
   const subject = subjectParts.join(" ");
   const authorLine = [authorFirstName, authorLastName].filter(Boolean).join(" ").trim();
 
+  // Email body with proper spacing
   const paragraphs = [];
 
   paragraphs.push("Hi CRG Research,");
@@ -166,7 +169,7 @@ function buildCrgEmailPayload() {
   paragraphs.push("Best,");
   paragraphs.push(authorLine || "");
 
-  const body = paragraphs.join("\n\n"); // <-- key change
+  const body = paragraphs.join("\n\n"); // double line breaks = clean spacing
   const cc = ccForNoteType(noteType);
 
   return { subject, body, cc };
