@@ -596,3 +596,24 @@ input[type="file"]::file-selector-button{
     width: 100%;
   }
 }
+
+/* =========================
+   NEW: phone formatting UI
+   ========================= */
+.phone-row{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.country-code{
+  width: 100% !important;
+  border-radius: var(--radius-field);
+}
+
+/* Co-author row enhancement (when we inject the CC dropdown) */
+.coauthor-entry .country-code{
+  width: 100% !important;
+}
