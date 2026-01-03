@@ -152,7 +152,7 @@ function buildCrgEmailPayload() {
   paragraphs.push("Please find my most recent note attached.");
 
   const metaLines = [
-    `Note type: ${noteType || "(N/A)"}`,
+    `Note type: ${noteType || "N/A"}`,
     title ? `Title: ${title}` : null,
     topic ? `Topic: ${topic}` : null,
     ticker ? `Ticker (Stooq): ${ticker}` : null,
