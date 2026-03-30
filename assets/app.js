@@ -2893,10 +2893,18 @@ document.addEventListener("DOMContentLoaded", () => {
       documentChildren.push(buildNomuraSubhead(docxLib, colors, "Model Files"), ...supportParagraphs);
     }
 
-    return buildResearchDocumentShell(docxLib, colors, publicationDate, data.generatedAt, data.noteId, documentChildren);
+    return buildResearchDocumentShell(
+      docxLib,
+      colors,
+      publicationDate,
+      data.generatedAt,
+      data.noteId,
+      documentChildren,
+      buildComplianceDeclarationSection(docxLib, colors, data)
+    );
   }
 
-  function buildResearchDocumentShell(docxLib, colors, publicationDate, generatedAt, noteId, children) {
+  function buildResearchDocumentShell(docxLib, colors, publicationDate, generatedAt, noteId, children, finalPrintChildren = []) {
     return new docxLib.Document({
       styles: {
         default: {
@@ -2940,7 +2948,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ]
             })
           },
-          children
+          children: [...children, ...finalPrintChildren]
         }
       ]
     });
@@ -3009,7 +3017,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       children.push(...deferredCordobaView);
-      return buildResearchDocumentShell(docxLib, colors, publicationDate, data.generatedAt, data.noteId, children);
+      return buildResearchDocumentShell(
+        docxLib,
+        colors,
+        publicationDate,
+        data.generatedAt,
+        data.noteId,
+        children,
+        buildComplianceDeclarationSection(docxLib, colors, data)
+      );
     }
 
     if (data.imageFiles.length) {
@@ -3025,7 +3041,15 @@ document.addEventListener("DOMContentLoaded", () => {
       children.push(buildNomuraSubhead(docxLib, colors, "Model Files"), ...supportParagraphs);
     }
 
-    return buildResearchDocumentShell(docxLib, colors, publicationDate, data.generatedAt, data.noteId, children);
+    return buildResearchDocumentShell(
+      docxLib,
+      colors,
+      publicationDate,
+      data.generatedAt,
+      data.noteId,
+      children,
+      buildComplianceDeclarationSection(docxLib, colors, data)
+    );
   }
 
   function buildEquitySecurityLine(docxLib, colors, data) {
@@ -3819,6 +3843,136 @@ document.addEventListener("DOMContentLoaded", () => {
         })
       ]
     });
+  }
+
+  function buildComplianceDeclarationSection(docxLib, colors, data) {
+    const justification = docxLib.AlignmentType.JUSTIFIED || docxLib.AlignmentType.BOTH || docxLib.AlignmentType.LEFT;
+    const noteReference = [data.title || "Research note", data.noteId ? `Note ID ${data.noteId}` : ""].filter(Boolean).join(" | ");
+    const analystNames = collectComplianceAnalystNames(data);
+    const analystLabel = analystNames.length ? formatHumanList(analystNames) : "the named analyst(s)";
+    const analystVerb = analystNames.length === 1 ? "is" : "are";
+    const analystPronoun = analystNames.length === 1 ? "that individual" : "those individuals";
+    const publicationTimestamp = formatProductionTimestamp(data.generatedAt);
+
+    const sections = [
+      {
+        heading: "Regulatory Status And Purpose",
+        body: `${noteReference} is issued by Cordoba Research Group solely as part of its educational and training activities. Cordoba Research Group is not a company registered with the Financial Conduct Authority, is not authorised or regulated by the Financial Conduct Authority, and does not hold itself out as an authorised investment firm, research house, broker, adviser, arranger, or distributor. Cordoba Research Group is an educational group whose purpose is to provide students and early-career participants with research opportunities, editorial training, and practical learning experience in institutional-style analytical writing.`
+      },
+      {
+        heading: "Educational And Informational Use Only",
+        body: `This material has been prepared strictly for educational and informational purposes. It is intended to demonstrate research process, analytical structure, valuation framing, market writing discipline, and note-production workflow. It is not intended to constitute, and must not be construed as constituting, investment advice, personal advice, financial advice, regulated investment research, a financial promotion, an offer, a solicitation, an invitation, or a recommendation to buy, sell, underwrite, subscribe for, hold, or otherwise transact in any security, derivative, fund, currency, commodity, credit instrument, or other investment.`
+      },
+      {
+        heading: "No Investment Advice Or Recommendation",
+        body: `Cordoba Research Group does not provide investment advice and does not make investment recommendations. Any valuation commentary, rating language, market observations, scenario framing, target prices, trade illustrations, or risk discussions contained in this note are included solely as part of an educational research exercise. They are not prepared in accordance with legal or regulatory requirements designed to promote the independence of investment research, and they are not subject to any prohibition on dealing ahead of the dissemination of investment research that may apply to authorised firms.`
+      },
+      {
+        heading: "No Reliance, No Solicitation, No Financial Promotion",
+        body: `No statement in this note should be relied upon as a basis for any investment decision, portfolio action, transaction, mandate allocation, treasury decision, hedging activity, or suitability assessment. Nothing in this note constitutes a solicitation, inducement, marketing communication, invitation to engage in investment activity, or communication approved for the purposes of the Financial Services and Markets Act 2000 or any equivalent regime in another jurisdiction. Recipients must not treat this material as a substitute for independent diligence, regulated research, or advice from an appropriately authorised professional.`
+      },
+      {
+        heading: "Authorship And Editorial Responsibility",
+        body: `${analystLabel} ${analystVerb} responsible for the authorship and substantive content of this note. The views, observations, interpretations, and analytical judgments expressed in the note are attributable to ${analystPronoun} in an editorial sense. Such attribution does not alter the educational status of the material and does not imply that Cordoba Research Group, or any affiliated person, is issuing regulated investment research or assuming advisory, fiduciary, suitability, or execution responsibilities in respect of any reader, user, institution, or third party.`
+      },
+      {
+        heading: "Sources, Models, Forecasts, And Data Integrity",
+        body: `The note may contain references to public filings, company disclosures, market prices, index levels, financial models, consensus assumptions, historical series, scenario analysis, or third-party data sources. Such material may be incomplete, delayed, estimated, reformatted, simplified, rounded, or subject to revision without notice. Forecasts, sensitivities, and scenario outputs are inherently uncertain and may depend on assumptions that prove inaccurate. Past performance, historical price action, realised volatility, benchmark comparisons, and model-derived outputs are not reliable indicators of future results.`
+      },
+      {
+        heading: "Reader Responsibility And Independent Judgment",
+        body: `Each reader remains solely responsible for exercising independent judgment in relation to any market, issuer, asset, or transaction referred to in this note. Where a reader is considering an investment, financing, hedging, treasury, structuring, or capital-allocation decision, that reader should obtain advice from appropriately authorised legal, regulatory, tax, accounting, and investment professionals before acting. No recipient should assume that any market view, valuation range, target price, scenario case, or research conclusion contained in this note is suitable for that recipient’s objectives, financial position, risk tolerance, regulatory perimeter, or fiduciary obligations.`
+      },
+      {
+        heading: "Distribution, Jurisdiction, And Use Restrictions",
+        body: `This note is not directed at, and should not be distributed to or relied upon by, any person in any jurisdiction where its circulation or use would be contrary to local law, regulation, or licensing requirements. The material should be treated as internal educational content or limited-circulation informational material, as applicable to the context in which it is received. Recipients must not reissue, market, syndicate, excerpt, or republish the note as regulated research, client advice, or externally approved investment material without first obtaining any approvals, permissions, and legal review that may be required.`
+      },
+      {
+        heading: "Limitation Of Responsibility",
+        body: `To the fullest extent permitted by law, Cordoba Research Group disclaims responsibility for any loss, liability, cost, claim, damage, or consequence arising directly or indirectly from the use of, reliance on, reference to, circulation of, or inability to use this note. This includes, without limitation, any loss arising from inaccuracies, omissions, model errors, data errors, stale information, transcription mistakes, interpretive judgments, or revisions to market data or company disclosures. If any part of this declaration is held unenforceable, the remaining parts shall continue to apply to the fullest extent permitted.`
+      },
+      {
+        heading: "Final Print Notice",
+        body: `Published ${publicationTimestamp}. This declaration forms an integral part of the note and must be read together with the substantive analysis, exhibits, valuation material, and supporting tables that precede it. By reading or retaining this note, the recipient acknowledges the educational and non-advisory basis on which it has been prepared and agrees that responsibility for any investment or commercial decision remains exclusively with the recipient and that recipient’s authorised advisers.`
+      }
+    ];
+
+    return [
+      new docxLib.Paragraph({
+        pageBreakBefore: true,
+        border: {
+          top: {
+            color: colors.line,
+            style: docxLib.BorderStyle.SINGLE,
+            size: 4
+          }
+        },
+        children: [
+          new docxLib.TextRun({
+            text: "Legal And Compliance Declaration",
+            bold: true,
+            size: 20,
+            color: colors.black,
+            font: "Arial"
+          })
+        ],
+        spacing: { before: 0, after: 70 }
+      }),
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.TextRun({
+            text: "Final print / regulatory notice",
+            bold: true,
+            size: 14,
+            color: colors.red,
+            font: "Arial"
+          })
+        ],
+        spacing: { after: 95 }
+      }),
+      ...sections.flatMap((section) => ([
+        new docxLib.Paragraph({
+          children: [
+            new docxLib.TextRun({
+              text: section.heading,
+              bold: true,
+              size: 15,
+              color: colors.black,
+              font: "Arial"
+            })
+          ],
+          spacing: { before: 80, after: 26 }
+        }),
+        new docxLib.Paragraph({
+          alignment: justification,
+          children: [
+            new docxLib.TextRun({
+              text: section.body,
+              size: 15,
+              color: colors.ink,
+              font: "Arial"
+            })
+          ],
+          spacing: { after: 62 },
+          indent: { left: 0, right: 0 }
+        })
+      ]))
+    ];
+  }
+
+  function collectComplianceAnalystNames(data) {
+    return [
+      [data.authorFirstName, data.authorLastName].filter(Boolean).join(" ").trim(),
+      ...(data.coAuthors || []).map((coAuthor) => [coAuthor.firstName, coAuthor.lastName].filter(Boolean).join(" ").trim())
+    ].filter(Boolean);
+  }
+
+  function formatHumanList(items) {
+    const cleanItems = items.map((item) => String(item || "").trim()).filter(Boolean);
+    if (!cleanItems.length) return "";
+    if (cleanItems.length === 1) return cleanItems[0];
+    if (cleanItems.length === 2) return `${cleanItems[0]} and ${cleanItems[1]}`;
+    return `${cleanItems.slice(0, -1).join(", ")}, and ${cleanItems[cleanItems.length - 1]}`;
   }
 
   function buildDocAuthorLine(lastName, firstName, phone) {
