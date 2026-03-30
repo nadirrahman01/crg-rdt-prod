@@ -3859,7 +3859,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const sections = [
       {
-        heading: "1. Status of Publisher",
+        heading: "Status of Publisher",
         subheading: "Regulatory perimeter and institutional status",
         paragraphs: [
           `${noteReference} has been prepared and circulated by Cordoba Research Group solely in connection with its educational, editorial, and training activities. Cordoba Research Group is not authorised, approved, supervised, or otherwise regulated by the Financial Conduct Authority and is not a company registered with the Financial Conduct Authority for the carrying on of investment business, research distribution, brokerage, advisory, arranging, dealing, discretionary management, or any other regulated activity. Cordoba Research Group is not a registered investment firm, broker, investment adviser, wealth manager, regulated research provider, or financial intermediary, and no statement in this note should be read as suggesting otherwise.`,
@@ -3867,7 +3867,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "2. Nature of the Material",
+        heading: "Nature of the Material",
         subheading: "Educational and informational publication only",
         paragraphs: [
           `This material is provided strictly for educational and informational purposes. It is intended to illustrate how a research note may be framed, structured, edited, and presented, including the handling of market data, valuation concepts, scenario analysis, risk articulation, and analytical narrative. It is not intended to provide personalised or general investment advice; it does not constitute legal, tax, accounting, regulatory, or financial advice; and it must not be treated as a substitute for advice from a properly authorised or qualified professional adviser.`,
@@ -3875,7 +3875,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "3. No Offer, No Solicitation, No Financial Promotion",
+        heading: "No Offer, No Solicitation, No Financial Promotion",
         subheading: "No invitation to transact and no approved marketing communication",
         paragraphs: [
           `This note does not constitute an offer, invitation, solicitation, inducement, marketing communication, approval communication, placing document, offering memorandum, prospectus, term sheet, dealing instruction, or call to action in relation to any issuer, security, derivative, fund, commodity, rate product, credit instrument, currency, or investment strategy. It must not be treated as an offer to buy or sell, or as a solicitation of an offer to buy or sell, any financial instrument or to participate in any transaction, placement, underwriting, financing, syndication, hedging arrangement, or capital-markets activity.`,
@@ -3883,7 +3883,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "4. No Advice, Recommendation, Suitability Assessment, or Fiduciary Relationship",
+        heading: "No Advice, Recommendation, Suitability Assessment, or Fiduciary Relationship",
         subheading: "Recipient responsibility for judgment and decision-making",
         paragraphs: [
           `Cordoba Research Group does not provide investment advice and does not make investment recommendations. No statement, chart, scenario, rating, target price, valuation range, market comment, or analytical conclusion in this note should be relied upon as a basis for any investment decision, portfolio construction decision, asset-allocation decision, hedging decision, lending decision, treasury action, suitability assessment, mandate decision, or execution instruction. This material does not take into account the investment objectives, financial situation, regulatory status, legal constraints, tax position, risk tolerance, or portfolio composition of any particular person.`,
@@ -3891,7 +3891,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "5. Sources, Verification, Accuracy, Completeness, and Timeliness",
+        heading: "Sources, Verification, Accuracy, Completeness, and Timeliness",
         subheading: "Public and third-party information; no guarantee of independent verification",
         paragraphs: [
           `Information used in the preparation of this note may have been derived from public filings, company announcements, exchange data, price feeds, benchmark providers, market vendors, published commentary, consensus estimates, analyst presentations, official statistics, third-party databases, and other sources believed, but not guaranteed, to be reliable. Such information may be incomplete, abbreviated, reformatted, rounded, selectively presented, translated, delayed, stale, superseded, or otherwise affected by the limitations of the original source material or by the way in which it has been incorporated into the note.`,
@@ -3899,7 +3899,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "6. Valuations, Forecasts, Forward-Looking Statements, and Market Variables",
+        heading: "Valuations, Forecasts, Forward-Looking Statements, and Market Variables",
         subheading: "Assumption-driven analysis and uncertainty of outcomes",
         paragraphs: [
           `Any forecast, estimate, projection, expected return, target price, scenario, sensitivity, probability, valuation output, implied upside, downside estimate, or other forward-looking statement in this note is inherently uncertain and dependent upon assumptions, methodologies, judgments, simplifications, model choices, and market inputs that may prove to be incorrect, incomplete, or unstable. Different assumptions, data selections, discount rates, benchmark choices, macro views, or analytical frameworks may produce materially different results. Forward-looking statements are not statements of fact and should not be interpreted as assurances or guarantees of future performance or future market levels.`,
@@ -3907,7 +3907,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "7. Views, Opinions, Changes Without Notice, and No Duty to Update",
+        heading: "Views, Opinions, Changes Without Notice, and No Duty to Update",
         subheading: "Current only as of publication and subject to revision",
         paragraphs: [
           `Any view, opinion, interpretation, analytical judgment, or conclusion contained in this note is current only as of the publication timestamp stated below or the relevant drafting date reflected in the note and may change at any time without notice. Markets evolve, information changes, company circumstances develop, and analytical judgments may be revised as new information becomes available. Cordoba Research Group and the named analyst authors reserve the right to alter, withdraw, replace, or discontinue any view expressed in the note without any duty to notify readers, recipients, or third parties.`,
@@ -3915,7 +3915,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "8. Authorship, Editorial Responsibility, and Internal Divergence of Views",
+        heading: "Authorship, Editorial Responsibility, and Internal Divergence of Views",
         subheading: "Named authorship and limits of attribution",
         paragraphs: [
           `${analystLabel} ${analystVerb} responsible for the authorship and substantive content of this note, and the views, observations, interpretations, estimates, and analytical judgments expressed in the note are attributable to ${analystPronoun} in an editorial sense. That attribution reflects authorship responsibility only. It does not imply that the named analyst authors are regulated analysts, approved persons, authorised advisers, or persons producing research under a regulated investment-research regime. It also does not create any duty on the part of the named analyst authors toward any reader or recipient.`,
@@ -3923,7 +3923,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "9. Distribution, Circulation, Audience, and Use Restrictions",
+        heading: "Distribution, Circulation, Audience, and Use Restrictions",
         subheading: "Limitations on onward circulation and jurisdictional use",
         paragraphs: [
           `This note is not directed at retail investors and is not prepared for general public distribution as regulated investment material. It should not be distributed, transmitted, published, excerpted, syndicated, marketed, or relied upon in any jurisdiction or circumstance in which such use would be unlawful or would require registration, authorisation, approval, licensing, filing, or review not obtained by Cordoba Research Group. Each recipient is responsible for satisfying itself that receipt, possession, use, and onward circulation of the note is lawful in the relevant jurisdiction and context.`,
@@ -3931,7 +3931,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "10. Intellectual Property and Restrictions on Reproduction",
+        heading: "Intellectual Property and Restrictions on Reproduction",
         subheading: "No reproduction, republication, redistribution, or commercial exploitation without permission",
         paragraphs: [
           `Unless otherwise indicated, the text, structure, compilation, editorial arrangement, and original analytical content of this note are proprietary to Cordoba Research Group and/or the named analyst authors. The note is made available for the limited educational purpose for which it was prepared and may not be copied, reproduced, republished, extracted, adapted, translated, distributed, uploaded, transmitted, licensed, sold, commercialised, or otherwise exploited, in whole or in part, without prior written permission from Cordoba Research Group, except to the extent permitted by applicable law for strictly limited non-commercial internal reference purposes.`,
@@ -3939,7 +3939,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "11. Limitation of Liability and Exclusion of Responsibility",
+        heading: "Limitation of Liability and Exclusion of Responsibility",
         subheading: "No liability for use, reliance, or consequences of circulation",
         paragraphs: [
           `To the fullest extent permitted by law, Cordoba Research Group disclaims all liability, responsibility, duty of care, and accountability arising directly or indirectly from the preparation, use, reference to, circulation of, or reliance upon this note or any part of it. This exclusion applies whether any claim sounds in contract, tort, negligence, misrepresentation, statutory duty, fiduciary duty, restitution, or otherwise, and extends to direct, indirect, incidental, consequential, punitive, special, exemplary, or other forms of loss or damage, including without limitation trading losses, opportunity costs, lost profits, lost revenues, reputational harm, loss of data, business interruption, financing costs, regulatory consequences, or losses associated with adverse market movements.`,
@@ -3947,7 +3947,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "12. Recipient Responsibility and Professional Advice",
+        heading: "Recipient Responsibility and Professional Advice",
         subheading: "Independent assessment remains essential",
         paragraphs: [
           `Each recipient must rely on its own independent assessment and judgment when evaluating any market, issuer, instrument, or transaction referred to in this note. No person should assume that any security, instrument, structure, issuer, benchmark, valuation conclusion, or trade concept mentioned in the note is suitable for their objectives, risk profile, capital base, liquidity needs, constitutional restrictions, mandate terms, fiduciary duties, accounting treatment, tax position, or regulatory obligations. The responsibility for testing assumptions, verifying facts, understanding legal documentation, and assessing suitability remains entirely with the recipient and its advisers.`,
@@ -3955,7 +3955,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
       },
       {
-        heading: "13. Record of Publication",
+        heading: "Record of Publication",
         subheading: "Relationship of this notice to the note as a whole",
         paragraphs: [
           `Published ${publicationTimestamp}. This Regulatory Disclosure and Important Notice forms an integral part of the publication record for ${noteReference} and must be read together with the substantive analysis, charts, tables, appendices, and supporting material that precede it. By accessing, retaining, forwarding, or using this note, the recipient acknowledges the educational, non-advisory, non-promotional, and non-regulated basis on which it has been prepared and circulated.`,
