@@ -1245,7 +1245,7 @@ document.addEventListener("DOMContentLoaded", () => {
           buildFinding(
             "warning",
             "Financial table not populated",
-            "Add live forecast values into the financial grid so the equity note prints with actual financial estimates rather than placeholders.",
+            "Add live forecast values into the financial grid so the equity note renders with actual financial estimates rather than placeholders.",
             "Equity",
             { focusId: "financialTableEditor" }
           )
@@ -3854,56 +3854,113 @@ document.addEventListener("DOMContentLoaded", () => {
     const analystPronoun = analystNames.length === 1 ? "that individual" : "those individuals";
     const publicationTimestamp = formatProductionTimestamp(data.generatedAt);
     const legalBodySize = 14;
-    const legalHeadingSize = 13;
+    const legalHeadingSize = 12;
+    const legalSubheadingSize = 11;
 
     const sections = [
       {
-        heading: "Regulatory Status And Educational Purpose",
-        body: `${noteReference} has been prepared and circulated by Cordoba Research Group solely in furtherance of its educational, editorial, and training activities. Cordoba Research Group is not a company registered with the Financial Conduct Authority, is not authorised, approved, or otherwise regulated by the Financial Conduct Authority, is not entered on the Financial Services Register as an authorised investment firm, and does not carry on regulated activities by virtue of this publication. Cordoba Research Group is an educational group established to provide students and developing analysts with research opportunities, writing discipline, and practical experience in the preparation of institutional-style market commentary and analytical notes.`
+        heading: "1. Status of Publisher",
+        subheading: "Regulatory perimeter and institutional status",
+        paragraphs: [
+          `${noteReference} has been prepared and circulated by Cordoba Research Group solely in connection with its educational, editorial, and training activities. Cordoba Research Group is not authorised, approved, supervised, or otherwise regulated by the Financial Conduct Authority and is not a company registered with the Financial Conduct Authority for the carrying on of investment business, research distribution, brokerage, advisory, arranging, dealing, discretionary management, or any other regulated activity. Cordoba Research Group is not a registered investment firm, broker, investment adviser, wealth manager, regulated research provider, or financial intermediary, and no statement in this note should be read as suggesting otherwise.`,
+          `Cordoba Research Group is an educational platform and research group intended to provide students and developing analysts with opportunities to practise institutional-style writing, analytical discipline, editorial judgment, and structured market commentary. The note has therefore been produced within an educational context and must be understood as such. The fact that the note adopts institutional conventions of structure, tone, layout, valuation language, or market terminology does not alter its educational character and does not convert it into regulated investment research, financial advice, or any communication approved by an authorised person for investment purposes.`
+        ]
       },
       {
-        heading: "Informational Material Only; Not Advice Or Research In The Regulated Sense",
-        body: `This material is provided strictly for educational and informational purposes. It is intended to illustrate research process, analytical reasoning, market-writing technique, note structure, valuation framing, and production workflow, and it should be read on that basis only. It does not constitute investment advice, personal advice, financial advice, tax advice, legal advice, accounting advice, portfolio advice, regulated investment research, independent research, or research prepared in accordance with legal or regulatory requirements designed to promote the independence of investment research. Nothing in this note should be interpreted as a recommendation or opinion as to the merits, suitability, appropriateness, or expected performance of any security, issuer, index, derivative, fund, commodity, currency, rate product, credit instrument, structured product, or investment strategy.`
+        heading: "2. Nature of the Material",
+        subheading: "Educational and informational publication only",
+        paragraphs: [
+          `This material is provided strictly for educational and informational purposes. It is intended to illustrate how a research note may be framed, structured, edited, and presented, including the handling of market data, valuation concepts, scenario analysis, risk articulation, and analytical narrative. It is not intended to provide personalised or general investment advice; it does not constitute legal, tax, accounting, regulatory, or financial advice; and it must not be treated as a substitute for advice from a properly authorised or qualified professional adviser.`,
+          `Nothing in this note constitutes, or should be construed as constituting, investment advice, a personal recommendation, a regulated investment recommendation, independent research, or investment research prepared in accordance with legal or regulatory requirements designed to promote the independence of investment research. The note is not prepared subject to the rules, controls, separations, monitoring arrangements, research independence safeguards, or dealing restrictions that may apply to research produced by an authorised investment firm or broker-dealer.`
+        ]
       },
       {
-        heading: "No Offer, Solicitation, Inducement, Or Financial Promotion",
-        body: `This note does not constitute, and must not be relied upon as, an offer, solicitation, invitation, inducement, marketing communication, placement document, term sheet, approval communication, dealing instruction, or call to action in respect of any investment or transaction. It is not intended to be, and must not be treated as, a financial promotion for the purposes of the Financial Services and Markets Act 2000 or any analogous regime in any other jurisdiction, nor has it been approved for such purpose by an authorised person. Any references to ratings, target prices, return scenarios, catalysts, risks, valuation outputs, or market levels are included solely within an educational framework and do not amount to an invitation, recommendation, or encouragement to buy, sell, subscribe for, hold, hedge, or otherwise transact.`
+        heading: "3. No Offer, No Solicitation, No Financial Promotion",
+        subheading: "No invitation to transact and no approved marketing communication",
+        paragraphs: [
+          `This note does not constitute an offer, invitation, solicitation, inducement, marketing communication, approval communication, placing document, offering memorandum, prospectus, term sheet, dealing instruction, or call to action in relation to any issuer, security, derivative, fund, commodity, rate product, credit instrument, currency, or investment strategy. It must not be treated as an offer to buy or sell, or as a solicitation of an offer to buy or sell, any financial instrument or to participate in any transaction, placement, underwriting, financing, syndication, hedging arrangement, or capital-markets activity.`,
+          `This note is not intended to be, and must not be relied upon as, a financial promotion for the purposes of the Financial Services and Markets Act 2000 or any corresponding law or regulation in another jurisdiction. It has not been approved by an authorised person for communication to persons who may require that level of approval, and it must not be circulated in a manner that would cause it to be characterised as an externally approved marketing, distribution, or promotional document. Any ratings, target prices, catalysts, valuation outputs, trade illustrations, or scenario outcomes mentioned in the note are included solely within an educational framework and do not amount to a recommendation or inducement.`
+        ]
       },
       {
-        heading: "No Recommendation; No Reliance For Decision-Making",
-        body: `Cordoba Research Group does not provide investment advice and does not make investment recommendations. No statement in this note should be relied upon as a basis for any investment decision, portfolio construction decision, capital allocation decision, hedging decision, treasury action, lending decision, suitability assessment, mandate decision, or execution instruction. Recipients must not treat this material as a substitute for their own assessment, for regulated research issued by authorised firms, or for advice obtained from appropriately authorised professionals with knowledge of the recipient’s objectives, constraints, financial position, regulatory perimeter, and risk tolerance.`
+        heading: "4. No Advice, Recommendation, Suitability Assessment, or Fiduciary Relationship",
+        subheading: "Recipient responsibility for judgment and decision-making",
+        paragraphs: [
+          `Cordoba Research Group does not provide investment advice and does not make investment recommendations. No statement, chart, scenario, rating, target price, valuation range, market comment, or analytical conclusion in this note should be relied upon as a basis for any investment decision, portfolio construction decision, asset-allocation decision, hedging decision, lending decision, treasury action, suitability assessment, mandate decision, or execution instruction. This material does not take into account the investment objectives, financial situation, regulatory status, legal constraints, tax position, risk tolerance, or portfolio composition of any particular person.`,
+          `No fiduciary duty, advisory duty, suitability duty, execution duty, monitoring duty, or continuing duty is owed by Cordoba Research Group or by the named analyst authors to any reader, recipient, institution, or third party by reason of the preparation, circulation, availability, or use of this note. Recipients remain solely responsible for exercising their own independent judgment. Any person considering any action in relation to a market, issuer, or instrument referred to in the note should obtain advice from properly authorised legal, tax, accounting, regulatory, and investment professionals before acting or refraining from acting.`
+        ]
       },
       {
-        heading: "Sources, Verification, Completeness, And Timeliness",
-        body: `Information used in the preparation of this note may have been drawn from public filings, company announcements, exchange data, vendor datasets, price feeds, benchmark providers, published commentary, consensus materials, and other third-party sources believed, but not guaranteed, to be reliable. Such information may be incomplete, abbreviated, rounded, reformatted, delayed, stale, superseded, or otherwise subject to change without notice. Cordoba Research Group does not represent or warrant that any statement, dataset, estimate, chart, assumption, table, or model input is complete, accurate, independently verified, timely, suitable for any purpose, or free from error or omission. Any omission of context, methodology, risk factors, or subsequent developments may materially affect interpretation.`
+        heading: "5. Sources, Verification, Accuracy, Completeness, and Timeliness",
+        subheading: "Public and third-party information; no guarantee of independent verification",
+        paragraphs: [
+          `Information used in the preparation of this note may have been derived from public filings, company announcements, exchange data, price feeds, benchmark providers, market vendors, published commentary, consensus estimates, analyst presentations, official statistics, third-party databases, and other sources believed, but not guaranteed, to be reliable. Such information may be incomplete, abbreviated, reformatted, rounded, selectively presented, translated, delayed, stale, superseded, or otherwise affected by the limitations of the original source material or by the way in which it has been incorporated into the note.`,
+          `Cordoba Research Group does not represent, warrant, or guarantee that any information, statement, chart, table, model output, estimate, assumption, or summary contained in this note is accurate, complete, fair, balanced, timely, reliable, suitable, or fit for any particular purpose, nor that it has been independently verified in every respect. There may be errors, omissions, transcription issues, formatting discrepancies, stale data, or missing contextual information. The absence of any express qualification within the body of the note should not be taken to imply that a statement has been independently verified or remains current at the time of reading.`
+        ]
       },
       {
-        heading: "Forecasts, Forward-Looking Statements, And Market Risk",
-        body: `Any forecasts, target prices, scenario cases, sensitivities, probabilities, expected-return statements, or other forward-looking observations contained in this note are inherently uncertain and based on assumptions, judgments, simplifications, and market conditions that may prove inaccurate or incomplete. Actual outcomes may differ materially, including as a result of changes in macroeconomic conditions, issuer fundamentals, policy, liquidity, market structure, regulation, rates, currencies, credit conditions, geopolitics, or other factors. Past performance is not indicative of future results. The value of investments and the income derived from them may fall as well as rise, and investors may receive back less than originally invested or, where leverage or derivatives are involved, may incur losses in excess of initial capital committed.`
+        heading: "6. Valuations, Forecasts, Forward-Looking Statements, and Market Variables",
+        subheading: "Assumption-driven analysis and uncertainty of outcomes",
+        paragraphs: [
+          `Any forecast, estimate, projection, expected return, target price, scenario, sensitivity, probability, valuation output, implied upside, downside estimate, or other forward-looking statement in this note is inherently uncertain and dependent upon assumptions, methodologies, judgments, simplifications, model choices, and market inputs that may prove to be incorrect, incomplete, or unstable. Different assumptions, data selections, discount rates, benchmark choices, macro views, or analytical frameworks may produce materially different results. Forward-looking statements are not statements of fact and should not be interpreted as assurances or guarantees of future performance or future market levels.`,
+          `Actual outcomes may differ materially from any forward-looking view expressed in the note as a result of changes in issuer fundamentals, policy, regulation, rates, currencies, liquidity, funding conditions, market structure, competitive dynamics, geopolitical events, management decisions, commodity prices, spreads, implied volatilities, credit conditions, or broader macroeconomic developments. Prices, yields, spreads, valuations, exchange rates, and market-implied metrics may move adversely and rapidly. Past performance is not indicative of future results. Capital is at risk. Investments may fall as well as rise in value, income may vary, and investors may receive back less than originally invested. Instruments involving leverage, options, swaps, futures, or other derivatives may expose participants to amplified gains and losses and may entail losses in excess of initial capital committed or collateral posted.`
+        ]
       },
       {
-        heading: "Views Subject To Change; No Duty To Update",
-        body: `Any view, opinion, interpretation, or analytical conclusion expressed in this note is current only as of the publication timestamp stated below and may change at any time without notice. Cordoba Research Group and the named analyst authors undertake no obligation to revise, supplement, correct, withdraw, or update the note, whether as a result of new information, subsequent events, market developments, changes in assumptions, or otherwise. The continued availability, circulation, storage, forwarding, or download of this document should not be taken as implying that the information or views contained in it remain current after the date of publication.`
+        heading: "7. Views, Opinions, Changes Without Notice, and No Duty to Update",
+        subheading: "Current only as of publication and subject to revision",
+        paragraphs: [
+          `Any view, opinion, interpretation, analytical judgment, or conclusion contained in this note is current only as of the publication timestamp stated below or the relevant drafting date reflected in the note and may change at any time without notice. Markets evolve, information changes, company circumstances develop, and analytical judgments may be revised as new information becomes available. Cordoba Research Group and the named analyst authors reserve the right to alter, withdraw, replace, or discontinue any view expressed in the note without any duty to notify readers, recipients, or third parties.`,
+          `Neither Cordoba Research Group nor the named analyst authors undertake any obligation to revise, supplement, correct, amend, republish, or update the note, whether as a result of subsequent events, new information, changes in assumptions, data revisions, market developments, or otherwise. Continued storage, forwarding, availability, download, or possession of the note should not be taken to imply that the content remains current, accurate, or complete after the publication date.`
+        ]
       },
       {
-        heading: "Distribution Restrictions And Audience",
-        body: `This material is not directed at retail investors and is not prepared for public distribution as regulated investment material. It should not be distributed, published, excerpted, syndicated, marketed, or relied upon in any jurisdiction or circumstance in which such use would be unlawful or would require authorisation, approval, registration, or review not obtained by Cordoba Research Group. Recipients should not reproduce or circulate this note externally as client research, approved sales material, or regulated communication without first obtaining any legal, compliance, editorial, and supervisory approvals that may be required in the relevant jurisdiction and institutional context.`
+        heading: "8. Authorship, Editorial Responsibility, and Internal Divergence of Views",
+        subheading: "Named authorship and limits of attribution",
+        paragraphs: [
+          `${analystLabel} ${analystVerb} responsible for the authorship and substantive content of this note, and the views, observations, interpretations, estimates, and analytical judgments expressed in the note are attributable to ${analystPronoun} in an editorial sense. That attribution reflects authorship responsibility only. It does not imply that the named analyst authors are regulated analysts, approved persons, authorised advisers, or persons producing research under a regulated investment-research regime. It also does not create any duty on the part of the named analyst authors toward any reader or recipient.`,
+          `Views expressed in this note may differ from views expressed elsewhere by Cordoba Research Group participants, contributors, reviewers, students, mentors, editors, or associated parties. The existence of named authors should not be read as implying institutional unanimity, house view consistency, supervisory approval of an investment thesis, or endorsement by any external institution. Cordoba Research Group may host, circulate, or archive materials containing different, inconsistent, or subsequently revised viewpoints relating to the same issuer, market, instrument, or macro theme without any obligation to reconcile those views across documents.`
+        ]
       },
       {
-        heading: "Analyst Authorship And Editorial Responsibility",
-        body: `${analystLabel} ${analystVerb} responsible for the authorship and substantive content of this note, and the views, observations, interpretations, and analytical judgments expressed herein are attributable to ${analystPronoun} in an editorial sense. Such attribution is limited to authorship and intellectual responsibility for the text and does not imply that Cordoba Research Group, the named analyst authors, or any associated person is assuming fiduciary, advisory, suitability, execution, underwriting, arranging, or distribution responsibilities toward any recipient. The existence of named authors should not be interpreted as evidencing regulatory approval, licensing status, or the issuance of regulated investment research.`
+        heading: "9. Distribution, Circulation, Audience, and Use Restrictions",
+        subheading: "Limitations on onward circulation and jurisdictional use",
+        paragraphs: [
+          `This note is not directed at retail investors and is not prepared for general public distribution as regulated investment material. It should not be distributed, transmitted, published, excerpted, syndicated, marketed, or relied upon in any jurisdiction or circumstance in which such use would be unlawful or would require registration, authorisation, approval, licensing, filing, or review not obtained by Cordoba Research Group. Each recipient is responsible for satisfying itself that receipt, possession, use, and onward circulation of the note is lawful in the relevant jurisdiction and context.`,
+          `Recipients must not circulate this note externally as client research, approved sales material, issuer marketing, a due-diligence substitute, or a regulated communication without first obtaining any editorial, legal, compliance, and supervisory approvals that may be necessary. The note is intended for limited educational use and should be treated accordingly. No recipient may imply that the note has been approved, endorsed, or issued by an authorised investment firm, broker, bank, or regulator merely because it adopts the structure or tone of institutional-style research.`
+        ]
       },
       {
-        heading: "Limitation Of Liability",
-        body: `To the fullest extent permitted by law, Cordoba Research Group disclaims all liability, responsibility, and duty of care arising directly or indirectly from the use of, reference to, distribution of, or reliance upon this note or any part of it. This exclusion extends, without limitation, to loss or damage arising from inaccuracy, incompleteness, non-verification, stale information, model error, data error, omission, transcription error, judgment error, formatting error, technological failure, or subsequent changes in market conditions or company circumstances. No representation or warranty, express or implied, is given in respect of merchantability, fitness for purpose, suitability, availability, completeness, accuracy, or timeliness. If any provision of this notice is held invalid or unenforceable, the remainder shall continue in full force to the fullest extent permitted by law.`
+        heading: "10. Intellectual Property and Restrictions on Reproduction",
+        subheading: "No reproduction, republication, redistribution, or commercial exploitation without permission",
+        paragraphs: [
+          `Unless otherwise indicated, the text, structure, compilation, editorial arrangement, and original analytical content of this note are proprietary to Cordoba Research Group and/or the named analyst authors. The note is made available for the limited educational purpose for which it was prepared and may not be copied, reproduced, republished, extracted, adapted, translated, distributed, uploaded, transmitted, licensed, sold, commercialised, or otherwise exploited, in whole or in part, without prior written permission from Cordoba Research Group, except to the extent permitted by applicable law for strictly limited non-commercial internal reference purposes.`,
+          `Any unauthorised onward circulation, republication, or commercial use may mischaracterise the status of the note and may expose downstream recipients to material that has not been prepared for their use or regulatory context. Quotations, extracts, screenshots, or republication of tables, charts, or commentary from the note should not be made in a manner that creates the impression that Cordoba Research Group has issued approved investment advice, regulated research, or promotional material.`
+        ]
       },
       {
-        heading: "Recipient Responsibility",
-        body: `Each recipient must rely on their own independent judgment and should obtain advice from appropriately authorised legal, regulatory, tax, accounting, and investment professionals before taking or refraining from taking any action in connection with any matter referred to in this note. No person should assume that any issuer, market, transaction, instrument, or strategy mentioned herein is suitable for their own objectives, risk profile, capital base, liquidity needs, governing mandate, constitutional restrictions, fiduciary duties, or regulatory obligations.`
+        heading: "11. Limitation of Liability and Exclusion of Responsibility",
+        subheading: "No liability for use, reliance, or consequences of circulation",
+        paragraphs: [
+          `To the fullest extent permitted by law, Cordoba Research Group disclaims all liability, responsibility, duty of care, and accountability arising directly or indirectly from the preparation, use, reference to, circulation of, or reliance upon this note or any part of it. This exclusion applies whether any claim sounds in contract, tort, negligence, misrepresentation, statutory duty, fiduciary duty, restitution, or otherwise, and extends to direct, indirect, incidental, consequential, punitive, special, exemplary, or other forms of loss or damage, including without limitation trading losses, opportunity costs, lost profits, lost revenues, reputational harm, loss of data, business interruption, financing costs, regulatory consequences, or losses associated with adverse market movements.`,
+          `Without limitation, no responsibility is accepted for loss arising from inaccuracies, omissions, stale information, incomplete context, data vendor issues, benchmark errors, model limitations, assumption failures, formatting discrepancies, charting issues, software faults, or subsequent revisions to public information. No representation or warranty, express or implied, is made in respect of merchantability, title, non-infringement, quality, suitability, fitness for a particular purpose, completeness, timeliness, fairness, or reliability. If any part of this notice is held unenforceable, the remaining provisions shall continue to apply to the fullest extent permitted by law.`
+        ]
       },
       {
-        heading: "Publication Record",
-        body: `Published ${publicationTimestamp}. This Regulatory Disclosure and Important Notice forms an integral part of the note and must be read together with the substantive analysis, charts, tables, exhibits, and supporting material that precede it. By accessing, retaining, forwarding, or using this note, the recipient acknowledges the educational, non-advisory, and non-promotional basis on which it has been prepared.`
+        heading: "12. Recipient Responsibility and Professional Advice",
+        subheading: "Independent assessment remains essential",
+        paragraphs: [
+          `Each recipient must rely on its own independent assessment and judgment when evaluating any market, issuer, instrument, or transaction referred to in this note. No person should assume that any security, instrument, structure, issuer, benchmark, valuation conclusion, or trade concept mentioned in the note is suitable for their objectives, risk profile, capital base, liquidity needs, constitutional restrictions, mandate terms, fiduciary duties, accounting treatment, tax position, or regulatory obligations. The responsibility for testing assumptions, verifying facts, understanding legal documentation, and assessing suitability remains entirely with the recipient and its advisers.`,
+          `Where relevant, recipients should obtain advice from properly authorised legal, tax, accounting, regulatory, and investment professionals before taking or refraining from taking any action in connection with any matter discussed in the note. Any use of the note within an institution, classroom, committee, or investment process should be accompanied by the recipient’s own diligence, challenge, and review procedures. The educational availability of this material does not reduce the need for professional advice or independent verification.`
+        ]
+      },
+      {
+        heading: "13. Record of Publication",
+        subheading: "Relationship of this notice to the note as a whole",
+        paragraphs: [
+          `Published ${publicationTimestamp}. This Regulatory Disclosure and Important Notice forms an integral part of the publication record for ${noteReference} and must be read together with the substantive analysis, charts, tables, appendices, and supporting material that precede it. By accessing, retaining, forwarding, or using this note, the recipient acknowledges the educational, non-advisory, non-promotional, and non-regulated basis on which it has been prepared and circulated.`,
+          `If there is any inconsistency between the style, form, structure, or presentation of the note and the regulatory status described in this notice, this notice shall prevail. The institutional appearance of the publication is a matter of educational format and editorial discipline only and should not be interpreted as conferring any regulated status, authorisation, endorsement, or legal effect beyond that expressly stated in this notice.`
+        ]
       }
     ];
 
@@ -3926,46 +3983,60 @@ document.addEventListener("DOMContentLoaded", () => {
             font: "Arial"
           })
         ],
-        spacing: { before: 0, after: 42 }
+        spacing: { before: 0, after: 34 }
       }),
       new docxLib.Paragraph({
         alignment: justification,
         children: [
           new docxLib.TextRun({
-            text: `This section forms part of the publication record for ${noteReference}. It sets out the status, limitations, authorship attribution, and use restrictions applicable to the note.`,
+            text: `This notice sets out the regulatory status, limitations, authorship attribution, distribution restrictions, and use conditions applicable to ${noteReference}. It should be read in full and together with the substantive body of the note.`,
             size: legalBodySize,
             color: colors.muted,
             font: "Arial"
           })
         ],
-        spacing: { after: 86, line: 220 }
+        spacing: { after: 108, line: 228 }
       }),
       ...sections.flatMap((section) => ([
         new docxLib.Paragraph({
           children: [
             new docxLib.TextRun({
-              text: section.heading.toUpperCase(),
+              text: section.heading,
               bold: true,
               size: legalHeadingSize,
-              color: colors.muted,
+              color: colors.black,
               font: "Arial"
             })
           ],
-          spacing: { before: 88, after: 22 }
+          spacing: { before: 124, after: 18 }
         }),
         new docxLib.Paragraph({
-          alignment: justification,
           children: [
             new docxLib.TextRun({
-              text: section.body,
-              size: legalBodySize,
+              text: section.subheading,
+              italics: true,
+              size: legalSubheadingSize,
               color: colors.muted,
               font: "Arial"
             })
           ],
-          spacing: { after: 74, line: 220 },
-          indent: { left: 0, right: 0 }
-        })
+          spacing: { after: 34 }
+        }),
+        ...section.paragraphs.map((paragraph, index) =>
+          new docxLib.Paragraph({
+            alignment: justification,
+            children: [
+              new docxLib.TextRun({
+                text: paragraph,
+                size: legalBodySize,
+                color: colors.muted,
+                font: "Arial"
+              })
+            ],
+            spacing: { after: index === section.paragraphs.length - 1 ? 82 : 52, line: 228 },
+            indent: { left: 0, right: 0 }
+          })
+        )
       ]))
     ];
   }
