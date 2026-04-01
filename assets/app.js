@@ -3968,7 +3968,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function paragraphBlocks(text) {
     return String(text || "")
-      .split(/\n{2,}/)
+      .replace(/\r\n/g, "\n")
+      .split(/\n+/)
       .map((block) => block.trim())
       .filter(Boolean);
   }
@@ -6389,19 +6390,39 @@ document.addEventListener("DOMContentLoaded", () => {
       return [new docxLib.Paragraph({ text: "No content supplied.", spacing: { after: 44 } })];
     }
 
-    return blocks.map((block) =>
-      new docxLib.Paragraph({
-        children: [
-          new docxLib.TextRun({
-            text: block.replace(/\s*\n\s*/g, " "),
-            font: "Arial",
-            size: 18,
-            color: "1B1F24"
+    return blocks.flatMap((block, index) => {
+      const paragraphs = [
+        new docxLib.Paragraph({
+          children: [
+            new docxLib.TextRun({
+              text: block.replace(/\s*\n\s*/g, " "),
+              font: "Arial",
+              size: 18,
+              color: "1B1F24"
+            })
+          ],
+          spacing: { after: 0 }
+        })
+      ];
+
+      if (index < blocks.length - 1) {
+        paragraphs.push(
+          new docxLib.Paragraph({
+            children: [
+              new docxLib.TextRun({
+                text: " ",
+                font: "Arial",
+                size: 3,
+                color: "1B1F24"
+              })
+            ],
+            spacing: { after: 0 }
           })
-        ],
-        spacing: { after: 58 }
-      })
-    );
+        );
+      }
+
+      return paragraphs;
+    });
   }
 
   function buildNomuraMetricTable(docxLib, colors, rows) {
