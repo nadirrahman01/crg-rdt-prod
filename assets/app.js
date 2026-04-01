@@ -24,6 +24,100 @@ document.addEventListener("DOMContentLoaded", () => {
     { value: "", label: "Other" }
   ];
 
+  const WORLD_COUNTRY_CODES = [
+    "AF","AX","AL","DZ","AS","AD","AO","AI","AQ","AG","AR","AM","AW","AU","AT","AZ","BS","BH","BD","BB","BY","BE","BZ","BJ","BM","BT","BO","BQ","BA","BW","BV","BR","IO","BN","BG","BF","BI","CV","KH","CM","CA","KY","CF","TD","CL","CN","CX","CC","CO","KM","CG","CD","CK","CR","CI","HR","CU","CW","CY","CZ","DK","DJ","DM","DO","EC","EG","SV","GQ","ER","EE","SZ","ET","FK","FO","FJ","FI","FR","GF","PF","TF","GA","GM","GE","DE","GH","GI","GR","GL","GD","GP","GU","GT","GG","GN","GW","GY","HT","HM","VA","HN","HK","HU","IS","IN","ID","IR","IQ","IE","IM","IT","JM","JP","JE","JO","KZ","KE","KI","KP","KR","KW","KG","LA","LV","LB","LS","LR","LY","LI","LT","LU","MO","MG","MW","MY","MV","ML","MT","MH","MQ","MR","MU","YT","MX","FM","MD","MC","MN","ME","MS","MA","MZ","MM","NA","NR","NP","NL","NC","NZ","NI","NE","NG","NU","NF","MK","MP","NO","OM","PK","PW","PS","PA","PG","PY","PE","PH","PN","PL","PT","PR","QA","RE","RO","RU","RW","BL","SH","KN","LC","MF","PM","VC","WS","SM","ST","SA","SN","RS","SC","SL","SG","SX","SK","SI","SB","SO","ZA","GS","SS","ES","LK","SD","SR","SJ","SE","CH","SY","TW","TJ","TZ","TH","TL","TG","TK","TO","TT","TN","TR","TM","TC","TV","UG","UA","AE","GB","US","UM","UY","UZ","VU","VE","VN","VG","VI","WF","EH","YE","ZM","ZW"
+  ];
+
+  const WORLD_COUNTRIES = buildWorldCountryOptions();
+  const EQUITY_INDUSTRIES = [
+    "Aerospace & Defense",
+    "Air Freight & Logistics",
+    "Airlines",
+    "Auto Components",
+    "Automobiles",
+    "Banks",
+    "Beverages",
+    "Biotechnology",
+    "Broadline Retail",
+    "Building Products",
+    "Capital Markets",
+    "Chemicals",
+    "Commercial Services & Supplies",
+    "Communications Equipment",
+    "Construction & Engineering",
+    "Construction Materials",
+    "Consumer Finance",
+    "Consumer Staples Distribution & Retail",
+    "Containers & Packaging",
+    "Diversified Consumer Services",
+    "Diversified Financial Services",
+    "Diversified Telecommunication Services",
+    "Distributors",
+    "Electric Utilities",
+    "Electrical Equipment",
+    "Electronic Equipment, Instruments & Components",
+    "Energy Equipment & Services",
+    "Entertainment",
+    "Equity Real Estate Investment Trusts (REITs)",
+    "Food Products",
+    "Gas Utilities",
+    "Health Care Equipment & Supplies",
+    "Health Care Providers & Services",
+    "Health Care Technology",
+    "Hotels, Restaurants & Leisure",
+    "Household Durables",
+    "Household Products",
+    "Independent Power and Renewable Electricity Producers",
+    "Industrial Conglomerates",
+    "Insurance",
+    "Interactive Media & Services",
+    "IT Services",
+    "Leisure Products",
+    "Life Sciences Tools & Services",
+    "Machinery",
+    "Marine Transportation",
+    "Media",
+    "Metals & Mining",
+    "Multi-Utilities",
+    "Oil, Gas & Consumable Fuels",
+    "Paper & Forest Products",
+    "Personal Care Products",
+    "Pharmaceuticals",
+    "Professional Services",
+    "Real Estate Management & Development",
+    "Renewable Energy",
+    "Road & Rail",
+    "Semiconductors & Semiconductor Equipment",
+    "Software",
+    "Technology Hardware, Storage & Peripherals",
+    "Textiles, Apparel & Luxury Goods",
+    "Thrifts & Mortgage Finance",
+    "Tobacco",
+    "Trading Companies & Distributors",
+    "Transportation Infrastructure",
+    "Water Utilities",
+    "Wireless Telecommunication Services"
+  ];
+
+  const ISSUER_COUNTRY_MAP = {
+    US: "923213",
+    GB: "814275",
+    DE: "742318",
+    FR: "742319",
+    IT: "735482",
+    ES: "731456",
+    JP: "552410",
+    CN: "683120",
+    IN: "744205",
+    SA: "615240",
+    AE: "615241",
+    BR: "691330",
+    ZA: "604120",
+    TR: "631450",
+    MX: "612340",
+    ID: "643210"
+  };
+
   const FIELD_LABELS = {
     noteType: "Note type",
     distribution: "Distribution",
@@ -31,11 +125,18 @@ document.addEventListener("DOMContentLoaded", () => {
     deck: "Deck / standfirst",
     title: "Research title",
     topic: "Topic / coverage angle",
+    coverageCountry: "Coverage country",
+    issuerId: "Issuer number",
     authorLastName: "Primary author last name",
     authorFirstName: "Primary author first name",
     ticker: "Ticker / company",
+    equitySectorLine: "Sector / industry",
     crgRating: "CRG rating",
     targetPrice: "Target price",
+    marketCapUsd: "Market cap",
+    businessDescription: "Business description",
+    fiveYearRationale: "5 Year rationale & price target",
+    esgSummary: "ESG summary",
     keyTakeaways: "Executive summary / key takeaways",
     analysis: "Analysis and commentary",
     cordobaView: "The Cordoba View"
@@ -48,11 +149,18 @@ document.addEventListener("DOMContentLoaded", () => {
     deck: "Brief",
     title: "Brief",
     topic: "Brief",
+    coverageCountry: "Brief",
+    issuerId: "Brief",
     authorLastName: "Authors",
     authorFirstName: "Authors",
     ticker: "Equity",
+    equitySectorLine: "Equity",
     crgRating: "Equity",
     targetPrice: "Equity",
+    marketCapUsd: "Equity",
+    businessDescription: "Equity",
+    fiveYearRationale: "Research",
+    esgSummary: "Research",
     keyTakeaways: "Research",
     analysis: "Research",
     cordobaView: "Research"
@@ -72,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "cordobaView"
   ];
 
-  const EQUITY_REQUIRED_IDS = ["ticker", "crgRating", "targetPrice"];
+  const EQUITY_REQUIRED_IDS = ["ticker", "equitySectorLine", "crgRating", "targetPrice", "marketCapUsd", "businessDescription"];
 
   const SECTION_REQUIREMENTS = {
     note: ["noteType", "distribution", "publicationDate", "title", "deck", "topic"],
@@ -99,6 +207,25 @@ document.addEventListener("DOMContentLoaded", () => {
     title: document.getElementById("title"),
     deck: document.getElementById("deck"),
     topic: document.getElementById("topic"),
+    macroFiPanel: document.getElementById("macroFiPanel"),
+    coverageCountryPanel: document.getElementById("coverageCountryPanel"),
+    coverageCountryToggle: document.getElementById("coverageCountryToggle"),
+    coverageCountrySearch: document.getElementById("coverageCountrySearch"),
+    coverageCountryDisplay: document.getElementById("coverageCountryDisplay"),
+    coverageCountryOptions: document.getElementById("coverageCountryOptions"),
+    coverageCountry: document.getElementById("coverageCountry"),
+    industryPanel: document.getElementById("industryPanel"),
+    industryToggle: document.getElementById("industryToggle"),
+    industrySearch: document.getElementById("industrySearch"),
+    industryOptions: document.getElementById("industryOptions"),
+    issuerId: document.getElementById("issuerId"),
+    macroFiHeading: document.getElementById("macroFiHeading"),
+    agencyRating: document.getElementById("agencyRating"),
+    shortTermRating: document.getElementById("shortTermRating"),
+    longTermRating: document.getElementById("longTermRating"),
+    ratingsProfileRows: document.getElementById("ratingsProfileRows"),
+    addRatingProfileRowBtn: document.getElementById("addRatingProfileRowBtn"),
+    ratingProfileRowTemplate: document.getElementById("ratingProfileRowTemplate"),
     authorLastName: document.getElementById("authorLastName"),
     authorFirstName: document.getElementById("authorFirstName"),
     authorPhoneCountry: document.getElementById("authorPhoneCountry"),
@@ -128,8 +255,8 @@ document.addEventListener("DOMContentLoaded", () => {
     upsideToTarget: document.getElementById("upsideToTarget"),
     modelFiles: document.getElementById("modelFiles"),
     modelLink: document.getElementById("modelLink"),
+    businessDescription: document.getElementById("businessDescription"),
     valuationSummary: document.getElementById("valuationSummary"),
-    scenarioNotes: document.getElementById("scenarioNotes"),
     financialTableTitle: document.getElementById("financialTableTitle"),
     financialSourceNote: document.getElementById("financialSourceNote"),
     financialTableEditor: document.getElementById("financialTableEditor"),
@@ -142,15 +269,28 @@ document.addEventListener("DOMContentLoaded", () => {
     financialAddColumnBtn: document.getElementById("financialAddColumnBtn"),
     financialAddRowBtn: document.getElementById("financialAddRowBtn"),
     financialResetBtn: document.getElementById("financialResetBtn"),
+    bodySections: document.getElementById("bodySections"),
+    addCustomSectionBtn: document.getElementById("addCustomSectionBtn"),
+    customBodySectionTemplate: document.getElementById("customBodySectionTemplate"),
+    headingKeyTakeaways: document.getElementById("headingKeyTakeaways"),
+    headingAnalysis: document.getElementById("headingAnalysis"),
+    headingContent: document.getElementById("headingContent"),
+    headingFiveYearRationale: document.getElementById("headingFiveYearRationale"),
+    headingEsgSummary: document.getElementById("headingEsgSummary"),
+    headingCordobaView: document.getElementById("headingCordobaView"),
     keyTakeaways: document.getElementById("keyTakeaways"),
     analysis: document.getElementById("analysis"),
     content: document.getElementById("content"),
+    fiveYearRationale: document.getElementById("fiveYearRationale"),
+    esgSummary: document.getElementById("esgSummary"),
     cordobaView: document.getElementById("cordobaView"),
     imageUpload: document.getElementById("imageUpload"),
     modelSummaryHead: document.getElementById("modelSummaryHead"),
     modelSummaryList: document.getElementById("modelSummaryList"),
     imageSummaryHead: document.getElementById("imageSummaryHead"),
     imageSummaryList: document.getElementById("imageSummaryList"),
+    figurePlacementPanel: document.getElementById("figurePlacementPanel"),
+    figurePlacementList: document.getElementById("figurePlacementList"),
     completionBar: document.getElementById("completionBar"),
     completionText: document.getElementById("completionText"),
     readinessPercent: document.getElementById("readinessPercent"),
@@ -167,6 +307,12 @@ document.addEventListener("DOMContentLoaded", () => {
     previewAuthor: document.getElementById("previewAuthor"),
     previewCoverage: document.getElementById("previewCoverage"),
     previewSupport: document.getElementById("previewSupport"),
+    previewDocBtn: document.getElementById("previewDocBtn"),
+    previewModal: document.getElementById("previewModal"),
+    previewModalBackdrop: document.getElementById("previewModalBackdrop"),
+    previewModalBody: document.getElementById("previewModalBody"),
+    closePreviewBtn: document.getElementById("closePreviewBtn"),
+    previewGenerateBtn: document.getElementById("previewGenerateBtn"),
     generateDocBtn: document.getElementById("generateDocBtn"),
     emailToCrgBtn: document.getElementById("emailToCrgBtn"),
     resetFormBtn: document.getElementById("resetFormBtn"),
@@ -198,7 +344,13 @@ document.addEventListener("DOMContentLoaded", () => {
     financialTable: null,
     railCollapsed: false,
     saveTimer: null,
-    lastSavedAt: null
+    lastSavedAt: null,
+    customSectionCount: 0,
+    brandLogoImagePromise: null,
+    figurePlacements: {},
+    figureFiles: [],
+    figureDetails: {},
+    previewObjectUrls: []
   };
 
   const draftFieldIds = [
@@ -209,6 +361,12 @@ document.addEventListener("DOMContentLoaded", () => {
     "title",
     "deck",
     "topic",
+    "coverageCountry",
+    "issuerId",
+    "macroFiHeading",
+    "agencyRating",
+    "shortTermRating",
+    "longTermRating",
     "authorLastName",
     "authorFirstName",
     "authorPhoneCountry",
@@ -226,14 +384,22 @@ document.addEventListener("DOMContentLoaded", () => {
     "marketCapUsd",
     "adtUsd",
     "modelLink",
+    "businessDescription",
     "valuationSummary",
-    "scenarioNotes",
     "financialTableTitle",
     "financialSourceNote",
     "financialTableInput",
+    "headingKeyTakeaways",
+    "headingAnalysis",
+    "headingContent",
+    "headingFiveYearRationale",
+    "headingEsgSummary",
+    "headingCordobaView",
     "keyTakeaways",
     "analysis",
     "content",
+    "fiveYearRationale",
+    "esgSummary",
     "cordobaView",
     "chartRange"
   ];
@@ -243,17 +409,23 @@ document.addEventListener("DOMContentLoaded", () => {
   function init() {
     startHeaderClock();
     restoreRailState();
+    populateCoverageCountryOptions();
+    populateIndustryOptions();
     wireSectionNavigation();
     wirePrimaryPhone();
+    initializeBodySectionEditor();
     wireFormEvents();
     restoreDraft();
     ensurePublicationDate();
     initializeFinancialTableEditor();
     ensureDeskLineDefault();
+    syncIssuerId();
+    updateCoverageCountryDisplayFromCode();
     syncPrimaryPhone();
-    toggleEquitySection();
+    toggleNoteTypeSections();
     updateFileSummary(dom.modelFiles, dom.modelSummaryHead, dom.modelSummaryList, "No supporting files attached.");
-    updateFileSummary(dom.imageUpload, dom.imageSummaryHead, dom.imageSummaryList, "No figures attached.");
+    setManagedFigureFiles([]);
+    syncFigurePlacementControls();
     updateAllUI();
     checkLibraries();
   }
@@ -265,15 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateHeaderDateTime() {
     if (!dom.headerDateTime) return;
-
-    const now = new Date();
-    dom.headerDateTime.textContent = new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    }).format(now).replace(",", " |");
+    dom.headerDateTime.textContent = formatLocalTimestamp(new Date());
   }
 
   function wireSectionNavigation() {
@@ -324,16 +488,57 @@ document.addEventListener("DOMContentLoaded", () => {
   function wireFormEvents() {
     dom.noteType.addEventListener("change", () => {
       ensureDeskLineDefault();
-      toggleEquitySection();
+      toggleNoteTypeSections();
       resetChartState({ keepStatusText: false });
+      syncFigurePlacementControls();
       updateAllUI();
       queueDraftSave();
     });
 
     dom.publicationDate.addEventListener("change", () => {
+      syncIssuerId();
       updateAllUI();
       queueDraftSave();
     });
+
+    dom.coverageCountryDisplay?.addEventListener("click", openCoverageCountryPanel);
+    dom.coverageCountryToggle?.addEventListener("click", () => {
+      if (dom.coverageCountryPanel?.hidden) openCoverageCountryPanel();
+      else closeCoverageCountryPanel();
+    });
+    dom.coverageCountrySearch?.addEventListener("input", () => {
+      renderCoverageCountryOptions(dom.coverageCountrySearch.value);
+    });
+    dom.coverageCountryOptions?.addEventListener("click", (event) => {
+      const option = event.target.closest("[data-country-code]");
+      if (!option) return;
+      selectCoverageCountry(option.getAttribute("data-country-code"));
+    });
+    dom.equitySectorLine?.addEventListener("click", openIndustryPanel);
+    dom.industryToggle?.addEventListener("click", () => {
+      if (dom.industryPanel?.hidden) openIndustryPanel();
+      else closeIndustryPanel();
+    });
+    dom.industrySearch?.addEventListener("input", () => {
+      renderIndustryOptions(dom.industrySearch.value);
+    });
+    dom.industryOptions?.addEventListener("click", (event) => {
+      const option = event.target.closest("[data-industry-value]");
+      if (!option) return;
+      selectIndustry(option.getAttribute("data-industry-value"));
+    });
+    document.addEventListener("click", (event) => {
+      if (dom.coverageCountryPanel && !dom.coverageCountryPanel.hidden) {
+        const picker = document.getElementById("coverageCountryPicker");
+        if (picker && !picker.contains(event.target)) closeCoverageCountryPanel();
+      }
+      if (dom.industryPanel && !dom.industryPanel.hidden) {
+        const picker = document.getElementById("industryPicker");
+        if (picker && !picker.contains(event.target)) closeIndustryPanel();
+      }
+    });
+
+    dom.macroFiHeading?.addEventListener("input", syncFigurePlacementControls);
 
     dom.deskLine.addEventListener("input", () => {
       dom.deskLine.dataset.autofill = "false";
@@ -349,6 +554,16 @@ document.addEventListener("DOMContentLoaded", () => {
       dom.priceCurrency.dataset.autofill = "false";
     });
 
+    dom.addCustomSectionBtn?.addEventListener("click", () => {
+      addCustomBodySection();
+      syncFigurePlacementControls();
+      updateAllUI();
+      queueDraftSave();
+    });
+
+    dom.bodySections?.addEventListener("click", handleBodySectionActions);
+    dom.bodySections?.addEventListener("input", handleBodySectionInput);
+
     dom.targetPrice.addEventListener("input", () => {
       updateUpsideDisplay();
       updateAllUI();
@@ -361,9 +576,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     dom.imageUpload.addEventListener("change", () => {
-      updateFileSummary(dom.imageUpload, dom.imageSummaryHead, dom.imageSummaryList, "No figures attached.");
+      handleFigureUploadChange();
+      syncFigurePlacementControls();
       updateAllUI();
     });
+
+    dom.addRatingProfileRowBtn?.addEventListener("click", () => {
+      addRatingProfileRow();
+      updateAllUI();
+      queueDraftSave();
+    });
+    dom.ratingsProfileRows?.addEventListener("click", handleRatingProfileActions);
+
+    dom.figurePlacementList?.addEventListener("change", handleFigurePlacementChange);
+    dom.figurePlacementList?.addEventListener("input", handleFigurePlacementChange);
+    dom.figurePlacementList?.addEventListener("click", handleFigurePlacementActions);
 
     dom.financialAddColumnBtn.addEventListener("click", addFinancialPeriodColumn);
     dom.financialAddRowBtn.addEventListener("click", addFinancialLineItem);
@@ -398,6 +625,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     dom.fetchPriceChart.addEventListener("click", buildPriceChart);
+    dom.previewDocBtn?.addEventListener("click", openPreviewModal);
+    dom.closePreviewBtn?.addEventListener("click", closePreviewModal);
+    dom.previewModalBackdrop?.addEventListener("click", closePreviewModal);
+    dom.previewGenerateBtn?.addEventListener("click", () => {
+      closePreviewModal();
+      form.requestSubmit(dom.generateDocBtn);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !dom.previewModal?.hidden) closePreviewModal();
+    });
     dom.emailToCrgBtn.addEventListener("click", draftEmailToResearch);
     dom.resetFormBtn.addEventListener("click", resetDraft);
 
@@ -453,6 +690,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Fixed Income Research": "Global Fixed Income Strategy",
       "Commodity Insights": "Global Commodity Strategy",
       "Commodity Research": "Global Commodity Strategy",
+      "Short Note / Market Alert": "Global Market Alert",
       Commodity: "Global Commodity Strategy"
     };
 
@@ -461,6 +699,165 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function defaultDeskLine(noteType) {
     return strategyLabelForNoteType(noteType);
+  }
+
+  function buildWorldCountryOptions() {
+    const displayNames = typeof Intl.DisplayNames === "function"
+      ? new Intl.DisplayNames(["en"], { type: "region" })
+      : null;
+
+    return WORLD_COUNTRY_CODES
+      .map((code) => ({
+        code,
+        name: code === "PS" ? "Palestine" : (displayNames?.of(code) || code)
+      }))
+      .sort((left, right) => left.name.localeCompare(right.name, "en", { sensitivity: "base" }));
+  }
+
+  function getCoverageCountryLabel(countryCode) {
+    const normalized = String(countryCode || "").trim().toUpperCase();
+    return WORLD_COUNTRIES.find((entry) => entry.code === normalized)?.name || normalized || "N/A";
+  }
+
+  function populateCoverageCountryOptions() {
+    if (!dom.coverageCountryOptions) return;
+    renderCoverageCountryOptions("");
+  }
+
+  function updateCoverageCountryDisplayFromCode() {
+    if (!dom.coverageCountryDisplay) return;
+    dom.coverageCountryDisplay.value = getCoverageCountryLabel(dom.coverageCountry.value).replace(/^N\/A$/, "");
+  }
+
+  function renderCoverageCountryOptions(filterText = "") {
+    if (!dom.coverageCountryOptions) return;
+    const normalizedFilter = normalizeComparableText(filterText);
+    const matches = WORLD_COUNTRIES.filter((country) => {
+      if (!normalizedFilter) return true;
+      return normalizeComparableText(country.name).includes(normalizedFilter) || normalizeComparableText(country.code).includes(normalizedFilter);
+    });
+
+    dom.coverageCountryOptions.innerHTML = "";
+    if (!matches.length) {
+      const empty = document.createElement("div");
+      empty.className = "country-picker-empty";
+      empty.textContent = "No matching countries";
+      dom.coverageCountryOptions.appendChild(empty);
+      return;
+    }
+
+    matches.forEach((country) => {
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "country-picker-option";
+      option.textContent = country.name;
+      option.setAttribute("data-country-code", country.code);
+      if (country.code === String(dom.coverageCountry.value || "").trim().toUpperCase()) {
+        option.classList.add("is-selected");
+      }
+      dom.coverageCountryOptions.appendChild(option);
+    });
+  }
+
+  function openCoverageCountryPanel() {
+    if (!dom.coverageCountryPanel) return;
+    dom.coverageCountryPanel.hidden = false;
+    if (dom.coverageCountrySearch) {
+      dom.coverageCountrySearch.value = "";
+      renderCoverageCountryOptions("");
+      window.setTimeout(() => dom.coverageCountrySearch.focus(), 0);
+    }
+  }
+
+  function closeCoverageCountryPanel() {
+    if (!dom.coverageCountryPanel) return;
+    dom.coverageCountryPanel.hidden = true;
+  }
+
+  function selectCoverageCountry(countryCode) {
+    const normalized = String(countryCode || "").trim().toUpperCase();
+    dom.coverageCountry.value = normalized;
+    updateCoverageCountryDisplayFromCode();
+    syncIssuerId();
+    renderCoverageCountryOptions(dom.coverageCountrySearch?.value || "");
+    closeCoverageCountryPanel();
+    updateAllUI();
+    queueDraftSave();
+  }
+
+  function populateIndustryOptions() {
+    if (!dom.industryOptions) return;
+    renderIndustryOptions("");
+  }
+
+  function renderIndustryOptions(filterText = "") {
+    if (!dom.industryOptions) return;
+    const normalizedFilter = normalizeComparableText(filterText);
+    const matches = EQUITY_INDUSTRIES.filter((industry) => {
+      if (!normalizedFilter) return true;
+      return normalizeComparableText(industry).includes(normalizedFilter);
+    });
+
+    dom.industryOptions.innerHTML = "";
+    if (!matches.length) {
+      const empty = document.createElement("div");
+      empty.className = "country-picker-empty";
+      empty.textContent = "No matching industries";
+      dom.industryOptions.appendChild(empty);
+      return;
+    }
+
+    matches.forEach((industry) => {
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "country-picker-option";
+      option.textContent = industry;
+      option.setAttribute("data-industry-value", industry);
+      if (industry === String(dom.equitySectorLine?.value || "").trim()) option.classList.add("is-selected");
+      dom.industryOptions.appendChild(option);
+    });
+  }
+
+  function openIndustryPanel() {
+    if (!dom.industryPanel) return;
+    dom.industryPanel.hidden = false;
+    if (dom.industrySearch) {
+      dom.industrySearch.value = "";
+      renderIndustryOptions("");
+      window.setTimeout(() => dom.industrySearch.focus(), 0);
+    }
+  }
+
+  function closeIndustryPanel() {
+    if (!dom.industryPanel) return;
+    dom.industryPanel.hidden = true;
+  }
+
+  function selectIndustry(industry) {
+    const normalized = String(industry || "").trim();
+    if (!dom.equitySectorLine) return;
+    dom.equitySectorLine.value = normalized;
+    dom.equitySectorLine.dataset.autofill = "false";
+    renderIndustryOptions(dom.industrySearch?.value || "");
+    closeIndustryPanel();
+    updateAllUI();
+    queueDraftSave();
+  }
+
+  function isMacroFiNoteType(noteType) {
+    return noteType === "Macro Research" || noteType === "Fixed Income Research";
+  }
+
+  function isEquitySelected() {
+    return dom.noteType.value === "Equity Research";
+  }
+
+  function isMacroFiSelected() {
+    return isMacroFiNoteType(dom.noteType.value);
+  }
+
+  function isShortNoteSelected() {
+    return dom.noteType.value === "Short Note / Market Alert";
   }
 
   function ensurePublicationDate() {
@@ -505,6 +902,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function syncPrimaryPhone() {
     dom.authorPhone.value = buildInternationalHyphen(dom.authorPhoneCountry.value, dom.authorPhoneNational.value);
+  }
+
+  function syncIssuerId() {
+    if (!dom.issuerId) return;
+    const selectedCountry = String(dom.coverageCountry?.value || "").trim().toUpperCase();
+    dom.issuerId.value = selectedCountry ? (ISSUER_COUNTRY_MAP[selectedCountry] || buildIssuerIdFromCountry(selectedCountry)) : "";
+  }
+
+  function buildIssuerIdFromCountry(countryCode) {
+    const normalized = String(countryCode || "").trim().toUpperCase();
+    if (!normalized) return "";
+    const total = normalized.split("").reduce((sum, char, index) => sum + (char.charCodeAt(0) * (index + 3)), 0);
+    return String(((total * 7919) % 900000) + 100000);
   }
 
   function createCountryOptionsHtml(selectedValue) {
@@ -589,6 +999,285 @@ document.addEventListener("DOMContentLoaded", () => {
         return { lastName, firstName, phone, countryCode, phoneLocal };
       })
       .filter((coAuthor) => coAuthor.lastName || coAuthor.firstName || coAuthor.phone);
+  }
+
+  function initializeBodySectionEditor() {
+    syncBodySectionVisibility();
+  }
+
+  function addCustomBodySection(seed = {}, shouldAppend = true) {
+    if (!dom.customBodySectionTemplate || !dom.bodySections) return null;
+
+    state.customSectionCount += 1;
+    const fragment = dom.customBodySectionTemplate.content.cloneNode(true);
+    const card = fragment.querySelector(".body-section-card");
+    const key = seed.key || `custom-${state.customSectionCount}`;
+    card.dataset.sectionKey = key;
+
+    const headingInput = fragment.querySelector("[data-custom-field='heading']");
+    const contentInput = fragment.querySelector("[data-custom-field='content']");
+    if (headingInput) headingInput.value = seed.label || "Custom Section";
+    if (contentInput) contentInput.value = seed.content || "";
+
+    if (shouldAppend) {
+      dom.bodySections.appendChild(fragment);
+      return dom.bodySections.querySelector(`[data-section-key='${key}']`);
+    }
+
+    return card;
+  }
+
+  function handleBodySectionActions(event) {
+    const actionButton = event.target.closest("[data-body-action]");
+    if (!actionButton || !dom.bodySections) return;
+
+    const card = actionButton.closest(".body-section-card");
+    if (!card) return;
+
+    const action = actionButton.getAttribute("data-body-action");
+    if (action === "move-up") {
+      const previous = card.previousElementSibling;
+      if (previous) dom.bodySections.insertBefore(card, previous);
+    } else if (action === "move-down") {
+      const next = card.nextElementSibling;
+      if (next) dom.bodySections.insertBefore(next, card);
+    } else if (action === "remove" && card.dataset.sectionRole === "custom") {
+      card.remove();
+    } else {
+      return;
+    }
+
+    syncFigurePlacementControls();
+    updateAllUI();
+    queueDraftSave();
+  }
+
+  function handleBodySectionInput(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
+
+    if (
+      target.closest(".body-section-heading") ||
+      target.getAttribute("data-custom-field") === "heading"
+    ) {
+      syncFigurePlacementControls();
+    }
+  }
+
+  function getBodySectionContent(card) {
+    const sectionKey = card.dataset.sectionKey;
+    if (card.dataset.sectionRole === "custom") {
+      const contentInput = card.querySelector("[data-custom-field='content']");
+      return String(contentInput?.value || "").trim();
+    }
+
+    const element = document.getElementById(sectionKey);
+    return String(element?.value || "").trim();
+  }
+
+  function getBodySectionHeading(card) {
+    if (card.dataset.sectionRole === "custom") {
+      return String(card.querySelector("[data-custom-field='heading']")?.value || "").trim() || "Custom Section";
+    }
+
+    const headingInput = card.querySelector(".body-section-heading input");
+    return String(headingInput?.value || "").trim() || defaultHeadingForSection(card.dataset.sectionKey);
+  }
+
+  function defaultHeadingForSection(sectionKey) {
+    const defaults = {
+      keyTakeaways: "Key Takeaways",
+      analysis: "Analysis And Commentary",
+      content: "Additional Detail",
+      fiveYearRationale: "5 Year Rationale & Price Target",
+      esgSummary: "ESG Summary",
+      cordobaView: "The Cordoba View"
+    };
+
+    return defaults[sectionKey] || "Section";
+  }
+
+  function isEquityOnlySectionKey(sectionKey) {
+    return sectionKey === "fiveYearRationale" || sectionKey === "esgSummary";
+  }
+
+  function resolveBodySectionContent(data, sectionKey, fallbackContent = "") {
+    const map = {
+      keyTakeaways: data.keyTakeaways,
+      analysis: data.analysis,
+      content: data.content,
+      fiveYearRationale: data.fiveYearRationale,
+      esgSummary: data.esgSummary,
+      cordobaView: data.cordobaView
+    };
+
+    return String(map[sectionKey] ?? fallbackContent ?? "").trim();
+  }
+
+  function normalizeBodySectionLayoutForExport(data) {
+    const source = Array.isArray(data.bodySectionLayout) && data.bodySectionLayout.length
+      ? data.bodySectionLayout
+      : [
+        { key: "keyTakeaways", label: defaultHeadingForSection("keyTakeaways"), role: "core" },
+        { key: "analysis", label: defaultHeadingForSection("analysis"), role: "core" },
+        { key: "content", label: defaultHeadingForSection("content"), role: "core" },
+        ...(data.noteType === "Equity Research"
+          ? [
+            { key: "fiveYearRationale", label: defaultHeadingForSection("fiveYearRationale"), role: "core" },
+            { key: "esgSummary", label: defaultHeadingForSection("esgSummary"), role: "core" }
+          ]
+          : []),
+        { key: "cordobaView", label: defaultHeadingForSection("cordobaView"), role: "core" }
+      ];
+
+    return source
+      .map((entry) => {
+        const key = String(entry?.key || "").trim();
+        if (!key) return null;
+
+        const role = entry?.role === "custom" || key.startsWith("custom-") ? "custom" : "core";
+        const label = String(entry?.label || defaultHeadingForSection(key)).trim() || defaultHeadingForSection(key);
+        const content = role === "custom"
+          ? String(entry?.content || "").trim()
+          : resolveBodySectionContent(data, key, entry?.content);
+        const hidden = Boolean(entry?.hidden) || (isEquityOnlySectionKey(key) && data.noteType !== "Equity Research");
+
+        return { key, label, content, role, hidden };
+      })
+      .filter(Boolean);
+  }
+
+  function getNarrativeSectionPartitions(data) {
+    const layout = normalizeBodySectionLayoutForExport(data)
+      .filter((entry) => !entry.hidden)
+      .filter((entry) => entry.role === "custom" || entry.content || entry.key === "keyTakeaways" || entry.key === "analysis");
+
+    const keyTakeaways = layout.find((entry) => entry.key === "keyTakeaways") || {
+      key: "keyTakeaways",
+      label: defaultHeadingForSection("keyTakeaways"),
+      content: data.keyTakeaways
+    };
+
+    const cordobaView = layout.find((entry) => entry.key === "cordobaView" && entry.content);
+    const middle = layout.filter((entry) => entry.key !== "keyTakeaways" && entry.key !== "cordobaView");
+
+    return { keyTakeaways, middle, cordobaView };
+  }
+
+  function buildNarrativeSectionBlocks(docxLib, colors, sections) {
+    const blocks = [];
+
+    sections.forEach((section) => {
+      const label = String(section?.label || defaultHeadingForSection(section?.key)).trim();
+      const content = String(section?.content || "").trim();
+      if (!label || !content) return;
+
+      blocks.push(
+        buildNomuraSubhead(docxLib, colors, label),
+        ...buildNomuraBodyParagraphs(docxLib, content)
+      );
+    });
+
+    return blocks;
+  }
+
+  function collectBodySectionLayout() {
+    if (!dom.bodySections) return [];
+
+    return Array.from(dom.bodySections.querySelectorAll(".body-section-card"))
+      .map((card) => ({
+        key: card.dataset.sectionKey || "",
+        label: getBodySectionHeading(card),
+        content: getBodySectionContent(card),
+        role: card.dataset.sectionRole || "core",
+        hidden: Boolean(card.hidden)
+      }));
+  }
+
+  function restoreBodySectionLayout(layout = []) {
+    if (!dom.bodySections) return;
+
+    Array.from(dom.bodySections.querySelectorAll(".body-section-card.is-custom")).forEach((card) => card.remove());
+
+    const coreCards = new Map(
+      Array.from(dom.bodySections.querySelectorAll(".body-section-card"))
+        .filter((card) => card.dataset.sectionRole !== "custom")
+        .map((card) => [card.dataset.sectionKey, card])
+    );
+
+    const orderedCards = [];
+    layout.forEach((entry) => {
+      if (!entry?.key) return;
+
+      if (entry.role === "custom" || entry.key.startsWith("custom-")) {
+        const customCard = addCustomBodySection(entry, false);
+        if (customCard) orderedCards.push(customCard);
+        return;
+      }
+
+      const card = coreCards.get(entry.key);
+      if (!card) return;
+      orderedCards.push(card);
+      coreCards.delete(entry.key);
+    });
+
+    orderedCards.push(...Array.from(coreCards.values()));
+    orderedCards.forEach((card) => dom.bodySections.appendChild(card));
+    syncBodySectionVisibility();
+    syncFigurePlacementControls();
+  }
+
+  function addRatingProfileRow(seed = {}) {
+    if (!dom.ratingProfileRowTemplate || !dom.ratingsProfileRows) return null;
+    const fragment = dom.ratingProfileRowTemplate.content.cloneNode(true);
+    const row = fragment.querySelector(".ratings-profile-row");
+    row.querySelector("[data-rating-field='agency']").value = seed.agency || "";
+    row.querySelector("[data-rating-field='short']").value = seed.shortTerm || "";
+    row.querySelector("[data-rating-field='long']").value = seed.longTerm || "";
+    dom.ratingsProfileRows.appendChild(fragment);
+    return dom.ratingsProfileRows.lastElementChild;
+  }
+
+  function handleRatingProfileActions(event) {
+    const actionButton = event.target.closest("[data-rating-action]");
+    if (!actionButton) return;
+
+    if (actionButton.getAttribute("data-rating-action") === "remove") {
+      actionButton.closest(".ratings-profile-row")?.remove();
+      updateAllUI();
+      queueDraftSave();
+    }
+  }
+
+  function collectRatingsProfile() {
+    const rows = [];
+    const firstRow = {
+      agency: String(dom.agencyRating?.value || "").trim(),
+      shortTerm: String(dom.shortTermRating?.value || "").trim(),
+      longTerm: String(dom.longTermRating?.value || "").trim()
+    };
+    if (firstRow.agency || firstRow.shortTerm || firstRow.longTerm) rows.push(firstRow);
+
+    rows.push(
+      ...Array.from(dom.ratingsProfileRows?.querySelectorAll(".ratings-profile-row") || []).map((row) => ({
+        agency: String(row.querySelector("[data-rating-field='agency']")?.value || "").trim(),
+        shortTerm: String(row.querySelector("[data-rating-field='short']")?.value || "").trim(),
+        longTerm: String(row.querySelector("[data-rating-field='long']")?.value || "").trim()
+      }))
+    );
+
+    return rows.filter((row) => row.agency || row.shortTerm || row.longTerm);
+  }
+
+  function restoreRatingsProfile(rows = []) {
+    if (!dom.ratingsProfileRows) return;
+    dom.ratingsProfileRows.innerHTML = "";
+
+    const [primaryRow, ...extraRows] = Array.isArray(rows) ? rows : [];
+    dom.agencyRating.value = primaryRow?.agency || "";
+    dom.shortTermRating.value = primaryRow?.shortTerm || "";
+    dom.longTermRating.value = primaryRow?.longTerm || "";
+    extraRows.forEach((row) => addRatingProfileRow(row));
   }
 
   function initializeFinancialTableEditor(forceReset = false) {
@@ -1034,18 +1723,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }).format(number);
   }
 
-  function isEquitySelected() {
-    return dom.noteType.value === "Equity Research";
-  }
-
   function toggleEquitySection() {
     const showEquity = isEquitySelected();
     dom.equitySection.hidden = !showEquity;
     dom.navEquity.textContent = showEquity ? buildSectionCompletion("equity") : "Optional";
   }
 
+  function toggleMacroFiPanel() {
+    if (!dom.macroFiPanel) return;
+    dom.macroFiPanel.hidden = !isMacroFiSelected();
+  }
+
+  function syncBodySectionVisibility() {
+    if (!dom.bodySections) return;
+    const showEquityOnly = isEquitySelected();
+    dom.bodySections.querySelectorAll(".is-equity-only").forEach((section) => {
+      section.hidden = !showEquityOnly;
+    });
+  }
+
+  function toggleNoteTypeSections() {
+    toggleEquitySection();
+    toggleMacroFiPanel();
+    syncIssuerId();
+    syncBodySectionVisibility();
+  }
+
   function getRequiredIds() {
-    return isEquitySelected() ? BASE_REQUIRED_IDS.concat(EQUITY_REQUIRED_IDS) : BASE_REQUIRED_IDS;
+    const requiredIds = [...BASE_REQUIRED_IDS];
+    if (dom.noteType.value === "Macro Research") requiredIds.push("coverageCountry", "issuerId");
+    if (isEquitySelected()) return requiredIds.concat(EQUITY_REQUIRED_IDS);
+    return requiredIds;
+  }
+
+  function getSectionRequirementIds(sectionKey) {
+    if (sectionKey === "note") {
+      const ids = [...SECTION_REQUIREMENTS.note];
+      if (dom.noteType.value === "Macro Research") ids.push("coverageCountry", "issuerId");
+      return ids;
+    }
+
+    if (sectionKey === "equity") {
+      return isEquitySelected() ? EQUITY_REQUIRED_IDS : [];
+    }
+
+    return SECTION_REQUIREMENTS[sectionKey] || [];
   }
 
   function isFilled(element) {
@@ -1064,14 +1786,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const element = document.getElementById(id);
       let valid = isFilled(element);
 
-      if (valid && id === "targetPrice") {
+      if (valid && (id === "targetPrice" || id === "marketCapUsd")) {
         valid = parseNumber(element.value) != null;
       }
 
       if (!valid) {
         missing.push({
           id,
-          label: id === "targetPrice" && isFilled(element) ? "Target price must be numeric" : (FIELD_LABELS[id] || id),
+          label:
+            (id === "targetPrice" || id === "marketCapUsd") && isFilled(element)
+              ? `${FIELD_LABELS[id] || id} must be numeric`
+              : (FIELD_LABELS[id] || id),
           section: FIELD_SECTION[id] || "General"
         });
       }
@@ -1091,6 +1816,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function normalizeComparableText(value) {
     return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, " ")
       .trim();
@@ -1171,7 +1898,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const findings = [];
     const noteType = String(data.noteType || "");
     const missingIds = new Set(validation.missing.map((entry) => entry.id));
-    const combinedResearchText = [data.keyTakeaways, data.analysis, data.content, data.cordobaView, data.scenarioNotes]
+    const combinedResearchText = [
+      ...normalizeBodySectionLayoutForExport(data).map((entry) => entry.content),
+      data.businessDescription,
+      data.valuationSummary
+    ]
       .filter(Boolean)
       .join("\n");
     const publicationDate = parseInputDate(data.publicationDate) || data.generatedAt || new Date();
@@ -1188,18 +1919,85 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     });
 
-    if (isEquitySelected()) {
+    if (noteType === "Macro Research" || noteType === "Fixed Income Research") {
+      const ratingsRows = Array.isArray(data.ratingsProfile) ? data.ratingsProfile : [];
+      if (!ratingsRows.length) {
+        findings.push(
+          buildFinding(
+            noteType === "Fixed Income Research" ? "warning" : "suggestion",
+            "Ratings table not populated",
+            "Add the agency, short-term, and long-term ratings profile so the note header carries the structured sovereign / issuer ratings block.",
+            "Brief",
+            { focusId: "agencyRating" }
+          )
+        );
+      }
+
+      const partialRatingsRow = ratingsRows.find((row) => (row.agency || row.shortTerm || row.longTerm) && (!row.agency || (!row.shortTerm && !row.longTerm)));
+      if (partialRatingsRow) {
+        findings.push(
+          buildFinding(
+            "warning",
+            "Ratings row is incomplete",
+            "Each ratings row should include the agency and at least one of the short-term or long-term ratings.",
+            "Brief",
+            { focusId: "agencyRating" }
+          )
+        );
+      }
+    }
+
+    if (noteType === "Equity Research") {
       const targetPrice = parseNumber(data.targetPrice);
       const valuationWordCount = countMeaningfulWords(data.valuationSummary);
+      const rationaleWordCount = countMeaningfulWords(data.fiveYearRationale);
+      const businessWordCount = countMeaningfulWords(data.businessDescription);
+      const esgWordCount = countMeaningfulWords(data.esgSummary);
       const financialMatrix = parseFinancialTableInput(data.financialTableInput, publicationDate);
-      if (targetPrice != null && valuationWordCount < 18) {
+      if (targetPrice != null && rationaleWordCount < 18) {
         findings.push(
           buildFinding(
             "critical",
             "Target price rationale missing",
-            "A target price is set, but the valuation summary does not yet explain the basis for that target.",
+            "A target price is set, but the 5 Year Rationale & Price Target section does not yet explain the basis for that target.",
+            "Equity",
+            { focusId: "fiveYearRationale" }
+          )
+        );
+      }
+
+      if (!missingIds.has("businessDescription") && businessWordCount < 18) {
+        findings.push(
+          buildFinding(
+            "warning",
+            "Business description is still light",
+            "Add a clearer two- or three-sentence description of what the business does and where the core exposure sits.",
+            "Equity",
+            { focusId: "businessDescription" }
+          )
+        );
+      }
+
+      if (valuationWordCount < 18) {
+        findings.push(
+          buildFinding(
+            "warning",
+            "Valuation summary needs more support",
+            "Add more detail on fair value, dislocation, and the core valuation driver so the note reads more like a sell-side product.",
             "Equity",
             { focusId: "valuationSummary" }
+          )
+        );
+      }
+
+      if (esgWordCount < 12) {
+        findings.push(
+          buildFinding(
+            "suggestion",
+            "ESG summary is limited",
+            "Add material governance, sustainability, or environmental risk points so the equity note captures the main ESG considerations.",
+            "Equity",
+            { focusId: "esgSummary" }
           )
         );
       }
@@ -1287,7 +2085,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    if (!missingIds.has("analysis") && countMeaningfulWords(data.analysis) < 120) {
+    const minimumAnalysisWords = noteType === "Short Note / Market Alert" ? 65 : 120;
+
+    if (!missingIds.has("analysis") && countMeaningfulWords(data.analysis) < minimumAnalysisWords) {
       findings.push(
         buildFinding(
           "warning",
@@ -1394,12 +2194,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function buildSectionCompletion(sectionKey) {
-    const ids = SECTION_REQUIREMENTS[sectionKey] || [];
+    const ids = getSectionRequirementIds(sectionKey);
     if (sectionKey === "equity" && !isEquitySelected()) return "Optional";
     const complete = ids.filter((id) => {
       const element = document.getElementById(id);
       if (!isFilled(element)) return false;
-      if (id === "targetPrice") return parseNumber(element.value) != null;
+      if (id === "targetPrice" || id === "marketCapUsd") return parseNumber(element.value) != null;
       return true;
     }).length;
     return `${complete}/${ids.length}`;
@@ -1411,7 +2211,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dom.navEquity.textContent = buildSectionCompletion("equity");
     dom.navBody.textContent = buildSectionCompletion("body");
 
-    const supportCount = Array.from(dom.modelFiles.files || []).length + Array.from(dom.imageUpload.files || []).length;
+    const supportCount = Array.from(dom.modelFiles.files || []).length + (state.figureFiles || []).length;
     dom.navExhibits.textContent = supportCount ? `${supportCount} files` : "Optional";
     if (review.blockingCount > 0) {
       dom.navOutput.textContent = "Blocked";
@@ -1545,7 +2345,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const attachmentBits = [];
     const modelCount = Array.from(dom.modelFiles.files || []).length;
-    const imageCount = Array.from(dom.imageUpload.files || []).length;
+    const imageCount = (state.figureFiles || []).length;
     if (isEquitySelected()) attachmentBits.push(state.priceChartImageBytes ? "price chart ready" : "price chart pending");
     if (modelCount) attachmentBits.push(`${modelCount} model file${modelCount > 1 ? "s" : ""}`);
     if (imageCount) attachmentBits.push(`${imageCount} exhibit${imageCount > 1 ? "s" : ""}`);
@@ -1569,6 +2369,14 @@ document.addEventListener("DOMContentLoaded", () => {
         data.crgRating || "Rating pending"
       ];
       dom.previewCoverage.textContent = coverageBits.join(" | ");
+    } else if (isMacroFiSelected()) {
+      const coverageBits = [
+        data.deskLine || data.noteType || "Desk line not set",
+        data.coverageCountry ? getCoverageCountryLabel(data.coverageCountry) : (data.noteType === "Fixed Income Research" ? "Country optional" : "Country pending"),
+        data.issuerId || (data.noteType === "Fixed Income Research" ? "Issuer optional" : "Issuer pending"),
+        data.publicationDate ? formatInputDateLabel(data.publicationDate) : "Date pending"
+      ];
+      dom.previewCoverage.textContent = coverageBits.join(" | ");
     } else {
       const coverageBits = [
         data.deskLine || data.noteType || "Desk line not set",
@@ -1580,7 +2388,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const supportBits = [];
     const modelCount = Array.from(dom.modelFiles.files || []).length;
-    const imageCount = Array.from(dom.imageUpload.files || []).length;
+    const imageCount = (state.figureFiles || []).length;
     if (state.priceChartImageBytes) supportBits.push("chart");
     if (modelCount) supportBits.push(`${modelCount} model file${modelCount > 1 ? "s" : ""}`);
     if (imageCount) supportBits.push(`${imageCount} image${imageCount > 1 ? "s" : ""}`);
@@ -1625,6 +2433,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return {
       values,
       coAuthors: getCoAuthors(),
+      bodySectionLayout: collectBodySectionLayout(),
+      ratingsProfile: collectRatingsProfile(),
       savedAt: new Date().toISOString()
     };
   }
@@ -1654,10 +2464,16 @@ document.addEventListener("DOMContentLoaded", () => {
       dom.coAuthorsList.innerHTML = "";
       state.coAuthorCount = 0;
       (payload.coAuthors || []).forEach((coAuthor) => addCoAuthorCard(coAuthor));
+      restoreBodySectionLayout(payload.bodySectionLayout || []);
+      restoreRatingsProfile(payload.ratingsProfile || []);
       state.lastSavedAt = payload.savedAt || null;
       dom.deskLine.dataset.autofill = "true";
       dom.equityCompanyName.dataset.autofill = dom.equityCompanyName.value.trim() ? "false" : "true";
       dom.priceCurrency.dataset.autofill = dom.priceCurrency.value.trim() ? "false" : "true";
+      syncIssuerId();
+      updateCoverageCountryDisplayFromCode();
+      renderIndustryOptions("");
+      syncBodySectionVisibility();
       ensureDeskLineDefault(true);
     } catch (error) {
       console.error("Draft restore failed:", error);
@@ -1672,7 +2488,12 @@ document.addEventListener("DOMContentLoaded", () => {
     dom.coAuthorsList.innerHTML = "";
     state.coAuthorCount = 0;
     state.lastSavedAt = null;
+    state.customSectionCount = 0;
+    state.figurePlacements = {};
+    state.figureDetails = {};
+    state.figureFiles = [];
     syncPrimaryPhone();
+    restoreRatingsProfile([]);
     dom.equityCompanyName.dataset.autofill = "true";
     dom.priceCurrency.dataset.autofill = "true";
     resetChartState({ keepStatusText: false });
@@ -1680,9 +2501,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ensurePublicationDate();
     initializeFinancialTableEditor(true);
     ensureDeskLineDefault(true);
+    updateCoverageCountryDisplayFromCode();
+    renderIndustryOptions("");
+    restoreBodySectionLayout([]);
     updateFileSummary(dom.modelFiles, dom.modelSummaryHead, dom.modelSummaryList, "No supporting files attached.");
-    updateFileSummary(dom.imageUpload, dom.imageSummaryHead, dom.imageSummaryList, "No figures attached.");
-    toggleEquitySection();
+    updateFigureSummary();
+    syncFigurePlacementControls();
+    toggleNoteTypeSections();
+    closePreviewModal();
     clearMessage();
     updateAllUI();
   }
@@ -1706,6 +2532,312 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     list.hidden = false;
+  }
+
+  function updateFigureSummary() {
+    if (!dom.imageSummaryHead || !dom.imageSummaryList) return;
+    const files = state.figureFiles || [];
+    dom.imageSummaryHead.textContent = files.length
+      ? `${files.length} figure${files.length > 1 ? "s" : ""} attached.`
+      : "No figures attached.";
+
+    dom.imageSummaryList.innerHTML = "";
+    if (!files.length) {
+      dom.imageSummaryList.hidden = true;
+      return;
+    }
+
+    files.forEach((file, index) => {
+      const item = document.createElement("li");
+      const meta = getFigureDetailForFile(file, index);
+      const label = `${meta.labelType} ${meta.labelNumber}`;
+      item.textContent = `${label} - ${meta.caption || file.name.replace(/\.[^.]+$/, "")}`;
+      dom.imageSummaryList.appendChild(item);
+    });
+
+    dom.imageSummaryList.hidden = false;
+  }
+
+  function figureFileKey(file) {
+    return `${file.name}__${file.size}__${file.lastModified}`;
+  }
+
+  function defaultFigureLabelType(file) {
+    return /chart/i.test(file.name) ? "Chart" : "Figure";
+  }
+
+  function defaultFigureCaption(file) {
+    return file.name.replace(/\.[^.]+$/, "");
+  }
+
+  function sanitizeFigureNumber(value, fallback) {
+    const parsed = Number.parseInt(String(value || "").trim(), 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  }
+
+  function getFigureDetailForFile(file, index = 0) {
+    const key = figureFileKey(file);
+    const existing = state.figureDetails[key] || {};
+    return {
+      placement: state.figurePlacements[key] || existing.placement || "end",
+      labelType: existing.labelType || defaultFigureLabelType(file),
+      labelNumber: sanitizeFigureNumber(existing.labelNumber, index + 1),
+      caption: String(existing.caption || "").trim() || defaultFigureCaption(file)
+    };
+  }
+
+  function setManagedFigureFiles(files) {
+    state.figureFiles = files;
+    const nextDetails = {};
+
+    state.figureFiles.forEach((file, index) => {
+      const key = figureFileKey(file);
+      nextDetails[key] = getFigureDetailForFile(file, index);
+    });
+
+    state.figureDetails = nextDetails;
+    state.figurePlacements = Object.fromEntries(
+      Object.entries(nextDetails).map(([key, detail]) => [key, detail.placement || "end"])
+    );
+    updateFigureSummary();
+  }
+
+  function handleFigureUploadChange() {
+    const incoming = Array.from(dom.imageUpload.files || []);
+    if (!incoming.length) return;
+
+    const nextFiles = [...state.figureFiles];
+    const seen = new Set(nextFiles.map((file) => figureFileKey(file)));
+    incoming.forEach((file) => {
+      const key = figureFileKey(file);
+      if (!seen.has(key)) {
+        nextFiles.push(file);
+        seen.add(key);
+      }
+    });
+
+    setManagedFigureFiles(nextFiles);
+    dom.imageUpload.value = "";
+  }
+
+  function removeFigureByKey(figureKey) {
+    setManagedFigureFiles((state.figureFiles || []).filter((file) => figureFileKey(file) !== figureKey));
+    syncFigurePlacementControls();
+    updateAllUI();
+    queueDraftSave();
+  }
+
+  function getFigurePlacementOptions(noteType = dom.noteType.value) {
+    const options = [];
+    const layout = collectBodySectionLayout().filter((entry) => !entry.hidden);
+    const keyTakeaways = layout.find((entry) => entry.key === "keyTakeaways");
+    const cordobaView = layout.find((entry) => entry.key === "cordobaView");
+    const middle = layout.filter((entry) => entry.key !== "keyTakeaways" && entry.key !== "cordobaView");
+
+    if (noteType === "Equity Research") {
+      options.push(
+        { value: "after-businessDescription", label: "After Business Description" },
+        { value: "after-valuationSummary", label: "After Valuation Summary" }
+      );
+
+      middle.forEach((entry) => {
+        options.push({ value: `after-${entry.key}`, label: `After ${entry.label}` });
+      });
+      if (cordobaView) options.push({ value: "after-cordobaView", label: `After ${cordobaView.label}` });
+
+      options.push({ value: "end", label: "End of Note" });
+      return options;
+    }
+
+    if (isMacroFiNoteType(noteType)) {
+      const macroHeading = String(dom.macroFiHeading?.value || "").trim() || "Ratings Profile";
+      options.push({ value: "after-macroFiProfile", label: `After ${macroHeading}` });
+    }
+
+    if (keyTakeaways) options.push({ value: "after-keyTakeaways", label: `After ${keyTakeaways.label}` });
+    middle.forEach((entry) => {
+      options.push({ value: `after-${entry.key}`, label: `After ${entry.label}` });
+    });
+    if (cordobaView) options.push({ value: "after-cordobaView", label: `After ${cordobaView.label}` });
+
+    options.push({ value: "end", label: "End of Note" });
+    return options;
+  }
+
+  function syncFigurePlacementControls() {
+    if (!dom.figurePlacementPanel || !dom.figurePlacementList) return;
+
+    const files = state.figureFiles || [];
+    if (!files.length) {
+      dom.figurePlacementPanel.hidden = true;
+      dom.figurePlacementList.innerHTML = "";
+      state.figurePlacements = {};
+      state.figureDetails = {};
+      return;
+    }
+
+    const options = getFigurePlacementOptions(dom.noteType.value);
+    const allowedValues = new Set(options.map((option) => option.value));
+    const nextPlacements = {};
+
+    dom.figurePlacementList.innerHTML = "";
+    files.forEach((file, index) => {
+      const key = figureFileKey(file);
+      const detail = getFigureDetailForFile(file, index);
+      const currentValue = allowedValues.has(detail.placement) ? detail.placement : "end";
+      nextPlacements[key] = currentValue;
+
+      const row = document.createElement("div");
+      row.className = "figure-placement-row";
+      row.setAttribute("data-figure-row", key);
+
+      const nameWrap = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "figure-placement-name";
+      name.textContent = `${detail.labelType} ${detail.labelNumber}: ${detail.caption}`;
+      nameWrap.appendChild(name);
+
+      const origin = document.createElement("div");
+      origin.className = "figure-placement-origin";
+      origin.textContent = file.name;
+      nameWrap.appendChild(origin);
+      row.appendChild(nameWrap);
+
+      const meta = document.createElement("div");
+      meta.className = "figure-placement-meta";
+
+      const metaGrid = document.createElement("div");
+      metaGrid.className = "figure-placement-meta-grid";
+
+      const kindSelect = document.createElement("select");
+      kindSelect.setAttribute("data-figure-key", key);
+      kindSelect.setAttribute("data-figure-field", "labelType");
+      ["Figure", "Chart", "Exhibit"].forEach((labelType) => {
+        const optionEl = document.createElement("option");
+        optionEl.value = labelType;
+        optionEl.textContent = labelType;
+        if (labelType === detail.labelType) optionEl.selected = true;
+        kindSelect.appendChild(optionEl);
+      });
+      metaGrid.appendChild(kindSelect);
+
+      const numberInput = document.createElement("input");
+      numberInput.type = "text";
+      numberInput.inputMode = "numeric";
+      numberInput.value = String(detail.labelNumber);
+      numberInput.setAttribute("data-figure-key", key);
+      numberInput.setAttribute("data-figure-field", "labelNumber");
+      numberInput.setAttribute("aria-label", "Figure number");
+      metaGrid.appendChild(numberInput);
+
+      const select = document.createElement("select");
+      select.setAttribute("data-figure-key", key);
+      select.setAttribute("data-figure-field", "placement");
+      options.forEach((option) => {
+        const optionEl = document.createElement("option");
+        optionEl.value = option.value;
+        optionEl.textContent = option.label;
+        if (option.value === currentValue) optionEl.selected = true;
+        select.appendChild(optionEl);
+      });
+      metaGrid.appendChild(select);
+      meta.appendChild(metaGrid);
+
+      const captionInput = document.createElement("input");
+      captionInput.type = "text";
+      captionInput.value = detail.caption;
+      captionInput.placeholder = "Figure caption";
+      captionInput.setAttribute("data-figure-key", key);
+      captionInput.setAttribute("data-figure-field", "caption");
+      meta.appendChild(captionInput);
+
+      const actionRow = document.createElement("div");
+      actionRow.className = "figure-placement-actions";
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "btn btn-ghost btn-xs";
+      removeBtn.setAttribute("data-figure-action", "remove");
+      removeBtn.setAttribute("data-figure-key", key);
+      removeBtn.textContent = "Remove";
+      actionRow.appendChild(removeBtn);
+      meta.appendChild(actionRow);
+
+      row.appendChild(meta);
+      dom.figurePlacementList.appendChild(row);
+    });
+
+    state.figurePlacements = nextPlacements;
+    dom.figurePlacementPanel.hidden = false;
+  }
+
+  function handleFigurePlacementChange(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement || target instanceof HTMLInputElement)) return;
+    const figureKey = target.getAttribute("data-figure-key");
+    if (!figureKey) return;
+    const field = target.getAttribute("data-figure-field");
+    if (!field) return;
+
+    const current = state.figureDetails[figureKey] || {};
+    if (field === "labelNumber") {
+      current.labelNumber = sanitizeFigureNumber(target.value, current.labelNumber || 1);
+      target.value = String(current.labelNumber);
+    } else {
+      current[field] = target.value;
+    }
+    if (field === "placement") state.figurePlacements[figureKey] = current.placement || "end";
+    state.figureDetails[figureKey] = current;
+    const nameEl = target.closest(".figure-placement-row")?.querySelector(".figure-placement-name");
+    if (nameEl) {
+      const labelType = current.labelType || "Figure";
+      const labelNumber = sanitizeFigureNumber(current.labelNumber, 1);
+      const caption = String(current.caption || "").trim() || "Untitled figure";
+      nameEl.textContent = `${labelType} ${labelNumber}: ${caption}`;
+    }
+    updateFigureSummary();
+    updateAllUI();
+  }
+
+  function handleFigurePlacementActions(event) {
+    const actionButton = event.target.closest("[data-figure-action='remove']");
+    if (!actionButton) return;
+    removeFigureByKey(actionButton.getAttribute("data-figure-key"));
+  }
+
+  function buildCurrentFigurePlacements(files) {
+    return files.reduce((acc, file) => {
+      acc[figureFileKey(file)] = getFigureDetailForFile(file).placement || state.figurePlacements[figureFileKey(file)] || "end";
+      return acc;
+    }, {});
+  }
+
+  function buildCurrentFigureDetails(files) {
+    return files.reduce((acc, file, index) => {
+      acc[figureFileKey(file)] = getFigureDetailForFile(file, index);
+      return acc;
+    }, {});
+  }
+
+  function resolveFigurePlacementForFile(file, data, availablePlacements) {
+    const requested = data.figurePlacements?.[figureFileKey(file)] || "end";
+    return availablePlacements.has(requested) ? requested : "end";
+  }
+
+  function getFigureFilesForPlacement(data, placement, availablePlacements) {
+    return (data.imageFiles || []).filter((file) => resolveFigurePlacementForFile(file, data, availablePlacements) === placement);
+  }
+
+  async function appendPlacedFigures(children, docxLib, colors, files, figureCounterRef, options = {}) {
+    if (!files.length) return;
+    const startIndex = figureCounterRef.value;
+    const imageParagraphs = await buildImageParagraphs(docxLib, files, colors, startIndex, options.figureDetails || {});
+    figureCounterRef.value += files.length;
+
+    if (options.withHeading) {
+      children.push(buildNomuraSubhead(docxLib, colors, options.heading || "Figures / Screenshots"));
+    }
+
+    children.push(...imageParagraphs);
   }
 
   function setMetric(element, value) {
@@ -2573,6 +3705,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    closePreviewModal();
     clearMessage();
 
     const validation = validateForm(true);
@@ -2653,6 +3786,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function collectFormData() {
     syncPrimaryPhone();
+    const imageFiles = [...(state.figureFiles || [])];
 
     return {
       noteType: dom.noteType.value.trim(),
@@ -2662,6 +3796,13 @@ document.addEventListener("DOMContentLoaded", () => {
       title: dom.title.value.trim(),
       deck: dom.deck.value.trim(),
       topic: dom.topic.value.trim(),
+      coverageCountry: dom.coverageCountry.value.trim(),
+      issuerId: dom.issuerId.value.trim(),
+      macroFiHeading: dom.macroFiHeading.value.trim(),
+      agencyRating: dom.agencyRating.value.trim(),
+      shortTermRating: dom.shortTermRating.value.trim(),
+      longTermRating: dom.longTermRating.value.trim(),
+      ratingsProfile: collectRatingsProfile(),
       authorLastName: dom.authorLastName.value.trim(),
       authorFirstName: dom.authorFirstName.value.trim(),
       authorPhone: dom.authorPhone.value.trim(),
@@ -2677,17 +3818,22 @@ document.addEventListener("DOMContentLoaded", () => {
       benchmarkTicker: dom.benchmarkTicker.value.trim(),
       marketCapUsd: dom.marketCapUsd.value.trim(),
       adtUsd: dom.adtUsd.value.trim(),
+      businessDescription: dom.businessDescription.value.trim(),
       valuationSummary: dom.valuationSummary.value.trim(),
-      scenarioNotes: dom.scenarioNotes.value.trim(),
       financialTableTitle: dom.financialTableTitle.value.trim(),
       financialSourceNote: dom.financialSourceNote.value.trim(),
       financialTableInput: dom.financialTableInput.value.trim(),
       modelLink: dom.modelLink.value.trim(),
+      bodySectionLayout: collectBodySectionLayout(),
       keyTakeaways: dom.keyTakeaways.value.trim(),
       analysis: dom.analysis.value.trim(),
       content: dom.content.value.trim(),
+      fiveYearRationale: dom.fiveYearRationale.value.trim(),
+      esgSummary: dom.esgSummary.value.trim(),
       cordobaView: dom.cordobaView.value.trim(),
-      imageFiles: Array.from(dom.imageUpload.files || []),
+      imageFiles,
+      figurePlacements: buildCurrentFigurePlacements(imageFiles),
+      figureDetails: buildCurrentFigureDetails(imageFiles),
       modelFiles: Array.from(dom.modelFiles.files || []),
       priceChartImageBytes: state.priceChartImageBytes,
       equityStats: { ...state.equityStats },
@@ -2709,7 +3855,8 @@ document.addEventListener("DOMContentLoaded", () => {
       "Macro Research": "MA",
       "Fixed Income Research": "FI",
       "Commodity Insights": "CO",
-      "Commodity Research": "CO"
+      "Commodity Research": "CO",
+      "Short Note / Market Alert": "AL"
     };
 
     return map[noteType] || "RS";
@@ -2803,6 +3950,15 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/>/g, "&gt;");
   }
 
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function lineItems(text) {
     return String(text || "")
       .split("\n")
@@ -2815,6 +3971,627 @@ document.addEventListener("DOMContentLoaded", () => {
       .split(/\n{2,}/)
       .map((block) => block.trim())
       .filter(Boolean);
+  }
+
+  function cleanupPreviewAssets() {
+    state.previewObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+    state.previewObjectUrls = [];
+  }
+
+  function peekNextNoteSequence(typeCode, dateStamp) {
+    try {
+      const raw = window.localStorage.getItem(NOTE_SEQUENCE_STORAGE_KEY);
+      const store = raw ? JSON.parse(raw) : {};
+      const key = `${typeCode}-${dateStamp}`;
+      const nextValue = Number(store[key] || 0) + 1;
+      return String(nextValue).padStart(2, "0");
+    } catch (error) {
+      console.warn("Unable to inspect note sequence:", error);
+      return String(generatedSequenceFromClock()).padStart(2, "0");
+    }
+  }
+
+  function buildPreviewNoteId(data) {
+    const generatedAt = data.generatedAt || new Date();
+    const dateStamp = formatCompactDateStamp(generatedAt);
+    return `CRG-${noteTypeCode(data.noteType)}-${dateStamp}-${peekNextNoteSequence(noteTypeCode(data.noteType), dateStamp)}`;
+  }
+
+  function buildPreviewAnalystPanelHtml(deskLine, contacts) {
+    const people = contacts.length
+      ? contacts
+      : [{ name: "Research Analyst", email: "research@cordobarg.com", phone: "N/A" }];
+
+    return `
+      <section class="preview-analyst-panel">
+        <h3>Research Analysts</h3>
+        <div class="preview-analyst-desk">${escapeHtml(deskLine || "Global Research Strategy")}</div>
+        ${people.map((person) => `
+          <div class="preview-analyst-person">
+            <strong>${escapeHtml(person.name)}</strong>
+            <span>${escapeHtml(person.email)}</span>
+            <span>${escapeHtml(person.phone)}</span>
+          </div>
+        `).join("")}
+      </section>
+    `;
+  }
+
+  function buildPreviewBannerHtml(data, publicationDate) {
+    return `
+      <header class="preview-export-banner">
+        <div class="preview-export-logo">
+          <img src="assets/cordoba-logo" alt="Cordoba Research Group logo">
+        </div>
+        <div class="preview-export-mark" aria-hidden="true">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="preview-export-brand">
+          <strong>Global Markets Research</strong>
+          <span>${escapeHtml(formatDocDate(publicationDate))}</span>
+        </div>
+      </header>
+    `;
+  }
+
+  function buildPreviewDisplayLineHtml(data) {
+    return `
+      <div class="preview-export-display">${escapeHtml(nomuraDisplayType(data.noteType))}</div>
+      <div class="preview-export-rule">${escapeHtml(data.deskLine || strategyLabelForNoteType(data.noteType) || "Research Note")}</div>
+    `;
+  }
+
+  function buildPreviewNarrativeHtml(label, content) {
+    if (!content) return "";
+    return `
+      <section class="preview-export-section">
+        <h3>${escapeHtml(label)}</h3>
+        ${paragraphBlocks(content).map((block) => `<p>${escapeHtml(block).replace(/\n/g, "<br>")}</p>`).join("")}
+      </section>
+    `;
+  }
+
+  function buildPreviewKeyTakeawaysBoxHtml(label, content) {
+    const items = lineItems(content);
+    return `
+      <section class="preview-key-box">
+        <h3>${escapeHtml(label)}</h3>
+        <ul>
+          ${(items.length ? items : ["No key takeaways supplied."]).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      </section>
+    `;
+  }
+
+  function getPreviewChartImageSrc(data) {
+    if (data?.priceChartImageBytes?.length) {
+      try {
+        const blob = new Blob([data.priceChartImageBytes], { type: "image/png" });
+        const objectUrl = URL.createObjectURL(blob);
+        state.previewObjectUrls.push(objectUrl);
+        return objectUrl;
+      } catch (error) {
+        console.warn("Unable to create preview chart URL from export bytes:", error);
+      }
+    }
+
+    try {
+      if (dom.priceChartCanvas && typeof dom.priceChartCanvas.toDataURL === "function") {
+        const dataUrl = dom.priceChartCanvas.toDataURL("image/png");
+        return dataUrl && dataUrl !== "data:," ? dataUrl : "";
+      }
+    } catch (error) {
+      console.warn("Unable to create preview chart image:", error);
+    }
+    return "";
+  }
+
+  function buildPreviewFigureMarkup(files, data, availablePlacements, placement) {
+    const placedFiles = getFigureFilesForPlacement(data, placement, availablePlacements);
+    return placedFiles.map((file, index) => {
+      const objectUrl = URL.createObjectURL(file);
+      state.previewObjectUrls.push(objectUrl);
+      const detail = data.figureDetails?.[figureFileKey(file)] || getFigureDetailForFile(file, index);
+      const caption = `${detail.labelType || "Figure"} ${sanitizeFigureNumber(detail.labelNumber, index + 1)}. ${detail.caption || defaultFigureCaption(file)}`;
+      return `
+        <figure class="preview-figure">
+          <img src="${objectUrl}" alt="${escapeAttribute(caption)}">
+          <figcaption>${escapeHtml(caption)}</figcaption>
+        </figure>
+      `;
+    }).join("");
+  }
+
+  function buildPreviewMacroFiProfileHtml(data) {
+    const heading = data.macroFiHeading || (data.noteType === "Fixed Income Research" ? "Ratings Overview" : "Sovereign Ratings");
+    const ratingsRows = (data.ratingsProfile || []).filter((row) => row.agency || row.shortTerm || row.longTerm);
+    const showMeta = data.noteType === "Macro Research" || data.coverageCountry || data.issuerId;
+
+    return `
+      <section class="preview-export-section">
+        <h3>${escapeHtml(heading)}</h3>
+        ${showMeta ? `
+          <div class="preview-macro-meta">
+            <div><strong>Coverage Country</strong><span>${escapeHtml(data.coverageCountry ? getCoverageCountryLabel(data.coverageCountry) : "N/A")}</span></div>
+            <div><strong>Issuer Number</strong><span>${escapeHtml(data.issuerId || "N/A")}</span></div>
+          </div>
+        ` : ""}
+        <table class="preview-ratings-table">
+          <thead>
+            <tr><th>Agency</th><th>Short-Term Rating</th><th>Long-Term Rating</th></tr>
+          </thead>
+          <tbody>
+            ${(ratingsRows.length ? ratingsRows : [{ agency: "N/A", shortTerm: "N/A", longTerm: "N/A" }]).map((row) => `
+              <tr>
+                <td>${escapeHtml(row.agency || "N/A")}</td>
+                <td>${escapeHtml(row.shortTerm || "N/A")}</td>
+                <td>${escapeHtml(row.longTerm || "N/A")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </section>
+    `;
+  }
+
+  function buildPreviewEquityTearSheetHtml(data, publicationDate) {
+    const targetPrice = parseNumber(data.targetPrice);
+    const marketPrice = Number.isFinite(data.equityStats.currentPrice) ? data.equityStats.currentPrice : null;
+    const upside = computeUpsideToTarget(marketPrice, targetPrice);
+    const priceDate = data.equityStats.priceDate ? formatDocDate(new Date(`${data.equityStats.priceDate}T00:00:00`)) : formatDocDate(publicationDate);
+    const priceCurrency = resolvePriceCurrency(data);
+    const chartSrc = getPreviewChartImageSrc(data);
+    const rows = [
+      { label: "Rating", value: data.crgRating || "N/A" },
+      { label: "Target price", value: formatPriceDisplay(targetPrice, priceCurrency) },
+      { label: "Closing price", sublabel: priceDate, value: formatPriceDisplay(marketPrice, priceCurrency) },
+      { label: "Implied upside", value: upside == null ? "N/A" : formatSignedPercent(upside) },
+      { label: "Market Cap (USD mn)", value: formatPlainMetricValue(data.marketCapUsd) },
+      { label: "ADT (USD mn)", value: formatPlainMetricValue(data.adtUsd) }
+    ];
+
+    return `
+      <section class="preview-tearsheet">
+        <table class="preview-tearsheet-table">
+          <tbody>
+            ${rows.map((row) => `
+              <tr>
+                <td>
+                  <strong>${escapeHtml(row.label)}</strong>
+                  ${row.sublabel ? `<span>${escapeHtml(row.sublabel)}</span>` : ""}
+                </td>
+                <td>${escapeHtml(row.value)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <div class="preview-chart-block">
+          <h4>Relative performance chart</h4>
+          <div class="preview-chart-frame">
+            ${chartSrc
+              ? `<img src="${chartSrc}" alt="Relative performance chart">`
+              : `<div class="preview-chart-empty">No tear sheet chart loaded.</div>`}
+          </div>
+          <p>Source: Yahoo Finance market data${data.equityStats.benchmarkLabel ? `, benchmarked against ${escapeHtml(data.equityStats.benchmarkLabel)}` : ""}</p>
+        </div>
+      </section>
+    `;
+  }
+
+  function buildPreviewFinancialTableHtml(data, publicationDate) {
+    const matrix = pruneEmptyFinancialRows(parseFinancialTableInput(data.financialTableInput, publicationDate));
+    if (!matrix.headers.length) return "";
+
+    const title = data.financialTableTitle || "Year-end 31 Dec";
+    const sourceNote = data.financialSourceNote || "Source: Company data, Cordoba Research Group estimates";
+    const priceCurrency = resolvePriceCurrency(data);
+
+    return `
+      <section class="preview-export-section">
+        <table class="preview-financial-table">
+          <thead>
+            <tr>
+              <th>
+                <div class="preview-financial-title">${escapeHtml(title)}</div>
+                ${priceCurrency ? `<div class="preview-financial-currency">Currency (${escapeHtml(priceCurrency)})</div>` : ""}
+              </th>
+              ${matrix.headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>
+            ${matrix.rows.map((row) => `
+              <tr>
+                <td>${escapeHtml(row.label || "-")}</td>
+                ${(row.values || []).map((value) => `<td>${escapeHtml(formatFinancialCellForExport(value, row.label))}</td>`).join("")}
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <div class="preview-financial-source">${escapeHtml(sourceNote)}</div>
+      </section>
+    `;
+  }
+
+  function buildPreviewSupportHtml(data) {
+    if (!data.modelLink && !data.modelFiles.length) return "";
+
+    return `
+      <section class="preview-export-section">
+        <h3>Model Files</h3>
+        ${data.modelLink ? `<p>${escapeHtml(data.modelLink)}</p>` : ""}
+        ${data.modelFiles.length ? `<ul>${data.modelFiles.map((file) => `<li>${escapeHtml(file.name)}</li>`).join("")}</ul>` : ""}
+      </section>
+    `;
+  }
+
+  function getCrgRatingDefinitionIntro() {
+    return "These are the CRG rating definitions. They reflect our opinion, are not statements of fact, and do not constitute regulated investment advice.";
+  }
+
+  function getCrgRatingDefinitionRows() {
+    return [
+      ["Outperform (O)", "Expected 15%+ upside over 12 months, supported by clear fundamental progress and identifiable catalysts."],
+      ["Sector Perform (SP)", "Expected return between -10% and +15% over 12 months, or a broadly balanced risk-reward profile versus the sector."],
+      ["Underperform (U)", "Expected return worse than -10% over 12 months, or a meaningfully inferior risk-reward profile versus the sector."],
+      ["Restricted (R)", "Applied to non-ethical businesses or activities. CRG may still publish research on such names for market context, sector context, or thematic relevance, but does not assign a recommendation rating."],
+      ["Not Rated (NR)", "Coverage is incomplete, conviction is still forming, or available evidence is not yet sufficient for a formal rating call."]
+    ];
+  }
+
+  function buildPreviewCrgRatingDefinitionsHtml() {
+    const rows = getCrgRatingDefinitionRows();
+
+    return `
+      <section class="preview-export-section preview-rating-definitions">
+        <div class="preview-rating-definitions-head">
+          <h3>CRG Rating Definitions</h3>
+        </div>
+        <p>${escapeHtml(getCrgRatingDefinitionIntro())}</p>
+        <table class="preview-ratings-definitions-table">
+          <tbody>
+            ${rows.map((row) => `
+              <tr>
+                <th>${escapeHtml(row[0])}</th>
+                <td>${escapeHtml(row[1])}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </section>
+    `;
+  }
+
+  function buildPreviewFooterHtml(noteId, data, pageNumber = 1, totalPages = 1) {
+    return `
+      <footer class="preview-export-footer">
+        <span>Note ID: ${escapeHtml(noteId)}</span>
+        <span>Published: ${escapeHtml(formatProductionTimestamp(data.generatedAt))}</span>
+        <span>Page ${pageNumber} of ${totalPages}</span>
+      </footer>
+    `;
+  }
+
+  function buildPreviewEquityCrgRatingDefinitionsPageHtml(data, pageNumber, totalPages) {
+    const introParagraphs = [
+      "CRG equity research ratings are relative opinion classifications intended to frame expected share-price performance over a 12-month horizon against the relevant sector opportunity set and the valuation case presented in the note. Target prices and valuation ranges reflect analytical judgment based on assumptions, scenario weighting, and market inputs that may change without notice.",
+      "The definitions below are explanatory only. They are not statements of fact, do not constitute regulated investment advice, and should be read together with the valuation discussion, catalysts, and risk factors set out in the note."
+    ];
+
+    return `
+      <article class="preview-export-page preview-reference-page">
+        <section class="preview-reference-head">
+          <h1>CRG Equity Research Rating Definitions</h1>
+          ${introParagraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
+        </section>
+        <section class="preview-reference-section">
+          <h2>STOCKS</h2>
+          ${getCrgRatingDefinitionRows().map((row) => `
+            <p><strong>${escapeHtml(row[0])}:</strong> ${escapeHtml(row[1])}</p>
+          `).join("")}
+          <p><strong>Benchmark interpretation:</strong> Unless stated otherwise in the note, rating language should be read in the context of 12-month total return potential relative to sector alternatives, the market-implied base case, and the benchmark context identified in the valuation discussion.</p>
+        </section>
+        ${buildPreviewFooterHtml(data.noteId, data, pageNumber, totalPages)}
+      </article>
+    `;
+  }
+
+  function buildComplianceNoticeModel(data) {
+    const noteReference = [data.title || "Research note", data.noteId ? `Note ID ${data.noteId}` : ""].filter(Boolean).join(" | ");
+    const analystNames = collectComplianceAnalystNames(data);
+    const analystLabel = analystNames.length ? formatHumanList(analystNames) : "the named analyst(s)";
+    const analystVerb = analystNames.length === 1 ? "is" : "are";
+    const analystPronoun = analystNames.length === 1 ? "that individual" : "those individuals";
+    const publicationTimestamp = formatProductionTimestamp(data.generatedAt);
+    const sections = [
+      {
+        heading: "Status of Publisher",
+        subheading: "Regulatory perimeter and institutional status",
+        paragraphs: [
+          `${noteReference} has been prepared and circulated by Cordoba Research Group solely in connection with its educational, editorial, and training activities. Cordoba Research Group is not authorised, approved, supervised, or otherwise regulated by the Financial Conduct Authority and is not a company registered with the Financial Conduct Authority for the carrying on of investment business, research distribution, brokerage, advisory, arranging, dealing, discretionary management, or any other regulated activity. Cordoba Research Group is not a registered investment firm, broker, investment adviser, wealth manager, regulated research provider, or financial intermediary, and no statement in this note should be read as suggesting otherwise.`,
+          `Cordoba Research Group is an educational platform and research group intended to provide students and developing analysts with opportunities to practise institutional-style writing, analytical discipline, editorial judgment, and structured market commentary. The note has therefore been produced within an educational context and must be understood as such. The fact that the note adopts institutional conventions of structure, tone, layout, valuation language, or market terminology does not alter its educational character and does not convert it into regulated investment research, financial advice, or any communication approved by an authorised person for investment purposes.`
+        ]
+      },
+      {
+        heading: "Nature of the Material",
+        subheading: "Educational and informational publication only",
+        paragraphs: [
+          `This material is provided strictly for educational and informational purposes. It is intended to illustrate how a research note may be framed, structured, edited, and presented, including the handling of market data, valuation concepts, scenario analysis, risk articulation, and analytical narrative. It is not intended to provide personalised or general investment advice; it does not constitute legal, tax, accounting, regulatory, or financial advice; and it must not be treated as a substitute for advice from a properly authorised or qualified professional adviser.`,
+          `Nothing in this note constitutes, or should be construed as constituting, investment advice, a personal recommendation, a regulated investment recommendation, independent research, or investment research prepared in accordance with legal or regulatory requirements designed to promote the independence of investment research. The note is not prepared subject to the rules, controls, separations, monitoring arrangements, research independence safeguards, or dealing restrictions that may apply to research produced by an authorised investment firm or broker-dealer.`
+        ]
+      },
+      {
+        heading: "No Offer, No Solicitation, No Financial Promotion",
+        subheading: "No invitation to transact and no approved marketing communication",
+        paragraphs: [
+          `This note does not constitute an offer, invitation, solicitation, inducement, marketing communication, approval communication, placing document, offering memorandum, prospectus, term sheet, dealing instruction, or call to action in relation to any issuer, security, derivative, fund, commodity, rate product, credit instrument, currency, or investment strategy. It must not be treated as an offer to buy or sell, or as a solicitation of an offer to buy or sell, any financial instrument or to participate in any transaction, placement, underwriting, financing, syndication, hedging arrangement, or capital-markets activity.`,
+          `This note is not intended to be, and must not be relied upon as, a financial promotion for the purposes of the Financial Services and Markets Act 2000 or any corresponding law or regulation in another jurisdiction. It has not been approved by an authorised person for communication to persons who may require that level of approval, and it must not be circulated in a manner that would cause it to be characterised as an externally approved marketing, distribution, or promotional document. Any ratings, target prices, catalysts, valuation outputs, trade illustrations, or scenario outcomes mentioned in the note are included solely within an educational framework and do not amount to a recommendation or inducement.`
+        ]
+      },
+      {
+        heading: "No Advice, Recommendation, Suitability Assessment, or Fiduciary Relationship",
+        subheading: "Recipient responsibility for judgment and decision-making",
+        paragraphs: [
+          `Cordoba Research Group does not provide investment advice and does not make investment recommendations. No statement, chart, scenario, rating, target price, valuation range, market comment, or analytical conclusion in this note should be relied upon as a basis for any investment decision, portfolio construction decision, asset-allocation decision, hedging decision, lending decision, treasury action, suitability assessment, mandate decision, or execution instruction. This material does not take into account the investment objectives, financial situation, regulatory status, legal constraints, tax position, risk tolerance, or portfolio composition of any particular person.`,
+          `No fiduciary duty, advisory duty, suitability duty, execution duty, monitoring duty, or continuing duty is owed by Cordoba Research Group or by the named analyst authors to any reader, recipient, institution, or third party by reason of the preparation, circulation, availability, or use of this note. Recipients remain solely responsible for exercising their own independent judgment. Any person considering any action in relation to a market, issuer, or instrument referred to in the note should obtain advice from properly authorised legal, tax, accounting, regulatory, and investment professionals before acting or refraining from acting.`
+        ]
+      },
+      {
+        heading: "Sources, Verification, Accuracy, Completeness, and Timeliness",
+        subheading: "Public and third-party information; no guarantee of independent verification",
+        paragraphs: [
+          `Information used in the preparation of this note may have been derived from public filings, company announcements, exchange data, price feeds, benchmark providers, market vendors, published commentary, consensus estimates, analyst presentations, official statistics, third-party databases, and other sources believed, but not guaranteed, to be reliable. Such information may be incomplete, abbreviated, reformatted, rounded, selectively presented, translated, delayed, stale, superseded, or otherwise affected by the limitations of the original source material or by the way in which it has been incorporated into the note.`,
+          `Cordoba Research Group does not represent, warrant, or guarantee that any information, statement, chart, table, model output, estimate, assumption, or summary contained in this note is accurate, complete, fair, balanced, timely, reliable, suitable, or fit for any particular purpose, nor that it has been independently verified in every respect. There may be errors, omissions, transcription issues, formatting discrepancies, stale data, or missing contextual information. The absence of any express qualification within the body of the note should not be taken to imply that a statement has been independently verified or remains current at the time of reading.`
+        ]
+      },
+      {
+        heading: "Valuations, Forecasts, Forward-Looking Statements, and Market Variables",
+        subheading: "Assumption-driven analysis and uncertainty of outcomes",
+        paragraphs: [
+          `Any forecast, estimate, projection, expected return, target price, scenario, sensitivity, probability, valuation output, implied upside, downside estimate, or other forward-looking statement in this note is inherently uncertain and dependent upon assumptions, methodologies, judgments, simplifications, model choices, and market inputs that may prove to be incorrect, incomplete, or unstable. Different assumptions, data selections, discount rates, benchmark choices, macro views, or analytical frameworks may produce materially different results. Forward-looking statements are not statements of fact and should not be interpreted as assurances or guarantees of future performance or future market levels.`,
+          `Actual outcomes may differ materially from any forward-looking view expressed in the note as a result of changes in issuer fundamentals, policy, regulation, rates, currencies, liquidity, funding conditions, market structure, competitive dynamics, geopolitical events, management decisions, commodity prices, spreads, implied volatilities, credit conditions, or broader macroeconomic developments. Prices, yields, spreads, valuations, exchange rates, and market-implied metrics may move adversely and rapidly. Past performance is not indicative of future results. Capital is at risk. Investments may fall as well as rise in value, income may vary, and investors may receive back less than originally invested. Instruments involving leverage, options, swaps, futures, or other derivatives may expose participants to amplified gains and losses and may entail losses in excess of initial capital committed or collateral posted.`
+        ]
+      },
+      {
+        heading: "Views, Opinions, Changes Without Notice, and No Duty to Update",
+        subheading: "Current only as of publication and subject to revision",
+        paragraphs: [
+          `Any view, opinion, interpretation, analytical judgment, or conclusion contained in this note is current only as of the publication timestamp stated below or the relevant drafting date reflected in the note and may change at any time without notice. Markets evolve, information changes, company circumstances develop, and analytical judgments may be revised as new information becomes available. Cordoba Research Group and the named analyst authors reserve the right to alter, withdraw, replace, or discontinue any view expressed in the note without any duty to notify readers, recipients, or third parties.`,
+          `Neither Cordoba Research Group nor the named analyst authors undertake any obligation to revise, supplement, correct, amend, republish, or update the note, whether as a result of subsequent events, new information, changes in assumptions, data revisions, market developments, or otherwise. Continued storage, forwarding, availability, download, or possession of the note should not be taken to imply that the content remains current, accurate, or complete after the publication date.`
+        ]
+      },
+      {
+        heading: "Authorship, Editorial Responsibility, and Internal Divergence of Views",
+        subheading: "Named authorship and limits of attribution",
+        paragraphs: [
+          `${analystLabel} ${analystVerb} responsible for the authorship and substantive content of this note, and the views, observations, interpretations, estimates, and analytical judgments expressed in the note are attributable to ${analystPronoun} in an editorial sense. That attribution reflects authorship responsibility only. It does not imply that the named analyst authors are regulated analysts, approved persons, authorised advisers, or persons producing research under a regulated investment-research regime. It also does not create any duty on the part of the named analyst authors toward any reader or recipient.`,
+          `Views expressed in this note may differ from views expressed elsewhere by Cordoba Research Group participants, contributors, reviewers, students, mentors, editors, or associated parties. The existence of named authors should not be read as implying institutional unanimity, house view consistency, supervisory approval of an investment thesis, or endorsement by any external institution. Cordoba Research Group may host, circulate, or archive materials containing different, inconsistent, or subsequently revised viewpoints relating to the same issuer, market, instrument, or macro theme without any obligation to reconcile those views across documents.`
+        ]
+      },
+      {
+        heading: "Distribution, Circulation, Audience, and Use Restrictions",
+        subheading: "Limitations on onward circulation and jurisdictional use",
+        paragraphs: [
+          `This note is not directed at retail investors and is not prepared for general public distribution as regulated investment material. It should not be distributed, transmitted, published, excerpted, syndicated, marketed, or relied upon in any jurisdiction or circumstance in which such use would be unlawful or would require registration, authorisation, approval, licensing, filing, or review not obtained by Cordoba Research Group. Each recipient is responsible for satisfying itself that receipt, possession, use, and onward circulation of the note is lawful in the relevant jurisdiction and context.`,
+          `Recipients must not circulate this note externally as client research, approved sales material, issuer marketing, a due-diligence substitute, or a regulated communication without first obtaining any editorial, legal, compliance, and supervisory approvals that may be necessary. The note is intended for limited educational use and should be treated accordingly. No recipient may imply that the note has been approved, endorsed, or issued by an authorised investment firm, broker, bank, or regulator merely because it adopts the structure or tone of institutional-style research.`
+        ]
+      },
+      {
+        heading: "Intellectual Property and Restrictions on Reproduction",
+        subheading: "No reproduction, republication, redistribution, or commercial exploitation without permission",
+        paragraphs: [
+          `Unless otherwise indicated, the text, structure, compilation, editorial arrangement, and original analytical content of this note are proprietary to Cordoba Research Group and/or the named analyst authors. The note is made available for the limited educational purpose for which it was prepared and may not be copied, reproduced, republished, extracted, adapted, translated, distributed, uploaded, transmitted, licensed, sold, commercialised, or otherwise exploited, in whole or in part, without prior written permission from Cordoba Research Group, except to the extent permitted by applicable law for strictly limited non-commercial internal reference purposes.`,
+          `Any unauthorised onward circulation, republication, or commercial use may mischaracterise the status of the note and may expose downstream recipients to material that has not been prepared for their use or regulatory context. Quotations, extracts, screenshots, or republication of tables, charts, or commentary from the note should not be made in a manner that creates the impression that Cordoba Research Group has issued approved investment advice, regulated research, or promotional material.`
+        ]
+      },
+      {
+        heading: "Limitation of Liability and Exclusion of Responsibility",
+        subheading: "No liability for use, reliance, or consequences of circulation",
+        paragraphs: [
+          `To the fullest extent permitted by law, Cordoba Research Group disclaims all liability, responsibility, duty of care, and accountability arising directly or indirectly from the preparation, use, reference to, circulation of, or reliance upon this note or any part of it. This exclusion applies whether any claim sounds in contract, tort, negligence, misrepresentation, statutory duty, fiduciary duty, restitution, or otherwise, and extends to direct, indirect, incidental, consequential, punitive, special, exemplary, or other forms of loss or damage, including without limitation trading losses, opportunity costs, lost profits, lost revenues, reputational harm, loss of data, business interruption, financing costs, regulatory consequences, or losses associated with adverse market movements.`,
+          `Without limitation, no responsibility is accepted for loss arising from inaccuracies, omissions, stale information, incomplete context, data vendor issues, benchmark errors, model limitations, assumption failures, formatting discrepancies, charting issues, software faults, or subsequent revisions to public information. No representation or warranty, express or implied, is made in respect of merchantability, title, non-infringement, quality, suitability, fitness for a particular purpose, completeness, timeliness, fairness, or reliability. If any part of this notice is held unenforceable, the remaining provisions shall continue to apply to the fullest extent permitted by law.`
+        ]
+      },
+      {
+        heading: "Recipient Responsibility and Professional Advice",
+        subheading: "Independent assessment remains essential",
+        paragraphs: [
+          `Each recipient must rely on its own independent assessment and judgment when evaluating any market, issuer, instrument, or transaction referred to in this note. No person should assume that any security, instrument, structure, issuer, benchmark, valuation conclusion, or trade concept mentioned in the note is suitable for their objectives, risk profile, capital base, liquidity needs, constitutional restrictions, mandate terms, fiduciary duties, accounting treatment, tax position, or regulatory obligations. The responsibility for testing assumptions, verifying facts, understanding legal documentation, and assessing suitability remains entirely with the recipient and its advisers.`,
+          `Where relevant, recipients should obtain advice from properly authorised legal, tax, accounting, regulatory, and investment professionals before taking or refraining from taking any action in connection with any matter discussed in the note. Any use of the note within an institution, classroom, committee, or investment process should be accompanied by the recipient’s own diligence, challenge, and review procedures. The educational availability of this material does not reduce the need for professional advice or independent verification.`
+        ]
+      },
+      {
+        heading: "Record of Publication",
+        subheading: "Relationship of this notice to the note as a whole",
+        paragraphs: [
+          `Published ${publicationTimestamp}. This Regulatory Disclosure and Important Notice forms an integral part of the publication record for ${noteReference} and must be read together with the substantive analysis, charts, tables, appendices, and supporting material that precede it. By accessing, retaining, forwarding, or using this note, the recipient acknowledges the educational, non-advisory, non-promotional, and non-regulated basis on which it has been prepared and circulated.`,
+          `If there is any inconsistency between the style, form, structure, or presentation of the note and the regulatory status described in this notice, this notice shall prevail. The institutional appearance of the publication is a matter of educational format and editorial discipline only and should not be interpreted as conferring any regulated status, authorisation, endorsement, or legal effect beyond that expressly stated in this notice.`
+        ]
+      }
+    ];
+
+    return {
+      noteReference,
+      introduction: `This notice sets out the regulatory status, limitations, authorship attribution, distribution restrictions, and use conditions applicable to ${noteReference}. It should be read in full and together with the substantive body of the note.`,
+      sections
+    };
+  }
+
+  function buildPreviewCompliancePageHtml(data, pageNumber, totalPages) {
+    const model = buildComplianceNoticeModel(data);
+
+    return `
+      <article class="preview-export-page preview-reference-page preview-legal-page">
+        <section class="preview-reference-head">
+          <h1>Regulatory Disclosure and Important Notice</h1>
+          <p>${escapeHtml(model.introduction)}</p>
+        </section>
+        ${model.sections.map((section) => `
+          <section class="preview-reference-section">
+            <h2>${escapeHtml(section.heading)}</h2>
+            <h3>${escapeHtml(section.subheading)}</h3>
+            ${section.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
+          </section>
+        `).join("")}
+        ${buildPreviewFooterHtml(data.noteId, data, pageNumber, totalPages)}
+      </article>
+    `;
+  }
+
+  function buildPreviewMainPageHtml(data, publicationDate, analystContacts, availablePlacements, sections, pageNumber, totalPages) {
+    const middleSections = sections.filter((entry) => entry.key !== "keyTakeaways" && entry.key !== "cordobaView");
+    const keyTakeaways = sections.find((entry) => entry.key === "keyTakeaways");
+    const cordobaView = sections.find((entry) => entry.key === "cordobaView");
+    const previewParts = [`<article class="preview-export-page">`, buildPreviewBannerHtml(data, publicationDate)];
+
+    if (data.noteType === "Equity Research") {
+      previewParts.push(
+        `<div class="preview-equity-security-line"><strong>${escapeHtml(data.equityCompanyName || data.title || data.ticker || "Company pending")}</strong>${data.equitySecurityDisplay ? ` <span>${escapeHtml(data.equitySecurityDisplay)}</span>` : ""}</div>`,
+        `<div class="preview-equity-sector-strip">EQUITY: ${escapeHtml((data.equitySectorLine || data.topic || "Equity Research").toUpperCase())}</div>`,
+        `<div class="preview-equity-front-grid">`,
+        `<div class="preview-equity-main">`,
+        `<h1 class="preview-export-title">${escapeHtml(data.title || "Untitled Equity Research Note")}</h1>`,
+        `<p class="preview-export-deck">${escapeHtml(data.deck || "No deck supplied")}</p>`,
+        `<p class="preview-export-topic">${escapeHtml(`${data.topic || data.deskLine || "Equity Research"} | ${formatDocDate(publicationDate)}`)}</p>`,
+        buildPreviewKeyTakeawaysBoxHtml(keyTakeaways?.label || "Key Takeaways", keyTakeaways?.content || data.keyTakeaways),
+        `</div>`,
+        `<aside class="preview-equity-sidebar">`,
+        buildPreviewEquityTearSheetHtml(data, publicationDate),
+        buildPreviewAnalystPanelHtml(data.deskLine || "Global Equity Strategy", analystContacts),
+        `</aside>`,
+        `</div>`,
+        buildPreviewFinancialTableHtml(data, publicationDate)
+      );
+
+      if (data.businessDescription) {
+        previewParts.push(buildPreviewNarrativeHtml("Business Description", data.businessDescription));
+        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-businessDescription"));
+      }
+      if (data.valuationSummary) {
+        previewParts.push(buildPreviewNarrativeHtml("Valuation Summary", data.valuationSummary));
+        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-valuationSummary"));
+      }
+      middleSections.forEach((section) => {
+        previewParts.push(buildPreviewNarrativeHtml(section.label, section.content));
+        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, `after-${section.key}`));
+      });
+      const endFigures = buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "end");
+      if (endFigures) previewParts.push(`<section class="preview-export-section"><h3>Figures / Screenshots</h3>${endFigures}</section>`);
+      previewParts.push(buildPreviewSupportHtml(data));
+      if (cordobaView?.content) {
+        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content));
+        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-cordobaView"));
+      }
+    } else {
+      previewParts.push(
+        buildPreviewDisplayLineHtml(data),
+        `<div class="preview-generic-front-grid">`,
+        `<div class="preview-generic-main">`,
+        `<h1 class="preview-export-title">${escapeHtml(data.title || "Untitled Research Note")}</h1>`,
+        `<p class="preview-export-deck">${escapeHtml(data.deck || "No deck supplied")}</p>`,
+        `<p class="preview-export-topic">${escapeHtml(`${data.topic || "Topic pending"} | ${formatDocDate(publicationDate)}`)}</p>`,
+        `${data.noteType === "Macro Research" || (isMacroFiNoteType(data.noteType) && (data.coverageCountry || data.issuerId))
+          ? `<p class="preview-export-meta-line">${escapeHtml(`Coverage Country: ${data.coverageCountry ? getCoverageCountryLabel(data.coverageCountry) : "N/A"} | Issuer Number: ${data.issuerId || "N/A"}`)}</p>`
+          : ""}`,
+        `</div>`,
+        `<aside class="preview-generic-side">${buildPreviewAnalystPanelHtml(data.deskLine || strategyLabelForNoteType(data.noteType) || "Global Research Strategy", analystContacts)}</aside>`,
+        `</div>`
+      );
+
+      if (isMacroFiNoteType(data.noteType)) {
+        previewParts.push(buildPreviewMacroFiProfileHtml(data));
+        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-macroFiProfile"));
+      }
+
+      previewParts.push(buildPreviewKeyTakeawaysBoxHtml(keyTakeaways?.label || "Key Takeaways", keyTakeaways?.content || data.keyTakeaways));
+      previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-keyTakeaways"));
+
+      middleSections.forEach((section) => {
+        previewParts.push(buildPreviewNarrativeHtml(section.label, section.content));
+        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, `after-${section.key}`));
+      });
+
+      if (cordobaView?.content) {
+        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content));
+        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-cordobaView"));
+      }
+
+      const endFigures = buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "end");
+      if (endFigures) previewParts.push(`<section class="preview-export-section"><h3>Figures / Screenshots</h3>${endFigures}</section>`);
+      previewParts.push(buildPreviewSupportHtml(data));
+    }
+
+    previewParts.push(buildPreviewFooterHtml(data.noteId, data, pageNumber, totalPages), `</article>`);
+    return previewParts.join("");
+  }
+
+  function buildPreviewDocumentSrcdoc(data, pagesHtml) {
+    const baseHref = escapeAttribute(document.baseURI || window.location.href || "");
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="${baseHref}">
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #edf0f5;
+      min-height: 100%;
+    }
+    body {
+      font-family: "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      color: #11151c;
+    }
+    .preview-document-shell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      padding: 28px 34px 34px;
+    }
+    @page {
+      size: A4;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-document-shell">${pagesHtml}</div>
+</body>
+</html>`;
+  }
+
+  function openPreviewModal() {
+    if (!dom.previewModal || !dom.previewModalBody) return;
+
+    cleanupPreviewAssets();
+    const data = collectFormData();
+    data.noteId = buildPreviewNoteId(data);
+    const publicationDate = parseInputDate(data.publicationDate) || data.generatedAt || new Date();
+    const analystContacts = collectAnalystContacts(data);
+    const availablePlacements = new Set(getFigurePlacementOptions(data.noteType).map((option) => option.value));
+    const sections = normalizeBodySectionLayoutForExport(data).filter((entry) => !entry.hidden && entry.content);
+    const previewMarkup = buildPreviewMainPageHtml(
+      data,
+      publicationDate,
+      analystContacts,
+      availablePlacements,
+      sections,
+      1,
+      1
+    );
+
+    dom.previewModalBody.innerHTML = `<div class="preview-page-stage">${previewMarkup}</div>`;
+    dom.previewModal.hidden = false;
+  }
+
+  function closePreviewModal() {
+    if (!dom.previewModal || !dom.previewModalBody) return;
+    dom.previewModal.hidden = true;
+    dom.previewModalBody.innerHTML = "";
+    cleanupPreviewAssets();
   }
 
   async function createDocument(data) {
@@ -2839,16 +4616,20 @@ document.addEventListener("DOMContentLoaded", () => {
       deskLine: data.deskLine,
       publicationDate
     });
-
-    const analystNames = [
-      buildDocAuthorLine(data.authorLastName, data.authorFirstName, data.authorPhone),
-      ...data.coAuthors
-        .filter((coAuthor) => coAuthor.lastName || coAuthor.firstName)
-        .map((coAuthor) => buildDocAuthorLine(coAuthor.lastName, coAuthor.firstName, coAuthor.phone))
-    ].filter(Boolean);
+    const analystContacts = collectAnalystContacts(data);
+    const { keyTakeaways, middle, cordobaView } = getNarrativeSectionPartitions(data);
+    const figureCounterRef = { value: 1 };
+    const availablePlacements = new Set(["end", "after-keyTakeaways"]);
+    if (isMacroFiNoteType(data.noteType)) availablePlacements.add("after-macroFiProfile");
+    middle.forEach((section) => availablePlacements.add(`after-${section.key}`));
+    if (cordobaView?.content) availablePlacements.add("after-cordobaView");
 
     if (data.noteType === "Equity Research") {
-      return createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystNames);
+      return createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystContacts, {
+        keyTakeaways,
+        middle,
+        cordobaView
+      }, figureCounterRef);
     }
 
     const documentChildren = [
@@ -2856,36 +4637,75 @@ document.addEventListener("DOMContentLoaded", () => {
         children: [
           new docxLib.ImageRun({
             data: bannerBytes,
-            transformation: { width: 705, height: 115 }
+            transformation: { width: 705, height: 122 }
           })
         ],
         spacing: { after: 110 }
       }),
-      buildNomuraTitlePanel(docxLib, colors, data, analystNames, publicationDate),
-      new docxLib.Paragraph({ spacing: { after: 70 } }),
-      buildKeyTakeawaysBox(docxLib, colors, lineItems(data.keyTakeaways))
+      buildNomuraTitlePanel(docxLib, colors, data, analystContacts, publicationDate)
     ];
 
-    documentChildren.push(
-      buildNomuraSubhead(docxLib, colors, "Analysis And Commentary"),
-      ...buildNomuraBodyParagraphs(docxLib, data.analysis)
-    );
-
-    if (data.content) {
+    if (isMacroFiNoteType(data.noteType)) {
       documentChildren.push(
-        buildNomuraSubhead(docxLib, colors, "Additional Detail"),
-        ...buildNomuraBodyParagraphs(docxLib, data.content)
+        new docxLib.Paragraph({ spacing: { after: 34 } }),
+        ...buildMacroFiProfileTable(docxLib, colors, data),
+        new docxLib.Paragraph({ spacing: { after: 54 } })
       );
+      await appendPlacedFigures(
+        documentChildren,
+        docxLib,
+        colors,
+        getFigureFilesForPlacement(data, "after-macroFiProfile", availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
+      );
+    } else {
+      documentChildren.push(new docxLib.Paragraph({ spacing: { after: 70 } }));
     }
 
     documentChildren.push(
-      buildNomuraSubhead(docxLib, colors, "The Cordoba View"),
-      ...buildNomuraBodyParagraphs(docxLib, data.cordobaView)
+      buildKeyTakeawaysBox(docxLib, colors, lineItems(keyTakeaways.content), keyTakeaways.label)
+    );
+    await appendPlacedFigures(
+      documentChildren,
+      docxLib,
+      colors,
+      getFigureFilesForPlacement(data, "after-keyTakeaways", availablePlacements),
+      figureCounterRef,
+      { figureDetails: data.figureDetails }
     );
 
-    const exhibitParagraphs = await buildNomuraExhibitParagraphs(docxLib, colors, data);
-    if (exhibitParagraphs.length) {
-      documentChildren.push(buildNomuraSubhead(docxLib, colors, "Figures / Screenshots"), ...exhibitParagraphs);
+    for (const section of middle) {
+      documentChildren.push(...buildNarrativeSectionBlocks(docxLib, colors, [section]));
+      await appendPlacedFigures(
+        documentChildren,
+        docxLib,
+        colors,
+        getFigureFilesForPlacement(data, `after-${section.key}`, availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
+      );
+    }
+
+    if (cordobaView?.content) {
+      documentChildren.push(...buildNarrativeSectionBlocks(docxLib, colors, [cordobaView]));
+      await appendPlacedFigures(
+        documentChildren,
+        docxLib,
+        colors,
+        getFigureFilesForPlacement(data, "after-cordobaView", availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
+      );
+    }
+
+    const endFigures = getFigureFilesForPlacement(data, "end", availablePlacements);
+    if (endFigures.length) {
+      await appendPlacedFigures(documentChildren, docxLib, colors, endFigures, figureCounterRef, {
+        withHeading: true,
+        heading: "Figures / Screenshots",
+        figureDetails: data.figureDetails
+      });
     }
 
     const supportParagraphs = buildSupportingMaterialParagraphs(docxLib, colors, data);
@@ -2954,91 +4774,95 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  async function createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystNames) {
+  async function createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystContacts, narrativeSections, figureCounterRef) {
+    const { keyTakeaways, middle, cordobaView } = narrativeSections;
+    const availablePlacements = new Set(["end"]);
+    if (data.businessDescription) availablePlacements.add("after-businessDescription");
+    if (data.valuationSummary) availablePlacements.add("after-valuationSummary");
+    middle.forEach((section) => availablePlacements.add(`after-${section.key}`));
+    if (cordobaView?.content) availablePlacements.add("after-cordobaView");
     const children = [
       new docxLib.Paragraph({
         children: [
           new docxLib.ImageRun({
             data: bannerBytes,
-            transformation: { width: 705, height: 115 }
+            transformation: { width: 705, height: 122 }
           })
         ],
         spacing: { after: 45 }
       }),
       buildEquitySecurityLine(docxLib, colors, data),
       buildEquitySectorStrip(docxLib, colors, data),
-      buildEquityFrontPageTable(docxLib, colors, data, publicationDate, analystNames),
+      buildEquityFrontPageTable(docxLib, colors, data, publicationDate, analystContacts, keyTakeaways),
       ...buildEquityFinancialTable(docxLib, colors, data, publicationDate)
     ];
+
+    if (data.businessDescription) {
+      children.push(
+        buildNomuraSubhead(docxLib, colors, "Business Description"),
+        ...buildNomuraBodyParagraphs(docxLib, data.businessDescription)
+      );
+      await appendPlacedFigures(
+        children,
+        docxLib,
+        colors,
+        getFigureFilesForPlacement(data, "after-businessDescription", availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
+      );
+    }
 
     if (data.valuationSummary) {
       children.push(
         buildNomuraSubhead(docxLib, colors, "Valuation Summary"),
         ...buildNomuraBodyParagraphs(docxLib, data.valuationSummary)
       );
-    }
-
-    if (data.scenarioNotes) {
-      children.push(
-        buildNomuraSubhead(docxLib, colors, "Scenario And Sensitivity Notes"),
-        ...buildNomuraBodyParagraphs(docxLib, data.scenarioNotes)
-      );
-    }
-
-    children.push(
-      buildNomuraSubhead(docxLib, colors, "Analysis And Commentary"),
-      ...buildNomuraBodyParagraphs(docxLib, data.analysis)
-    );
-
-    if (data.content) {
-      children.push(
-        buildNomuraSubhead(docxLib, colors, "Additional Detail"),
-        ...buildNomuraBodyParagraphs(docxLib, data.content)
-      );
-    }
-
-    if (data.cordobaView) {
-      const deferredCordobaView = [
-        buildNomuraSubhead(docxLib, colors, "The Cordoba View"),
-        ...buildNomuraBodyParagraphs(docxLib, data.cordobaView)
-      ];
-
-      if (data.imageFiles.length) {
-        const imageParagraphs = await buildEquityOnlyImageParagraphs(docxLib, colors, data.imageFiles);
-        children.push(
-          buildNomuraSubhead(docxLib, colors, "Figures / Screenshots"),
-          ...imageParagraphs
-        );
-      }
-
-      const supportParagraphs = buildSupportingMaterialParagraphs(docxLib, colors, data);
-      if (supportParagraphs.length) {
-        children.push(buildNomuraSubhead(docxLib, colors, "Model Files"), ...supportParagraphs);
-      }
-
-      children.push(...deferredCordobaView);
-      return buildResearchDocumentShell(
+      await appendPlacedFigures(
+        children,
         docxLib,
         colors,
-        publicationDate,
-        data.generatedAt,
-        data.noteId,
-        children,
-        buildComplianceDeclarationSection(docxLib, colors, data)
+        getFigureFilesForPlacement(data, "after-valuationSummary", availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
       );
     }
 
-    if (data.imageFiles.length) {
-      const imageParagraphs = await buildEquityOnlyImageParagraphs(docxLib, colors, data.imageFiles);
-      children.push(
-        buildNomuraSubhead(docxLib, colors, "Figures / Screenshots"),
-        ...imageParagraphs
+    for (const section of middle) {
+      children.push(...buildNarrativeSectionBlocks(docxLib, colors, [section]));
+      await appendPlacedFigures(
+        children,
+        docxLib,
+        colors,
+        getFigureFilesForPlacement(data, `after-${section.key}`, availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
       );
+    }
+
+    const endFigures = getFigureFilesForPlacement(data, "end", availablePlacements);
+    if (endFigures.length) {
+      await appendPlacedFigures(children, docxLib, colors, endFigures, figureCounterRef, {
+        withHeading: true,
+        heading: "Figures / Screenshots",
+        figureDetails: data.figureDetails
+      });
     }
 
     const supportParagraphs = buildSupportingMaterialParagraphs(docxLib, colors, data);
     if (supportParagraphs.length) {
       children.push(buildNomuraSubhead(docxLib, colors, "Model Files"), ...supportParagraphs);
+    }
+
+    if (cordobaView?.content) {
+      children.push(...buildNarrativeSectionBlocks(docxLib, colors, [cordobaView]));
+      await appendPlacedFigures(
+        children,
+        docxLib,
+        colors,
+        getFigureFilesForPlacement(data, "after-cordobaView", availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
+      );
     }
 
     return buildResearchDocumentShell(
@@ -3048,7 +4872,10 @@ document.addEventListener("DOMContentLoaded", () => {
       data.generatedAt,
       data.noteId,
       children,
-      buildComplianceDeclarationSection(docxLib, colors, data)
+      [
+        ...buildCrgRatingMethodologySection(docxLib, colors),
+        ...buildComplianceDeclarationSection(docxLib, colors, data, { pageBreakBefore: false })
+      ]
     );
   }
 
@@ -3121,7 +4948,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function buildEquityFrontPageTable(docxLib, colors, data, publicationDate, analystNames) {
+  function buildEquityFrontPageTable(docxLib, colors, data, publicationDate, analystContacts, keyTakeawaysSection) {
     const leftColumnChildren = [
       new docxLib.Paragraph({
         children: [
@@ -3158,13 +4985,18 @@ document.addEventListener("DOMContentLoaded", () => {
         ],
         spacing: { after: 46 }
       }),
-      buildKeyTakeawaysBox(docxLib, colors, lineItems(data.keyTakeaways))
+      buildKeyTakeawaysBox(
+        docxLib,
+        colors,
+        lineItems(keyTakeawaysSection?.content || data.keyTakeaways),
+        keyTakeawaysSection?.label || "Key Takeaways"
+      )
     ];
 
     const rightColumnChildren = [
       buildEquityTearSheetTable(docxLib, colors, data, publicationDate),
       ...buildEquitySidebarChart(docxLib, colors, data),
-      buildEquityAnalystSidebar(docxLib, colors, data, analystNames)
+      buildEquityAnalystSidebar(docxLib, colors, data, analystContacts)
     ];
 
     return new docxLib.Table({
@@ -3374,9 +5206,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return children;
   }
 
-  function buildEquityAnalystSidebar(docxLib, colors, data, analystNames) {
+  function buildEquityAnalystSidebar(docxLib, colors, data, analystContacts) {
     const analystDesk = data.deskLine || "Global Equity Strategy";
-    const names = analystNames.length ? analystNames : ["Research Analyst"];
 
     return new docxLib.Table({
       width: { size: 100, type: docxLib.WidthType.PERCENTAGE },
@@ -3400,37 +5231,7 @@ document.addEventListener("DOMContentLoaded", () => {
               },
               margins: { top: 0, bottom: 0, left: 0, right: 0 },
               children: [
-                new docxLib.Paragraph({
-                  children: [
-                    new docxLib.TextRun({
-                      text: "Research Analysts",
-                      bold: true,
-                      size: 15,
-                      color: colors.black,
-                      font: "Arial"
-                    })
-                  ],
-                  spacing: { after: 35 }
-                }),
-                new docxLib.Paragraph({
-                  border: {
-                    bottom: {
-                      color: colors.red,
-                      style: docxLib.BorderStyle.SINGLE,
-                      size: 5
-                    }
-                  },
-                  children: [
-                    new docxLib.TextRun({
-                      text: analystDesk,
-                      color: colors.red,
-                      size: 14,
-                      font: "Arial"
-                    })
-                  ],
-                  spacing: { after: 55 }
-                }),
-                buildAnalystNameTable(docxLib, colors, names)
+                ...buildAnalystContactPanel(docxLib, colors, analystDesk, analystContacts)
               ]
             })
           ]
@@ -3443,6 +5244,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const matrix = pruneEmptyFinancialRows(parseFinancialTableInput(data.financialTableInput, publicationDate));
     const title = data.financialTableTitle || "Year-end 31 Dec";
     const sourceNote = data.financialSourceNote || "Source: Company data, Cordoba Research Group estimates";
+    const priceCurrency = resolvePriceCurrency(data);
     const columnCount = matrix.headers.length;
     const valueColumnWidth = columnCount ? Math.max(11, Math.floor(66 / columnCount)) : 16;
     const metricColumnWidth = 100 - (valueColumnWidth * columnCount);
@@ -3461,11 +5263,24 @@ document.addEventListener("DOMContentLoaded", () => {
                   bold: true,
                   size: 12,
                   color: colors.black,
-                  font: "Arial"
-                })
-              ],
-              spacing: { after: 0 }
-            })
+                    font: "Arial"
+                  })
+                ],
+              spacing: { after: priceCurrency ? 8 : 0 }
+            }),
+            ...(priceCurrency
+              ? [new docxLib.Paragraph({
+                children: [
+                  new docxLib.TextRun({
+                    text: `Currency (${priceCurrency})`,
+                    size: 10,
+                    color: colors.muted,
+                    font: "Arial"
+                  })
+                ],
+                spacing: { after: 0 }
+              })]
+              : [])
           ]
         }),
         ...matrix.headers.map((header) =>
@@ -3504,6 +5319,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 children: [
                   new docxLib.TextRun({
                     text: row.label,
+                    bold: true,
                     size: 11,
                     color: colors.black,
                     font: "Arial"
@@ -3544,10 +5360,10 @@ document.addEventListener("DOMContentLoaded", () => {
         borders: {
           top: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
           bottom: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
-          left: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
-          right: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
+          left: { style: docxLib.BorderStyle.NONE },
+          right: { style: docxLib.BorderStyle.NONE },
           insideHorizontal: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
-          insideVertical: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 }
+          insideVertical: { style: docxLib.BorderStyle.NONE }
         },
         rows: [headerRow, ...dataRows]
       }),
@@ -3745,8 +5561,300 @@ document.addEventListener("DOMContentLoaded", () => {
     }).format(numeric);
   }
 
-  async function buildEquityOnlyImageParagraphs(docxLib, colors, files) {
-    return buildImageParagraphs(docxLib, files, colors, 1);
+  function buildCordobaEmail(firstName, lastName) {
+    const first = String(firstName || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
+    const fallback = [firstName, lastName]
+      .filter(Boolean)
+      .join("")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
+    const localPart = first || fallback || "research";
+    return `${localPart}@cordobarg.com`;
+  }
+
+  function collectAnalystContacts(data) {
+    const entries = [
+      {
+        firstName: data.authorFirstName,
+        lastName: data.authorLastName,
+        phone: data.authorPhone
+      },
+      ...(data.coAuthors || []).map((coAuthor) => ({
+        firstName: coAuthor.firstName,
+        lastName: coAuthor.lastName,
+        phone: coAuthor.phone
+      }))
+    ];
+
+    return entries
+      .map((entry) => {
+        const name = [entry.firstName, entry.lastName].filter(Boolean).join(" ").trim();
+        if (!name) return null;
+        return {
+          name,
+          email: buildCordobaEmail(entry.firstName, entry.lastName),
+          phone: formatPhoneDisplay(entry.phone)
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function buildAnalystContactPanel(docxLib, colors, deskLine, contacts) {
+    const people = contacts.length
+      ? contacts
+      : [{ name: "Research Analyst", email: "research@cordobarg.com", phone: "N/A" }];
+
+    return [
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.TextRun({
+            text: "Research Analysts",
+            bold: true,
+            size: 15,
+            color: colors.black,
+            font: "Arial"
+          })
+        ],
+        spacing: { after: 28 }
+      }),
+      new docxLib.Paragraph({
+        border: {
+          bottom: {
+            color: colors.red,
+            style: docxLib.BorderStyle.SINGLE,
+            size: 5
+          }
+        },
+        children: [
+          new docxLib.TextRun({
+            text: deskLine || "Global Research Strategy",
+            color: colors.red,
+            size: 14,
+            font: "Arial"
+          })
+        ],
+        spacing: { after: 42 }
+      }),
+      ...people.flatMap((person, index) => ([
+        new docxLib.Paragraph({
+          children: [
+            new docxLib.TextRun({
+              text: person.name,
+              bold: true,
+              size: 14,
+              color: colors.black,
+              font: "Arial"
+            })
+          ],
+          spacing: { after: 8 }
+        }),
+        new docxLib.Paragraph({
+          children: [
+            new docxLib.TextRun({
+              text: person.email,
+              size: 12,
+              color: colors.ink,
+              font: "Arial"
+            })
+          ],
+          spacing: { after: 8 }
+        }),
+        new docxLib.Paragraph({
+          children: [
+            new docxLib.TextRun({
+              text: person.phone || "N/A",
+              size: 12,
+              color: colors.ink,
+              font: "Arial"
+            })
+          ],
+          spacing: { after: index === people.length - 1 ? 0 : 28 }
+        })
+      ]))
+    ];
+  }
+
+  function buildMacroFiProfileTable(docxLib, colors, data) {
+    const heading = data.macroFiHeading || (data.noteType === "Fixed Income Research" ? "Ratings Overview" : "Sovereign Ratings");
+    const countryLabel = getCoverageCountryLabel(data.coverageCountry);
+    const issuerNumber = data.issuerId || "N/A";
+    const showMetadataTable = data.noteType === "Macro Research" || Boolean(data.coverageCountry || data.issuerId);
+    const ratings = (Array.isArray(data.ratingsProfile) && data.ratingsProfile.length
+      ? data.ratingsProfile
+      : [{
+        agency: data.agencyRating,
+        shortTerm: data.shortTermRating,
+        longTerm: data.longTermRating
+      }])
+      .filter((row) => row.agency || row.shortTerm || row.longTerm);
+
+    const metadataTable = new docxLib.Table({
+      width: { size: 100, type: docxLib.WidthType.PERCENTAGE },
+      borders: {
+        top: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
+        bottom: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
+        left: { style: docxLib.BorderStyle.NONE },
+        right: { style: docxLib.BorderStyle.NONE },
+        insideHorizontal: { style: docxLib.BorderStyle.NONE },
+        insideVertical: { style: docxLib.BorderStyle.NONE }
+      },
+      rows: [
+        new docxLib.TableRow({
+          children: [
+            ...[
+              { label: "Coverage Country", value: countryLabel },
+              { label: "Issuer Number", value: issuerNumber }
+            ].map((cell) =>
+              new docxLib.TableCell({
+                width: { size: 50, type: docxLib.WidthType.PERCENTAGE },
+                borders: {
+                  top: { style: docxLib.BorderStyle.NONE },
+                  bottom: { style: docxLib.BorderStyle.NONE },
+                  left: { style: docxLib.BorderStyle.NONE },
+                  right: { style: docxLib.BorderStyle.NONE }
+                },
+                margins: { top: 55, bottom: 55, left: 65, right: 65 },
+                children: [
+                  new docxLib.Paragraph({
+                    children: [
+                      new docxLib.TextRun({
+                        text: cell.label,
+                        size: 11,
+                        color: colors.muted,
+                        font: "Arial"
+                      })
+                    ],
+                    spacing: { after: 10 }
+                  }),
+                  new docxLib.Paragraph({
+                    children: [
+                      new docxLib.TextRun({
+                        text: cell.value,
+                        bold: true,
+                        size: 13,
+                        color: colors.black,
+                        font: "Arial"
+                      })
+                    ],
+                    spacing: { after: 0 }
+                  })
+                ]
+              })
+            )
+          ]
+        })
+      ]
+    });
+
+    const ratingsTable = new docxLib.Table({
+      width: { size: 100, type: docxLib.WidthType.PERCENTAGE },
+      borders: {
+        top: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
+        bottom: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
+        left: { style: docxLib.BorderStyle.NONE },
+        right: { style: docxLib.BorderStyle.NONE },
+        insideHorizontal: { color: colors.line, style: docxLib.BorderStyle.SINGLE, size: 4 },
+        insideVertical: { style: docxLib.BorderStyle.NONE }
+      },
+      rows: [
+        new docxLib.TableRow({
+          children: [
+            "Agency",
+            "Short-Term Rating",
+            "Long-Term Rating"
+          ].map((cell) =>
+            new docxLib.TableCell({
+              shading: { fill: colors.soft },
+              margins: { top: 55, bottom: 55, left: 55, right: 55 },
+              borders: {
+                top: { style: docxLib.BorderStyle.NONE },
+                bottom: { style: docxLib.BorderStyle.NONE },
+                left: { style: docxLib.BorderStyle.NONE },
+                right: { style: docxLib.BorderStyle.NONE }
+              },
+              children: [
+                new docxLib.Paragraph({
+                  alignment: docxLib.AlignmentType.CENTER,
+                  children: [
+                    new docxLib.TextRun({
+                      text: cell,
+                      bold: true,
+                      size: 11,
+                      color: colors.black,
+                      font: "Arial"
+                    })
+                  ],
+                  spacing: { after: 0 }
+                })
+              ]
+            })
+          )
+        }),
+        ...((ratings.length ? ratings : [{ agency: "N/A", shortTerm: "N/A", longTerm: "N/A" }]).map((cell) =>
+          new docxLib.TableRow({
+            children: [
+              cell.agency || "N/A",
+              cell.shortTerm || "N/A",
+              cell.longTerm || "N/A"
+            ].map((value) =>
+            new docxLib.TableCell({
+              margins: { top: 55, bottom: 55, left: 55, right: 55 },
+              borders: {
+                top: { style: docxLib.BorderStyle.NONE },
+                bottom: { style: docxLib.BorderStyle.NONE },
+                left: { style: docxLib.BorderStyle.NONE },
+                right: { style: docxLib.BorderStyle.NONE }
+              },
+              children: [
+                new docxLib.Paragraph({
+                  alignment: docxLib.AlignmentType.CENTER,
+                  children: [
+                    new docxLib.TextRun({
+                      text: value,
+                      size: 13,
+                      color: colors.ink,
+                      font: "Arial"
+                    })
+                  ],
+                  spacing: { after: 0 }
+                })
+              ]
+            })
+            )
+          })
+        ))
+      ]
+    });
+
+    return [
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.TextRun({
+            text: heading,
+            bold: true,
+            size: 18,
+            color: colors.red,
+            font: "Arial"
+          })
+        ],
+        spacing: { before: 60, after: 26 }
+      }),
+      ...(showMetadataTable
+        ? [
+          metadataTable,
+          new docxLib.Paragraph({ spacing: { after: 24 } })
+        ]
+        : []),
+      ratingsTable
+    ];
+  }
+
+  async function buildEquityOnlyImageParagraphs(docxLib, colors, files, figureDetails = {}) {
+    return buildImageParagraphs(docxLib, files, colors, 1, figureDetails);
   }
 
   function nomuraDisplayType(noteType) {
@@ -3845,128 +5953,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function buildComplianceDeclarationSection(docxLib, colors, data) {
+  function buildComplianceDeclarationSection(docxLib, colors, data, options = {}) {
     const justification = docxLib.AlignmentType.JUSTIFIED || docxLib.AlignmentType.BOTH || docxLib.AlignmentType.LEFT;
-    const noteReference = [data.title || "Research note", data.noteId ? `Note ID ${data.noteId}` : ""].filter(Boolean).join(" | ");
-    const analystNames = collectComplianceAnalystNames(data);
-    const analystLabel = analystNames.length ? formatHumanList(analystNames) : "the named analyst(s)";
-    const analystVerb = analystNames.length === 1 ? "is" : "are";
-    const analystPronoun = analystNames.length === 1 ? "that individual" : "those individuals";
-    const publicationTimestamp = formatProductionTimestamp(data.generatedAt);
+    const model = buildComplianceNoticeModel(data);
     const legalBodySize = 14;
     const legalHeadingSize = 12;
     const legalSubheadingSize = 11;
 
-    const sections = [
-      {
-        heading: "Status of Publisher",
-        subheading: "Regulatory perimeter and institutional status",
-        paragraphs: [
-          `${noteReference} has been prepared and circulated by Cordoba Research Group solely in connection with its educational, editorial, and training activities. Cordoba Research Group is not authorised, approved, supervised, or otherwise regulated by the Financial Conduct Authority and is not a company registered with the Financial Conduct Authority for the carrying on of investment business, research distribution, brokerage, advisory, arranging, dealing, discretionary management, or any other regulated activity. Cordoba Research Group is not a registered investment firm, broker, investment adviser, wealth manager, regulated research provider, or financial intermediary, and no statement in this note should be read as suggesting otherwise.`,
-          `Cordoba Research Group is an educational platform and research group intended to provide students and developing analysts with opportunities to practise institutional-style writing, analytical discipline, editorial judgment, and structured market commentary. The note has therefore been produced within an educational context and must be understood as such. The fact that the note adopts institutional conventions of structure, tone, layout, valuation language, or market terminology does not alter its educational character and does not convert it into regulated investment research, financial advice, or any communication approved by an authorised person for investment purposes.`
-        ]
-      },
-      {
-        heading: "Nature of the Material",
-        subheading: "Educational and informational publication only",
-        paragraphs: [
-          `This material is provided strictly for educational and informational purposes. It is intended to illustrate how a research note may be framed, structured, edited, and presented, including the handling of market data, valuation concepts, scenario analysis, risk articulation, and analytical narrative. It is not intended to provide personalised or general investment advice; it does not constitute legal, tax, accounting, regulatory, or financial advice; and it must not be treated as a substitute for advice from a properly authorised or qualified professional adviser.`,
-          `Nothing in this note constitutes, or should be construed as constituting, investment advice, a personal recommendation, a regulated investment recommendation, independent research, or investment research prepared in accordance with legal or regulatory requirements designed to promote the independence of investment research. The note is not prepared subject to the rules, controls, separations, monitoring arrangements, research independence safeguards, or dealing restrictions that may apply to research produced by an authorised investment firm or broker-dealer.`
-        ]
-      },
-      {
-        heading: "No Offer, No Solicitation, No Financial Promotion",
-        subheading: "No invitation to transact and no approved marketing communication",
-        paragraphs: [
-          `This note does not constitute an offer, invitation, solicitation, inducement, marketing communication, approval communication, placing document, offering memorandum, prospectus, term sheet, dealing instruction, or call to action in relation to any issuer, security, derivative, fund, commodity, rate product, credit instrument, currency, or investment strategy. It must not be treated as an offer to buy or sell, or as a solicitation of an offer to buy or sell, any financial instrument or to participate in any transaction, placement, underwriting, financing, syndication, hedging arrangement, or capital-markets activity.`,
-          `This note is not intended to be, and must not be relied upon as, a financial promotion for the purposes of the Financial Services and Markets Act 2000 or any corresponding law or regulation in another jurisdiction. It has not been approved by an authorised person for communication to persons who may require that level of approval, and it must not be circulated in a manner that would cause it to be characterised as an externally approved marketing, distribution, or promotional document. Any ratings, target prices, catalysts, valuation outputs, trade illustrations, or scenario outcomes mentioned in the note are included solely within an educational framework and do not amount to a recommendation or inducement.`
-        ]
-      },
-      {
-        heading: "No Advice, Recommendation, Suitability Assessment, or Fiduciary Relationship",
-        subheading: "Recipient responsibility for judgment and decision-making",
-        paragraphs: [
-          `Cordoba Research Group does not provide investment advice and does not make investment recommendations. No statement, chart, scenario, rating, target price, valuation range, market comment, or analytical conclusion in this note should be relied upon as a basis for any investment decision, portfolio construction decision, asset-allocation decision, hedging decision, lending decision, treasury action, suitability assessment, mandate decision, or execution instruction. This material does not take into account the investment objectives, financial situation, regulatory status, legal constraints, tax position, risk tolerance, or portfolio composition of any particular person.`,
-          `No fiduciary duty, advisory duty, suitability duty, execution duty, monitoring duty, or continuing duty is owed by Cordoba Research Group or by the named analyst authors to any reader, recipient, institution, or third party by reason of the preparation, circulation, availability, or use of this note. Recipients remain solely responsible for exercising their own independent judgment. Any person considering any action in relation to a market, issuer, or instrument referred to in the note should obtain advice from properly authorised legal, tax, accounting, regulatory, and investment professionals before acting or refraining from acting.`
-        ]
-      },
-      {
-        heading: "Sources, Verification, Accuracy, Completeness, and Timeliness",
-        subheading: "Public and third-party information; no guarantee of independent verification",
-        paragraphs: [
-          `Information used in the preparation of this note may have been derived from public filings, company announcements, exchange data, price feeds, benchmark providers, market vendors, published commentary, consensus estimates, analyst presentations, official statistics, third-party databases, and other sources believed, but not guaranteed, to be reliable. Such information may be incomplete, abbreviated, reformatted, rounded, selectively presented, translated, delayed, stale, superseded, or otherwise affected by the limitations of the original source material or by the way in which it has been incorporated into the note.`,
-          `Cordoba Research Group does not represent, warrant, or guarantee that any information, statement, chart, table, model output, estimate, assumption, or summary contained in this note is accurate, complete, fair, balanced, timely, reliable, suitable, or fit for any particular purpose, nor that it has been independently verified in every respect. There may be errors, omissions, transcription issues, formatting discrepancies, stale data, or missing contextual information. The absence of any express qualification within the body of the note should not be taken to imply that a statement has been independently verified or remains current at the time of reading.`
-        ]
-      },
-      {
-        heading: "Valuations, Forecasts, Forward-Looking Statements, and Market Variables",
-        subheading: "Assumption-driven analysis and uncertainty of outcomes",
-        paragraphs: [
-          `Any forecast, estimate, projection, expected return, target price, scenario, sensitivity, probability, valuation output, implied upside, downside estimate, or other forward-looking statement in this note is inherently uncertain and dependent upon assumptions, methodologies, judgments, simplifications, model choices, and market inputs that may prove to be incorrect, incomplete, or unstable. Different assumptions, data selections, discount rates, benchmark choices, macro views, or analytical frameworks may produce materially different results. Forward-looking statements are not statements of fact and should not be interpreted as assurances or guarantees of future performance or future market levels.`,
-          `Actual outcomes may differ materially from any forward-looking view expressed in the note as a result of changes in issuer fundamentals, policy, regulation, rates, currencies, liquidity, funding conditions, market structure, competitive dynamics, geopolitical events, management decisions, commodity prices, spreads, implied volatilities, credit conditions, or broader macroeconomic developments. Prices, yields, spreads, valuations, exchange rates, and market-implied metrics may move adversely and rapidly. Past performance is not indicative of future results. Capital is at risk. Investments may fall as well as rise in value, income may vary, and investors may receive back less than originally invested. Instruments involving leverage, options, swaps, futures, or other derivatives may expose participants to amplified gains and losses and may entail losses in excess of initial capital committed or collateral posted.`
-        ]
-      },
-      {
-        heading: "Views, Opinions, Changes Without Notice, and No Duty to Update",
-        subheading: "Current only as of publication and subject to revision",
-        paragraphs: [
-          `Any view, opinion, interpretation, analytical judgment, or conclusion contained in this note is current only as of the publication timestamp stated below or the relevant drafting date reflected in the note and may change at any time without notice. Markets evolve, information changes, company circumstances develop, and analytical judgments may be revised as new information becomes available. Cordoba Research Group and the named analyst authors reserve the right to alter, withdraw, replace, or discontinue any view expressed in the note without any duty to notify readers, recipients, or third parties.`,
-          `Neither Cordoba Research Group nor the named analyst authors undertake any obligation to revise, supplement, correct, amend, republish, or update the note, whether as a result of subsequent events, new information, changes in assumptions, data revisions, market developments, or otherwise. Continued storage, forwarding, availability, download, or possession of the note should not be taken to imply that the content remains current, accurate, or complete after the publication date.`
-        ]
-      },
-      {
-        heading: "Authorship, Editorial Responsibility, and Internal Divergence of Views",
-        subheading: "Named authorship and limits of attribution",
-        paragraphs: [
-          `${analystLabel} ${analystVerb} responsible for the authorship and substantive content of this note, and the views, observations, interpretations, estimates, and analytical judgments expressed in the note are attributable to ${analystPronoun} in an editorial sense. That attribution reflects authorship responsibility only. It does not imply that the named analyst authors are regulated analysts, approved persons, authorised advisers, or persons producing research under a regulated investment-research regime. It also does not create any duty on the part of the named analyst authors toward any reader or recipient.`,
-          `Views expressed in this note may differ from views expressed elsewhere by Cordoba Research Group participants, contributors, reviewers, students, mentors, editors, or associated parties. The existence of named authors should not be read as implying institutional unanimity, house view consistency, supervisory approval of an investment thesis, or endorsement by any external institution. Cordoba Research Group may host, circulate, or archive materials containing different, inconsistent, or subsequently revised viewpoints relating to the same issuer, market, instrument, or macro theme without any obligation to reconcile those views across documents.`
-        ]
-      },
-      {
-        heading: "Distribution, Circulation, Audience, and Use Restrictions",
-        subheading: "Limitations on onward circulation and jurisdictional use",
-        paragraphs: [
-          `This note is not directed at retail investors and is not prepared for general public distribution as regulated investment material. It should not be distributed, transmitted, published, excerpted, syndicated, marketed, or relied upon in any jurisdiction or circumstance in which such use would be unlawful or would require registration, authorisation, approval, licensing, filing, or review not obtained by Cordoba Research Group. Each recipient is responsible for satisfying itself that receipt, possession, use, and onward circulation of the note is lawful in the relevant jurisdiction and context.`,
-          `Recipients must not circulate this note externally as client research, approved sales material, issuer marketing, a due-diligence substitute, or a regulated communication without first obtaining any editorial, legal, compliance, and supervisory approvals that may be necessary. The note is intended for limited educational use and should be treated accordingly. No recipient may imply that the note has been approved, endorsed, or issued by an authorised investment firm, broker, bank, or regulator merely because it adopts the structure or tone of institutional-style research.`
-        ]
-      },
-      {
-        heading: "Intellectual Property and Restrictions on Reproduction",
-        subheading: "No reproduction, republication, redistribution, or commercial exploitation without permission",
-        paragraphs: [
-          `Unless otherwise indicated, the text, structure, compilation, editorial arrangement, and original analytical content of this note are proprietary to Cordoba Research Group and/or the named analyst authors. The note is made available for the limited educational purpose for which it was prepared and may not be copied, reproduced, republished, extracted, adapted, translated, distributed, uploaded, transmitted, licensed, sold, commercialised, or otherwise exploited, in whole or in part, without prior written permission from Cordoba Research Group, except to the extent permitted by applicable law for strictly limited non-commercial internal reference purposes.`,
-          `Any unauthorised onward circulation, republication, or commercial use may mischaracterise the status of the note and may expose downstream recipients to material that has not been prepared for their use or regulatory context. Quotations, extracts, screenshots, or republication of tables, charts, or commentary from the note should not be made in a manner that creates the impression that Cordoba Research Group has issued approved investment advice, regulated research, or promotional material.`
-        ]
-      },
-      {
-        heading: "Limitation of Liability and Exclusion of Responsibility",
-        subheading: "No liability for use, reliance, or consequences of circulation",
-        paragraphs: [
-          `To the fullest extent permitted by law, Cordoba Research Group disclaims all liability, responsibility, duty of care, and accountability arising directly or indirectly from the preparation, use, reference to, circulation of, or reliance upon this note or any part of it. This exclusion applies whether any claim sounds in contract, tort, negligence, misrepresentation, statutory duty, fiduciary duty, restitution, or otherwise, and extends to direct, indirect, incidental, consequential, punitive, special, exemplary, or other forms of loss or damage, including without limitation trading losses, opportunity costs, lost profits, lost revenues, reputational harm, loss of data, business interruption, financing costs, regulatory consequences, or losses associated with adverse market movements.`,
-          `Without limitation, no responsibility is accepted for loss arising from inaccuracies, omissions, stale information, incomplete context, data vendor issues, benchmark errors, model limitations, assumption failures, formatting discrepancies, charting issues, software faults, or subsequent revisions to public information. No representation or warranty, express or implied, is made in respect of merchantability, title, non-infringement, quality, suitability, fitness for a particular purpose, completeness, timeliness, fairness, or reliability. If any part of this notice is held unenforceable, the remaining provisions shall continue to apply to the fullest extent permitted by law.`
-        ]
-      },
-      {
-        heading: "Recipient Responsibility and Professional Advice",
-        subheading: "Independent assessment remains essential",
-        paragraphs: [
-          `Each recipient must rely on its own independent assessment and judgment when evaluating any market, issuer, instrument, or transaction referred to in this note. No person should assume that any security, instrument, structure, issuer, benchmark, valuation conclusion, or trade concept mentioned in the note is suitable for their objectives, risk profile, capital base, liquidity needs, constitutional restrictions, mandate terms, fiduciary duties, accounting treatment, tax position, or regulatory obligations. The responsibility for testing assumptions, verifying facts, understanding legal documentation, and assessing suitability remains entirely with the recipient and its advisers.`,
-          `Where relevant, recipients should obtain advice from properly authorised legal, tax, accounting, regulatory, and investment professionals before taking or refraining from taking any action in connection with any matter discussed in the note. Any use of the note within an institution, classroom, committee, or investment process should be accompanied by the recipient’s own diligence, challenge, and review procedures. The educational availability of this material does not reduce the need for professional advice or independent verification.`
-        ]
-      },
-      {
-        heading: "Record of Publication",
-        subheading: "Relationship of this notice to the note as a whole",
-        paragraphs: [
-          `Published ${publicationTimestamp}. This Regulatory Disclosure and Important Notice forms an integral part of the publication record for ${noteReference} and must be read together with the substantive analysis, charts, tables, appendices, and supporting material that precede it. By accessing, retaining, forwarding, or using this note, the recipient acknowledges the educational, non-advisory, non-promotional, and non-regulated basis on which it has been prepared and circulated.`,
-          `If there is any inconsistency between the style, form, structure, or presentation of the note and the regulatory status described in this notice, this notice shall prevail. The institutional appearance of the publication is a matter of educational format and editorial discipline only and should not be interpreted as conferring any regulated status, authorisation, endorsement, or legal effect beyond that expressly stated in this notice.`
-        ]
-      }
-    ];
-
     return [
       new docxLib.Paragraph({
-        pageBreakBefore: true,
+        pageBreakBefore: options.pageBreakBefore !== false,
         border: {
           top: {
             color: colors.line,
@@ -3989,7 +5985,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alignment: justification,
         children: [
           new docxLib.TextRun({
-            text: `This notice sets out the regulatory status, limitations, authorship attribution, distribution restrictions, and use conditions applicable to ${noteReference}. It should be read in full and together with the substantive body of the note.`,
+            text: model.introduction,
             size: legalBodySize,
             color: colors.muted,
             font: "Arial"
@@ -3997,7 +5993,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ],
         spacing: { after: 108, line: 228 }
       }),
-      ...sections.flatMap((section) => ([
+      ...model.sections.flatMap((section) => ([
         new docxLib.Paragraph({
           children: [
             new docxLib.TextRun({
@@ -4082,6 +6078,25 @@ document.addEventListener("DOMContentLoaded", () => {
     return digits ? `+${digits}` : "N/A";
   }
 
+  function loadBrandLogoImage() {
+    if (state.brandLogoImagePromise) return state.brandLogoImagePromise;
+
+    state.brandLogoImagePromise = new Promise((resolve) => {
+      const existingLogo = document.querySelector(".brand-logo");
+      if (existingLogo instanceof HTMLImageElement && existingLogo.complete && existingLogo.naturalWidth > 0) {
+        resolve(existingLogo);
+        return;
+      }
+
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => resolve(null);
+      image.src = "assets/cordoba-logo";
+    });
+
+    return state.brandLogoImagePromise;
+  }
+
   async function buildNomuraBannerImageBytes(meta) {
     const canvas = document.createElement("canvas");
     const width = 1600;
@@ -4089,6 +6104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ctx = canvas.getContext("2d");
     canvas.width = width;
     canvas.height = height;
+    const logoImage = await loadBrandLogoImage();
 
     const publicationDate = meta.publicationDate || new Date();
     const deskLine = meta.deskLine || defaultDeskLine(meta.noteType) || "Research - Global";
@@ -4096,41 +6112,50 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, width, height);
 
+    const headerGradient = ctx.createLinearGradient(0, 0, width, 0);
+    headerGradient.addColorStop(0, "#fbf7ef");
+    headerGradient.addColorStop(0.46, "#ffffff");
+    headerGradient.addColorStop(1, "#f7efdc");
+    ctx.fillStyle = headerGradient;
+    ctx.fillRect(0, 0, width, 140);
+
+    drawBannerShape(ctx, "rgba(132,95,15,0.14)", 1118, 140, 172, 0, 182, 140);
+    drawBannerShape(ctx, "rgba(132,95,15,0.20)", 1220, 140, 214, 0, 246, 140);
+    drawBannerShape(ctx, "rgba(93,67,11,0.14)", 1330, 140, 220, 0, 258, 140);
+    drawBannerShape(ctx, "rgba(203,166,91,0.28)", 1448, 140, 208, 0, 246, 140);
+
     ctx.fillStyle = "#845F0F";
-    ctx.fillRect(0, 0, width, 126);
+    ctx.fillRect(0, 216, width, 24);
 
-    drawBannerShape(ctx, "#ffffff", 1145, 126, 104, 0, 180, 126);
-    drawBannerShape(ctx, "rgba(255,255,255,0.16)", 1238, 126, 168, 0, 255, 126);
-    drawBannerShape(ctx, "rgba(84,60,10,0.22)", 1332, 126, 188, 0, 265, 126);
-    drawBannerShape(ctx, "rgba(84,60,10,0.14)", 1434, 126, 188, 0, 265, 126);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "700 42px Arial";
     ctx.textBaseline = "alphabetic";
-    ctx.fillText("CORDOBA RESEARCH GROUP", 54, 74);
+    if (logoImage) {
+      const maxWidth = 560;
+      const maxHeight = 92;
+      const scale = Math.min(maxWidth / logoImage.naturalWidth, maxHeight / logoImage.naturalHeight);
+      const renderWidth = Math.round(logoImage.naturalWidth * scale);
+      const renderHeight = Math.round(logoImage.naturalHeight * scale);
+      ctx.drawImage(logoImage, 44, 24, renderWidth, renderHeight);
+    } else {
+      ctx.fillStyle = "#111111";
+      ctx.font = "700 40px Arial";
+      ctx.fillText("CORDOBA RESEARCH GROUP", 50, 82);
+    }
 
     ctx.fillStyle = "#111111";
-    ctx.font = "700 38px Arial";
-    ctx.fillText(nomuraDisplayType(meta.noteType), 54, 178);
+    ctx.font = "700 40px Arial";
+    ctx.fillText(nomuraDisplayType(meta.noteType), 54, 188);
 
     ctx.fillStyle = "#845F0F";
     ctx.textAlign = "right";
     ctx.font = "600 24px Arial";
-    ctx.fillText("Global Markets Research", width - 46, 156);
-    ctx.font = "700 30px Arial";
-    ctx.fillText(formatDocDate(publicationDate), width - 46, 193);
-
-    const stripGradient = ctx.createLinearGradient(0, 0, width, 0);
-    stripGradient.addColorStop(0, "#6F500D");
-    stripGradient.addColorStop(0.58, "#9C7420");
-    stripGradient.addColorStop(1, "#CBA65B");
-    ctx.fillStyle = stripGradient;
-    ctx.fillRect(0, 214, width, 22);
+    ctx.fillText("Global Markets Research", width - 54, 164);
+    ctx.font = "700 32px Arial";
+    ctx.fillText(formatDocDate(publicationDate), width - 54, 200);
 
     ctx.textAlign = "left";
     ctx.fillStyle = "#ffffff";
     ctx.font = "600 14px Arial";
-    ctx.fillText(deskLine, 56, 229);
+    ctx.fillText(deskLine, 56, 232);
 
     return canvasToPngBytes(canvas);
   }
@@ -4148,9 +6173,12 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.restore();
   }
 
-  function buildNomuraTitlePanel(docxLib, colors, data, analystNames, publicationDate) {
+  function buildNomuraTitlePanel(docxLib, colors, data, analystContacts, publicationDate) {
     const analystDesk = data.deskLine || getDeskLine();
-    const analystNameLines = analystNames.length ? analystNames : ["Research Analyst"];
+    const showCoverageMeta = data.noteType === "Macro Research" || (isMacroFiNoteType(data.noteType) && (data.coverageCountry || data.issuerId));
+    const coverageMeta = showCoverageMeta
+      ? `Coverage Country: ${getCoverageCountryLabel(data.coverageCountry)} | Issuer Number: ${data.issuerId || "N/A"}`
+      : "";
 
     return new docxLib.Table({
       width: { size: 100, type: docxLib.WidthType.PERCENTAGE },
@@ -4208,8 +6236,21 @@ document.addEventListener("DOMContentLoaded", () => {
                       font: "Arial"
                     })
                   ],
-                  spacing: { after: 20 }
-                })
+                  spacing: { after: coverageMeta ? 16 : 20 }
+                }),
+                ...(coverageMeta
+                  ? [new docxLib.Paragraph({
+                    children: [
+                      new docxLib.TextRun({
+                        text: coverageMeta,
+                        size: 12,
+                        color: colors.red,
+                        font: "Arial"
+                      })
+                    ],
+                    spacing: { after: 12 }
+                  })]
+                  : [])
               ]
             }),
             new docxLib.TableCell({
@@ -4222,83 +6263,7 @@ document.addEventListener("DOMContentLoaded", () => {
               },
               margins: { top: 0, bottom: 0, left: 0, right: 0 },
               children: [
-                new docxLib.Paragraph({
-                  children: [
-                    new docxLib.TextRun({
-                      text: "Research Analysts",
-                      bold: true,
-                      size: 15,
-                      color: colors.black,
-                      font: "Arial"
-                    })
-                  ],
-                  spacing: { after: 45 }
-                }),
-                new docxLib.Paragraph({
-                  border: {
-                    bottom: {
-                      color: colors.red,
-                      style: docxLib.BorderStyle.SINGLE,
-                      size: 6
-                    }
-                  },
-                  children: [
-                    new docxLib.TextRun({
-                      text: analystDesk,
-                      color: colors.red,
-                      underline: {},
-                      size: 15,
-                      font: "Arial"
-                    })
-                  ],
-                  spacing: { after: 60 }
-                }),
-                buildAnalystNameTable(docxLib, colors, analystNameLines)
-              ]
-            })
-          ]
-        })
-      ]
-    });
-  }
-
-  function buildAnalystNameTable(docxLib, colors, lines) {
-    return new docxLib.Table({
-      width: { size: 100, type: docxLib.WidthType.PERCENTAGE },
-      borders: {
-        top: { style: docxLib.BorderStyle.NONE },
-        bottom: { style: docxLib.BorderStyle.NONE },
-        left: { style: docxLib.BorderStyle.NONE },
-        right: { style: docxLib.BorderStyle.NONE },
-        insideHorizontal: { style: docxLib.BorderStyle.NONE },
-        insideVertical: { style: docxLib.BorderStyle.NONE }
-      },
-      rows: [
-        new docxLib.TableRow({
-          children: [
-            new docxLib.TableCell({
-              shading: { fill: colors.black },
-              borders: {
-                top: { style: docxLib.BorderStyle.NONE },
-                bottom: { style: docxLib.BorderStyle.NONE },
-                left: { style: docxLib.BorderStyle.NONE },
-                right: { style: docxLib.BorderStyle.NONE }
-              },
-              margins: { top: 80, bottom: 80, left: 110, right: 110 },
-              children: [
-                ...lines.map((line) =>
-                  new docxLib.Paragraph({
-                    children: [
-                      new docxLib.TextRun({
-                        text: line,
-                        color: colors.white,
-                        size: 14,
-                        font: "Arial"
-                      })
-                    ],
-                    spacing: { after: 10 }
-                  })
-                )
+                ...buildAnalystContactPanel(docxLib, colors, analystDesk, analystContacts)
               ]
             })
           ]
@@ -4322,7 +6287,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function buildKeyTakeawaysBox(docxLib, colors, items) {
+  function buildKeyTakeawaysBox(docxLib, colors, items, heading = "Key Takeaways") {
     const cleanItems = items.length ? items : ["No key takeaways supplied."];
 
     return new docxLib.Table({
@@ -4351,7 +6316,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 new docxLib.Paragraph({
                   children: [
                     new docxLib.TextRun({
-                      text: "Key Takeaways",
+                      text: heading,
                       bold: true,
                       color: colors.red,
                       size: 18,
@@ -4509,7 +6474,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const startIndex = output.length ? 2 : 1;
-    const imageParagraphs = await buildImageParagraphs(docxLib, data.imageFiles, colors, startIndex);
+    const imageParagraphs = await buildImageParagraphs(docxLib, data.imageFiles, colors, startIndex, data.figureDetails || {});
     output.push(...imageParagraphs);
 
     return output;
@@ -4564,14 +6529,115 @@ document.addEventListener("DOMContentLoaded", () => {
     return paragraphs;
   }
 
-  async function buildImageParagraphs(docxLib, files, colors, startIndex = 1) {
+  function buildCrgRatingMethodologySection(docxLib, colors) {
+    const introParagraphs = [
+      "CRG equity research ratings are relative opinion classifications intended to frame expected share-price performance over a 12-month horizon against the relevant sector opportunity set and the valuation case presented in the note. Target prices and valuation ranges reflect analytical judgment based on assumptions, scenario weighting, and market inputs that may change without notice.",
+      "The definitions below are explanatory only. They are not statements of fact, do not constitute regulated investment advice, and should be read together with the valuation discussion, catalysts, and risk factors set out in the note."
+    ];
+    const justification = docxLib.AlignmentType.JUSTIFIED || docxLib.AlignmentType.BOTH || docxLib.AlignmentType.LEFT;
+
+    return [
+      new docxLib.Paragraph({
+        pageBreakBefore: true,
+        border: {
+          top: {
+            color: colors.line,
+            style: docxLib.BorderStyle.SINGLE,
+            size: 4
+          }
+        },
+        children: [
+          new docxLib.TextRun({
+            text: "CRG Equity Research Rating Definitions",
+            bold: true,
+            font: "Arial",
+            size: 18,
+            color: colors.black
+          })
+        ],
+        spacing: { before: 82, after: 30 }
+      }),
+      ...introParagraphs.map((paragraph, index) =>
+        new docxLib.Paragraph({
+          children: [
+            new docxLib.TextRun({
+              text: paragraph,
+              font: "Arial",
+              size: 14,
+              color: colors.muted
+            })
+          ],
+          spacing: { after: index === introParagraphs.length - 1 ? 46 : 34, line: 228 },
+          alignment: justification
+        })
+      ),
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.TextRun({
+            text: "STOCKS",
+            bold: true,
+            font: "Arial",
+            size: 12,
+            color: colors.black
+          })
+        ],
+        spacing: { before: 18, after: 26 }
+      }),
+      ...getCrgRatingDefinitionRows().map((row) =>
+        new docxLib.Paragraph({
+          children: [
+            new docxLib.TextRun({
+              text: `${row[0]}: `,
+              bold: true,
+              font: "Arial",
+              size: 14,
+              color: colors.black
+            }),
+            new docxLib.TextRun({
+              text: row[1],
+              font: "Arial",
+              size: 14,
+              color: colors.muted
+            })
+          ],
+          spacing: { after: 24, line: 228 },
+          alignment: justification
+        })
+      ),
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.TextRun({
+            text: "Benchmark interpretation: ",
+            bold: true,
+            font: "Arial",
+            size: 14,
+            color: colors.black
+          }),
+          new docxLib.TextRun({
+            text: "Unless stated otherwise in the note, rating language should be read in the context of 12-month total return potential relative to sector alternatives, the market-implied base case, and the benchmark context identified in the valuation discussion.",
+            font: "Arial",
+            size: 14,
+            color: colors.muted
+          })
+        ],
+        spacing: { before: 18, after: 60, line: 228 },
+        alignment: justification
+      })
+    ];
+  }
+
+  async function buildImageParagraphs(docxLib, files, colors, startIndex = 1, figureDetails = {}) {
     const output = [];
 
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index];
       const buffer = await file.arrayBuffer();
       const size = await getImageFit(file, 560, 320);
-      const caption = file.name.replace(/\.[^.]+$/, "");
+      const figureKey = figureFileKey(file);
+      const detail = figureDetails[figureKey] || {};
+      const labelType = detail.labelType || defaultFigureLabelType(file);
+      const labelNumber = sanitizeFigureNumber(detail.labelNumber, startIndex + index);
+      const caption = detail.caption || defaultFigureCaption(file);
 
       output.push(
         new docxLib.Paragraph({
@@ -4588,7 +6654,7 @@ document.addEventListener("DOMContentLoaded", () => {
           alignment: docxLib.AlignmentType.CENTER,
           children: [
             new docxLib.TextRun({
-              text: `Figure ${startIndex + index}. ${caption}`,
+              text: `${labelType} ${labelNumber}. ${caption}`,
               italics: true,
               color: colors.muted,
               size: 15,
@@ -4605,12 +6671,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatProductionTimestamp(date) {
     const d = date instanceof Date ? date : new Date(date);
-    const year = d.getUTCFullYear();
-    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-    const day = String(d.getUTCDate()).padStart(2, "0");
-    const hours = String(d.getUTCHours()).padStart(2, "0");
-    const minutes = String(d.getUTCMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
+    return formatPublishedTimestampForDocument(d);
+  }
+
+  function formatLocalTimestamp(date) {
+    const d = date instanceof Date ? date : new Date(date);
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZoneName: "short"
+    }).formatToParts(d);
+
+    const lookup = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+    const zone = lookup.timeZoneName || Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    return `${lookup.day} ${lookup.month} ${lookup.year}, ${lookup.hour}:${lookup.minute} ${zone}`.replace(/\s+/g, " ").trim();
+  }
+
+  function formatPublishedTimestampForDocument(date) {
+    const d = date instanceof Date ? date : new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const seconds = String(d.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   }
 
   function getImageFit(file, maxWidth, maxHeight) {
