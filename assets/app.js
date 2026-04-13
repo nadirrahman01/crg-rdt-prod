@@ -118,6 +118,70 @@ document.addEventListener("DOMContentLoaded", () => {
     ID: "643210"
   };
 
+  const SOVEREIGN_METADATA_MAP = {
+    US: { region: "North America", currency: "USD", classification: "Developed Market", benchmark: "US 10Y Treasury" },
+    GB: { region: "Europe", currency: "GBP", classification: "Developed Market", benchmark: "UK 10Y Gilt" },
+    DE: { region: "Europe", currency: "EUR", classification: "Developed Market", benchmark: "German 10Y Bund" },
+    FR: { region: "Europe", currency: "EUR", classification: "Developed Market", benchmark: "French 10Y OAT" },
+    IT: { region: "Europe", currency: "EUR", classification: "Developed Market", benchmark: "Italian 10Y BTP" },
+    ES: { region: "Europe", currency: "EUR", classification: "Developed Market", benchmark: "Spanish 10Y Bonos" },
+    JP: { region: "Asia Pacific", currency: "JPY", classification: "Developed Market", benchmark: "Japan 10Y JGB" },
+    CN: { region: "Asia Pacific", currency: "CNY", classification: "Emerging Market", benchmark: "China 10Y government bond" },
+    IN: { region: "Asia Pacific", currency: "INR", classification: "Emerging Market", benchmark: "India 10Y government bond" },
+    SA: { region: "Middle East", currency: "SAR", classification: "Emerging Market", benchmark: "Saudi Arabia 10Y government bond" },
+    AE: { region: "Middle East", currency: "AED", classification: "Emerging Market", benchmark: "UAE 10Y sovereign / federal benchmark" },
+    BR: { region: "Latin America", currency: "BRL", classification: "Emerging Market", benchmark: "Brazil 10Y government bond" },
+    ZA: { region: "Africa", currency: "ZAR", classification: "Emerging Market", benchmark: "South Africa 10Y government bond" },
+    TR: { region: "EMEA", currency: "TRY", classification: "Emerging Market", benchmark: "Turkey 10Y government bond" },
+    MX: { region: "Latin America", currency: "MXN", classification: "Emerging Market", benchmark: "Mexico 10Y government bond" },
+    ID: { region: "Asia Pacific", currency: "IDR", classification: "Emerging Market", benchmark: "Indonesia 10Y government bond" }
+  };
+
+  const DEVELOPED_MARKET_COUNTRY_CODES = new Set([
+    "AD","AU","AT","BE","CA","CY","CZ","DK","EE","FI","FR","DE","GR","HK","IS","IE","IT","JP","KR","LV","LI","LT","LU","MT","MC","NL","NZ","NO","PT","SG","SK","SI","ES","SE","CH","GB","US","SM"
+  ]);
+
+  const FRONTIER_MARKET_COUNTRY_CODES = new Set([
+    "BD","BA","BW","BG","BH","CI","HR","JO","KZ","KE","KW","LB","MU","MA","NG","OM","PK","PS","RO","RS","SI","LK","TN","UA","VN"
+  ]);
+
+  const REGION_COUNTRY_GROUPS = {
+    "North America": new Set(["BM","CA","GL","PM","US"]),
+    "Latin America": new Set(["AG","AI","AR","AW","BB","BO","BQ","BR","BS","BZ","CL","CO","CR","CU","CW","DM","DO","EC","FK","GD","GF","GP","GT","GY","HN","HT","JM","KN","KY","LC","MF","MQ","MS","MX","NI","PA","PE","PR","PY","SR","SV","SX","TC","TT","UY","VC","VE","VG","VI"]),
+    "Europe": new Set(["AD","AL","AT","AX","BA","BE","BG","BY","CH","CY","CZ","DE","DK","EE","ES","FI","FO","FR","GB","GG","GI","GR","HR","HU","IE","IM","IS","IT","JE","LI","LT","LU","LV","MC","MD","ME","MK","MT","NL","NO","PL","PT","RO","RS","RU","SE","SI","SJ","SK","SM","UA","VA"]),
+    "Middle East": new Set(["AE","BH","IL","IQ","IR","JO","KW","LB","OM","PS","QA","SA","SY","TR","YE"]),
+    "Africa": new Set(["AO","BF","BI","BJ","BW","CD","CF","CG","CI","CM","CV","DJ","DZ","EG","EH","ER","ET","GA","GH","GM","GN","GQ","GW","KE","KM","LR","LS","LY","MA","MG","ML","MR","MU","MW","MZ","NA","NE","NG","RE","RW","SC","SD","SH","SL","SN","SO","SS","ST","SZ","TD","TG","TN","TZ","UG","YT","ZA","ZM","ZW"]),
+    "Asia Pacific": new Set(["AF","AS","AU","BD","BN","BT","CC","CN","CX","FJ","FM","GU","HK","ID","IN","IO","JP","KH","KI","KP","KR","LA","LK","MH","MM","MN","MO","MP","MV","MY","NC","NF","NP","NR","NU","NZ","PF","PG","PH","PK","PN","PW","SB","SG","TH","TJ","TK","TL","TM","TO","TV","TW","UZ","VU","WF","WS","VN"])
+  };
+
+  const FINANCIAL_ROW_FORMATS = [
+    { value: "auto", label: "Auto" },
+    { value: "currency", label: "Currency" },
+    { value: "percentage", label: "Percentage" },
+    { value: "bps", label: "Bps" },
+    { value: "turns", label: "Turns" },
+    { value: "number", label: "Plain number" },
+    { value: "text", label: "Text" }
+  ];
+
+  const FIGURE_LABEL_TYPES = ["Figure", "Chart", "Exhibit", "Table"];
+  const FIGURE_DISPLAY_MODES = [
+    { value: "full", label: "Full-width" },
+    { value: "inline", label: "Inline" }
+  ];
+  const FIGURE_SIZE_OPTIONS = [
+    { value: "small", label: "Small" },
+    { value: "medium", label: "Medium" },
+    { value: "large", label: "Large" }
+  ];
+  const FIGURE_CROP_MODES = [
+    { value: "fill", label: "Fill" },
+    { value: "fit", label: "Fit" },
+    { value: "contain", label: "Contain" },
+    { value: "fixed", label: "Fixed ratio" }
+  ];
+  const MIN_FIGURE_QUALITY = { width: 900, height: 520 };
+
   const FIELD_LABELS = {
     noteType: "Note type",
     distribution: "Distribution",
@@ -220,9 +284,14 @@ document.addEventListener("DOMContentLoaded", () => {
     industryOptions: document.getElementById("industryOptions"),
     issuerId: document.getElementById("issuerId"),
     macroFiHeading: document.getElementById("macroFiHeading"),
+    sovereignRegion: document.getElementById("sovereignRegion"),
+    sovereignCurrency: document.getElementById("sovereignCurrency"),
+    sovereignClassification: document.getElementById("sovereignClassification"),
+    sovereignBenchmark: document.getElementById("sovereignBenchmark"),
     agencyRating: document.getElementById("agencyRating"),
     shortTermRating: document.getElementById("shortTermRating"),
     longTermRating: document.getElementById("longTermRating"),
+    ratingsProfileNotes: document.getElementById("ratingsProfileNotes"),
     ratingsProfileRows: document.getElementById("ratingsProfileRows"),
     addRatingProfileRowBtn: document.getElementById("addRatingProfileRowBtn"),
     ratingProfileRowTemplate: document.getElementById("ratingProfileRowTemplate"),
@@ -259,12 +328,14 @@ document.addEventListener("DOMContentLoaded", () => {
     valuationSummary: document.getElementById("valuationSummary"),
     financialTableTitle: document.getElementById("financialTableTitle"),
     financialSourceNote: document.getElementById("financialSourceNote"),
+    financialTableNotes: document.getElementById("financialTableNotes"),
     financialTableEditor: document.getElementById("financialTableEditor"),
     financialTableHead: document.getElementById("financialTableHead"),
     financialTableBody: document.getElementById("financialTableBody"),
     financialTableInput: document.getElementById("financialTableInput"),
     financialDownloadTemplateBtn: document.getElementById("financialDownloadTemplateBtn"),
     financialUploadTriggerBtn: document.getElementById("financialUploadTriggerBtn"),
+    financialToggleHeaderLockBtn: document.getElementById("financialToggleHeaderLockBtn"),
     financialTemplateUpload: document.getElementById("financialTemplateUpload"),
     financialAddColumnBtn: document.getElementById("financialAddColumnBtn"),
     financialAddRowBtn: document.getElementById("financialAddRowBtn"),
@@ -313,8 +384,19 @@ document.addEventListener("DOMContentLoaded", () => {
     previewModalBody: document.getElementById("previewModalBody"),
     closePreviewBtn: document.getElementById("closePreviewBtn"),
     previewGenerateBtn: document.getElementById("previewGenerateBtn"),
+    summariseBtn: document.getElementById("summariseBtn"),
+    summaryModal: document.getElementById("summaryModal"),
+    summaryModalBackdrop: document.getElementById("summaryModalBackdrop"),
+    closeSummaryBtn: document.getElementById("closeSummaryBtn"),
+    summaryNoteTitle: document.getElementById("summaryNoteTitle"),
+    summaryModalSubtitle: document.getElementById("summaryModalSubtitle"),
+    summaryToolbar: document.getElementById("summaryToolbar"),
+    summaryEditor: document.getElementById("summaryEditor"),
+    copySummaryBtn: document.getElementById("copySummaryBtn"),
+    publishSummaryBtn: document.getElementById("publishSummaryBtn"),
     generateDocBtn: document.getElementById("generateDocBtn"),
     emailToCrgBtn: document.getElementById("emailToCrgBtn"),
+    resetDraftTopBtn: document.getElementById("resetDraftTopBtn"),
     resetFormBtn: document.getElementById("resetFormBtn"),
     message: document.getElementById("message"),
     navNote: document.getElementById("nav-note"),
@@ -341,7 +423,10 @@ document.addEventListener("DOMContentLoaded", () => {
       benchmarkSymbol: "",
       range: ""
     },
+    lastResolvedEquitySymbol: "",
+    equityLookupRequestId: 0,
     financialTable: null,
+    financialHeaderLocked: false,
     railCollapsed: false,
     saveTimer: null,
     lastSavedAt: null,
@@ -350,7 +435,11 @@ document.addEventListener("DOMContentLoaded", () => {
     figurePlacements: {},
     figureFiles: [],
     figureDetails: {},
-    previewObjectUrls: []
+    figureQuality: {},
+    figurePreviewUrls: {},
+    previewObjectUrls: [],
+    richEditors: new Map(),
+    summaryHtml: ""
   };
 
   const draftFieldIds = [
@@ -364,9 +453,14 @@ document.addEventListener("DOMContentLoaded", () => {
     "coverageCountry",
     "issuerId",
     "macroFiHeading",
+    "sovereignRegion",
+    "sovereignCurrency",
+    "sovereignClassification",
+    "sovereignBenchmark",
     "agencyRating",
     "shortTermRating",
     "longTermRating",
+    "ratingsProfileNotes",
     "authorLastName",
     "authorFirstName",
     "authorPhoneCountry",
@@ -388,6 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "valuationSummary",
     "financialTableTitle",
     "financialSourceNote",
+    "financialTableNotes",
     "financialTableInput",
     "headingKeyTakeaways",
     "headingAnalysis",
@@ -404,6 +499,16 @@ document.addEventListener("DOMContentLoaded", () => {
     "chartRange"
   ];
 
+  const RICH_TEXT_FIELD_IDS = [
+    "businessDescription",
+    "valuationSummary",
+    "analysis",
+    "content",
+    "fiveYearRationale",
+    "esgSummary",
+    "cordobaView"
+  ];
+
   init();
 
   function init() {
@@ -416,10 +521,14 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeBodySectionEditor();
     wireFormEvents();
     restoreDraft();
+    initializeRichTextEditors();
+    initializeSummaryEditor();
     ensurePublicationDate();
     initializeFinancialTableEditor();
+    applyFinancialHeaderLockState();
     ensureDeskLineDefault();
     syncIssuerId();
+    applySovereignMetadataFromCountry(dom.coverageCountry?.value || "");
     updateCoverageCountryDisplayFromCode();
     syncPrimaryPhone();
     toggleNoteTypeSections();
@@ -550,8 +659,44 @@ document.addEventListener("DOMContentLoaded", () => {
       dom.equityCompanyName.dataset.autofill = "false";
     });
 
+    dom.equitySecurityDisplay?.addEventListener("input", () => {
+      dom.equitySecurityDisplay.dataset.autofill = "false";
+    });
+
+    dom.businessDescription?.addEventListener("input", syncFigurePlacementControls);
+    dom.valuationSummary?.addEventListener("input", syncFigurePlacementControls);
+
     dom.priceCurrency.addEventListener("input", () => {
       dom.priceCurrency.dataset.autofill = "false";
+    });
+
+    dom.marketCapUsd?.addEventListener("input", () => {
+      dom.marketCapUsd.dataset.autofill = "false";
+    });
+
+    dom.benchmarkName?.addEventListener("input", () => {
+      dom.benchmarkName.dataset.autofill = "false";
+    });
+
+    dom.benchmarkTicker?.addEventListener("input", () => {
+      dom.benchmarkTicker.dataset.autofill = "false";
+    });
+
+    dom.ticker?.addEventListener("input", () => {
+      const nextSymbol = marketDataSymbolFromTicker(dom.ticker.value);
+      const previousSymbol = getLastResolvedEquitySymbol();
+      clearEquityAutoFilledMetadata({ clearBenchmark: true, force: Boolean(previousSymbol && nextSymbol !== previousSymbol) });
+    });
+
+    [
+      dom.sovereignRegion,
+      dom.sovereignCurrency,
+      dom.sovereignClassification,
+      dom.sovereignBenchmark
+    ].forEach((input) => {
+      input?.addEventListener("input", () => {
+        input.dataset.autofill = "false";
+      });
     });
 
     dom.addCustomSectionBtn?.addEventListener("click", () => {
@@ -600,11 +745,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!ensureXlsxAvailable("import the completed Excel template")) return;
       dom.financialTemplateUpload.click();
     });
+    dom.financialToggleHeaderLockBtn?.addEventListener("click", toggleFinancialHeaderLock);
     dom.financialTemplateUpload.addEventListener("change", handleFinancialTemplateUpload);
 
     dom.financialTableEditor.addEventListener("input", handleFinancialGridInput);
+    dom.financialTableEditor.addEventListener("change", handleFinancialGridInput);
     dom.financialTableEditor.addEventListener("focusout", handleFinancialGridFocusOut);
     dom.financialTableEditor.addEventListener("click", handleFinancialGridClick);
+    dom.financialTableEditor.addEventListener("paste", handleFinancialGridPaste);
     dom.toggleRailBtn.addEventListener("click", toggleRail);
 
     dom.addCoAuthor.addEventListener("click", () => {
@@ -632,10 +780,17 @@ document.addEventListener("DOMContentLoaded", () => {
       closePreviewModal();
       form.requestSubmit(dom.generateDocBtn);
     });
+    dom.summariseBtn?.addEventListener("click", openSummaryModal);
+    dom.closeSummaryBtn?.addEventListener("click", closeSummaryModal);
+    dom.summaryModalBackdrop?.addEventListener("click", closeSummaryModal);
+    dom.copySummaryBtn?.addEventListener("click", copySummaryToClipboard);
+    dom.publishSummaryBtn?.addEventListener("click", publishSummaryToResearchCommentary);
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !dom.previewModal?.hidden) closePreviewModal();
+      if (event.key === "Escape" && !dom.summaryModal?.hidden) closeSummaryModal();
     });
     dom.emailToCrgBtn.addEventListener("click", draftEmailToResearch);
+    dom.resetDraftTopBtn?.addEventListener("click", resetDraft);
     dom.resetFormBtn.addEventListener("click", resetDraft);
 
     form.addEventListener("input", (event) => {
@@ -673,6 +828,390 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toggleRail() {
     applyRailState(!state.railCollapsed);
+  }
+
+  function normalizeParagraphStyle(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized === "subheading") return "subheading";
+    if (normalized === "quote") return "quote";
+    if (normalized === "source-note" || normalized === "sourcenote") return "source-note";
+    return "body";
+  }
+
+  function normalizeParagraphAlignment(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    if (normalized === "center" || normalized === "centre") return "center";
+    if (normalized === "right") return "right";
+    if (normalized === "justify" || normalized === "justified") return "justify";
+    return "left";
+  }
+
+  function getRichTextSelectionNode(surface) {
+    const selection = window.getSelection?.();
+    if (!selection || !selection.rangeCount) return null;
+    let node = selection.anchorNode || selection.focusNode;
+    if (!node) return null;
+    if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+    if (!(node instanceof Element) || !surface.contains(node)) return null;
+    return node;
+  }
+
+  function getRichTextBlockElement(surface) {
+    const node = getRichTextSelectionNode(surface);
+    if (!node) return null;
+    const block = node.closest("p, ul, ol");
+    return block && surface.contains(block) ? block : null;
+  }
+
+  function getBlockStyleFromElement(element) {
+    if (!(element instanceof Element)) return "body";
+    return normalizeParagraphStyle(element.getAttribute("data-paragraph-style"));
+  }
+
+  function getBlockAlignmentFromElement(element) {
+    if (!(element instanceof Element)) return "left";
+    return normalizeParagraphAlignment(
+      element.getAttribute("data-align") || element.style?.textAlign || element.getAttribute("align")
+    );
+  }
+
+  function syncRichBlockPresentation(element) {
+    if (!(element instanceof Element)) return;
+    const style = getBlockStyleFromElement(element);
+    const align = getBlockAlignmentFromElement(element);
+
+    element.classList.toggle("rich-text-subheading", style === "subheading");
+    element.classList.toggle("rich-text-quote", style === "quote");
+    element.classList.toggle("rich-text-source-note", style === "source-note");
+    element.classList.toggle("rt-align-center", align === "center");
+    element.classList.toggle("rt-align-right", align === "right");
+    element.classList.toggle("rt-align-justify", align === "justify");
+  }
+
+  function ensureRichTextParagraph(surface) {
+    if (!surface) return null;
+    let block = surface.querySelector("p, ul, ol");
+    if (block) return block;
+
+    surface.innerHTML = "<p><br></p>";
+    block = surface.querySelector("p");
+    return block;
+  }
+
+  function placeCaretAtEnd(element) {
+    if (!(element instanceof Element)) return;
+    const selection = window.getSelection?.();
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }
+
+  function syncRichToolbarState(shell, surface) {
+    if (!shell || !surface) return;
+    const block = getRichTextBlockElement(surface) || surface.querySelector("p, ul, ol");
+    const alignButtons = shell.querySelectorAll("[data-rich-align]");
+    const currentAlign = getBlockAlignmentFromElement(block);
+
+    alignButtons.forEach((button) => {
+      button.classList.toggle("is-active", button.getAttribute("data-rich-align") === currentAlign);
+    });
+  }
+
+  function applyParagraphStyle(surface, style) {
+    if (!surface) return;
+    const normalizedStyle = normalizeParagraphStyle(style);
+    const block = getRichTextBlockElement(surface) || ensureRichTextParagraph(surface);
+    if (!(block instanceof Element)) return;
+    if (!block.matches("p")) return;
+
+    if (normalizedStyle === "body") {
+      block.removeAttribute("data-paragraph-style");
+    } else {
+      block.setAttribute("data-paragraph-style", normalizedStyle);
+    }
+
+    syncRichBlockPresentation(block);
+    placeCaretAtEnd(block);
+  }
+
+  function applyParagraphAlignment(surface, align) {
+    if (!surface) return;
+    const normalizedAlign = normalizeParagraphAlignment(align);
+    const block = getRichTextBlockElement(surface) || ensureRichTextParagraph(surface);
+    if (!(block instanceof Element)) return;
+
+    if (normalizedAlign === "left") {
+      block.removeAttribute("data-align");
+    } else {
+      block.setAttribute("data-align", normalizedAlign);
+    }
+
+    syncRichBlockPresentation(block);
+  }
+
+  function insertSoftLineBreak(surface) {
+    if (!surface) return;
+    if (document.activeElement !== surface) surface.focus();
+    try {
+      if (document.queryCommandSupported?.("insertLineBreak")) {
+        document.execCommand("insertLineBreak", false, null);
+      } else {
+        document.execCommand("insertHTML", false, "<br>");
+      }
+    } catch (_) {
+      document.execCommand("insertHTML", false, "<br>");
+    }
+  }
+
+  function getRichTextToolbarMarkup() {
+    return `
+      <button type="button" class="rich-editor-btn" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button>
+      <button type="button" class="rich-editor-btn" data-rich-command="italic" aria-label="Italic"><em>I</em></button>
+      <button type="button" class="rich-editor-btn" data-rich-command="underline" aria-label="Underline"><span class="is-underlined">U</span></button>
+      <button type="button" class="rich-editor-btn" data-rich-command="insertUnorderedList" aria-label="Bullet list">•</button>
+      <button type="button" class="rich-editor-btn" data-rich-command="insertOrderedList" aria-label="Numbered list">1.</button>
+      <button type="button" class="rich-editor-btn" data-rich-command="softBreak" aria-label="Soft line break">↵</button>
+      <span class="rich-editor-toolbar-divider" aria-hidden="true"></span>
+      <button type="button" class="rich-editor-btn" data-rich-align="left" aria-label="Align left">L</button>
+      <button type="button" class="rich-editor-btn" data-rich-align="center" aria-label="Align center">C</button>
+      <button type="button" class="rich-editor-btn" data-rich-align="right" aria-label="Align right">R</button>
+      <button type="button" class="rich-editor-btn" data-rich-align="justify" aria-label="Justify">J</button>
+      <span class="rich-editor-toolbar-divider" aria-hidden="true"></span>
+      <span class="rich-editor-figure-ref">
+        <select class="rich-editor-figure-select" data-rich-figure-select aria-label="Figure reference token">
+          <option value="">Figure ref</option>
+        </select>
+        <button type="button" class="rich-editor-btn rich-editor-token-btn" data-rich-figure-action="insert" aria-label="Insert figure token">Insert</button>
+        <button type="button" class="rich-editor-btn rich-editor-token-btn" data-rich-figure-action="copy" aria-label="Copy figure token">Copy</button>
+      </span>
+    `;
+  }
+
+  function initializeRichTextEditors() {
+    RICH_TEXT_FIELD_IDS.forEach((id) => enhanceRichTextField(document.getElementById(id)));
+    dom.bodySections?.querySelectorAll("textarea[data-custom-field='content']").forEach((textarea) => {
+      enhanceRichTextField(textarea);
+    });
+  }
+
+  function initializeSummaryEditor() {
+    const shell = dom.summaryEditor?.closest(".rich-editor-shell");
+    if (!shell || shell.dataset.richWired === "true") return;
+    wireRichTextShell(shell, null, { preserveStructure: true });
+    updateRichEditorEmptyState(dom.summaryEditor);
+  }
+
+  function buildFigureTokenOptionsHtml(selectedValue = "") {
+    const options = (state.figureFiles || []).map((file, index) => {
+      const key = figureFileKey(file);
+      const detail = getFigureDetailForFile(file, index);
+      const label = `${buildFigureLabel(detail, index + 1)} token`;
+      const token = figureReferenceToken(key);
+      const selected = token === selectedValue ? " selected" : "";
+      return `<option value="${escapeAttribute(token)}"${selected}>${escapeHtml(label)}</option>`;
+    }).join("");
+
+    return `<option value="">Figure ref</option>${options}`;
+  }
+
+  function refreshFigureTokenControls(scope = document) {
+    const selects = Array.from(scope.querySelectorAll?.("[data-rich-figure-select]") || []);
+    selects.forEach((select) => {
+      const selectedValue = select.value;
+      select.innerHTML = buildFigureTokenOptionsHtml(selectedValue);
+      const hasFigures = (state.figureFiles || []).length > 0;
+      select.disabled = !hasFigures;
+      select.closest(".rich-editor-figure-ref")?.querySelectorAll("[data-rich-figure-action]").forEach((button) => {
+        button.disabled = !hasFigures;
+      });
+    });
+  }
+
+  function enhanceRichTextField(textarea) {
+    if (!(textarea instanceof HTMLTextAreaElement) || textarea.dataset.richTextEnhanced === "true") return;
+
+    textarea.dataset.richTextEnhanced = "true";
+    textarea.classList.add("rich-editor-source");
+
+    const shell = document.createElement("div");
+    shell.className = "rich-editor-shell";
+    shell.innerHTML = `
+      <div class="rich-editor-toolbar" aria-label="Text formatting toolbar">${getRichTextToolbarMarkup()}</div>
+      <div class="rich-editor-surface" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="${escapeAttribute(textarea.getAttribute("placeholder") || "Write here.")}"></div>
+    `;
+
+    textarea.parentElement.insertBefore(shell, textarea);
+    shell.appendChild(textarea);
+
+    const surface = shell.querySelector(".rich-editor-surface");
+    wireRichTextShell(shell, textarea);
+    syncRichTextSurfaceFromSource(textarea, surface);
+
+    const label = document.querySelector(`label[for='${textarea.id}']`);
+    if (label && label.dataset.richTextBound !== "true") {
+      label.dataset.richTextBound = "true";
+      label.addEventListener("click", (event) => {
+        event.preventDefault();
+        surface.focus();
+      });
+    }
+  }
+
+  function wireRichTextShell(shell, sourceTextarea = null, options = {}) {
+    if (!shell || shell.dataset.richWired === "true") return;
+    const toolbar = shell.querySelector(".rich-editor-toolbar");
+    const surface = shell.querySelector(".rich-editor-surface");
+    if (!toolbar || !surface) return;
+
+    shell.dataset.richWired = "true";
+
+    if (sourceTextarea) {
+      state.richEditors.set(sourceTextarea, { shell, toolbar, surface, source: sourceTextarea });
+    }
+    refreshFigureTokenControls(toolbar);
+
+    toolbar.addEventListener("mousedown", (event) => {
+      if (event.target.closest("[data-rich-command], [data-rich-align], [data-rich-figure-action]")) {
+        event.preventDefault();
+      }
+    });
+
+    toolbar.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-rich-command]");
+      const alignButton = event.target.closest("[data-rich-align]");
+      const figureButton = event.target.closest("[data-rich-figure-action]");
+
+      if (figureButton) {
+        const select = toolbar.querySelector("[data-rich-figure-select]");
+        const token = String(select?.value || "").trim();
+        if (!token) return;
+
+        if (figureButton.getAttribute("data-rich-figure-action") === "copy") {
+          try {
+            navigator.clipboard?.writeText(token);
+          } catch (_) {
+            // The selected token remains visible if clipboard access is unavailable.
+          }
+          return;
+        }
+
+        if (document.activeElement !== surface) surface.focus();
+        document.execCommand("insertText", false, token);
+        handleRichTextSurfaceUpdate(surface, sourceTextarea, true);
+        syncRichToolbarState(shell, surface);
+        return;
+      }
+
+      if (alignButton) {
+        if (document.activeElement !== surface) surface.focus();
+        applyParagraphAlignment(surface, alignButton.getAttribute("data-rich-align"));
+        handleRichTextSurfaceUpdate(surface, sourceTextarea, true);
+        syncRichToolbarState(shell, surface);
+        return;
+      }
+
+      if (!button) return;
+      const command = button.getAttribute("data-rich-command");
+      if (document.activeElement !== surface) surface.focus();
+
+      if (command === "softBreak") {
+        insertSoftLineBreak(surface);
+      } else if (command === "insertOrderedList" || command === "insertUnorderedList") {
+        document.execCommand(command, false, null);
+      } else {
+        document.execCommand(command, false, null);
+      }
+      handleRichTextSurfaceUpdate(surface, sourceTextarea, true);
+      syncRichToolbarState(shell, surface);
+    });
+
+    surface.addEventListener("input", () => {
+      handleRichTextSurfaceUpdate(surface, sourceTextarea, true);
+      syncRichToolbarState(shell, surface);
+    });
+
+    surface.addEventListener("blur", () => {
+      handleRichTextSurfaceUpdate(surface, sourceTextarea, false);
+      if (options.preserveStructure) {
+        updateRichEditorEmptyState(surface);
+      } else {
+        normalizeRichTextSurface(surface, sourceTextarea);
+      }
+      syncRichToolbarState(shell, surface);
+    });
+
+    surface.addEventListener("paste", (event) => {
+      event.preventDefault();
+      const text = event.clipboardData?.getData("text/plain") || "";
+      document.execCommand("insertText", false, text);
+      handleRichTextSurfaceUpdate(surface, sourceTextarea, true);
+      syncRichToolbarState(shell, surface);
+    });
+
+    ["keyup", "mouseup", "focus", "click"].forEach((eventName) => {
+      surface.addEventListener(eventName, () => syncRichToolbarState(shell, surface));
+    });
+
+    syncRichToolbarState(shell, surface);
+  }
+
+  function handleRichTextSurfaceUpdate(surface, sourceTextarea = null, shouldDispatch = false) {
+    if (!surface) return;
+    updateRichEditorEmptyState(surface);
+    if (!sourceTextarea) return;
+
+    const nextValue = buildRichTextStorageValue(surface.innerHTML);
+    const changed = sourceTextarea.value !== nextValue;
+    sourceTextarea.value = nextValue;
+    if (shouldDispatch && changed) {
+      sourceTextarea.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
+  function normalizeRichTextSurface(surface, sourceTextarea = null) {
+    if (!surface) return;
+    const nextHtml = buildRichTextStorageValue(surface.innerHTML);
+    const normalized = buildEditorRichTextHtml(nextHtml);
+    if (surface.innerHTML !== normalized) {
+      surface.innerHTML = normalized;
+    }
+    updateRichEditorEmptyState(surface);
+    if (sourceTextarea && sourceTextarea.value !== nextHtml) {
+      sourceTextarea.value = nextHtml;
+      sourceTextarea.dispatchEvent(new Event("change", { bubbles: true }));
+    } else if (sourceTextarea) {
+      sourceTextarea.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+
+  function syncRichTextSurfaceFromSource(sourceTextarea, surface) {
+    if (!surface) return;
+    surface.innerHTML = buildEditorRichTextHtml(sourceTextarea?.value || "");
+    surface.querySelectorAll("p, ul, ol").forEach((block) => syncRichBlockPresentation(block));
+    updateRichEditorEmptyState(surface);
+  }
+
+  function buildEditorRichTextHtml(value) {
+    const stored = String(value || "").trim();
+    if (!stored) return "";
+    return serializeRichTextBlocksToEditorHtml(parseRichTextBlocks(stored));
+  }
+
+  function updateRichEditorEmptyState(surface) {
+    if (!surface) return;
+    surface.classList.toggle("is-empty", !richTextToPlainText(surface.innerHTML));
+  }
+
+  function refreshRichTextEditorsFromSources() {
+    state.richEditors.forEach((entry, sourceTextarea) => {
+      if (!document.body.contains(sourceTextarea) || !document.body.contains(entry.surface)) {
+        state.richEditors.delete(sourceTextarea);
+        return;
+      }
+      syncRichTextSurfaceFromSource(sourceTextarea, entry.surface);
+    });
   }
 
   function todayIsoDate() {
@@ -776,9 +1315,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function selectCoverageCountry(countryCode) {
     const normalized = String(countryCode || "").trim().toUpperCase();
+    const previousCountry = String(dom.coverageCountry.value || "").trim().toUpperCase();
     dom.coverageCountry.value = normalized;
     updateCoverageCountryDisplayFromCode();
     syncIssuerId();
+    clearSovereignAutoFilledMetadata({ force: Boolean(previousCountry && previousCountry !== normalized) });
+    applySovereignMetadataFromCountry(normalized);
     renderCoverageCountryOptions(dom.coverageCountrySearch?.value || "");
     closeCoverageCountryPanel();
     updateAllUI();
@@ -910,6 +1452,61 @@ document.addEventListener("DOMContentLoaded", () => {
     dom.issuerId.value = selectedCountry ? (ISSUER_COUNTRY_MAP[selectedCountry] || buildIssuerIdFromCountry(selectedCountry)) : "";
   }
 
+  function applySovereignMetadataFromCountry(countryCode) {
+    const normalized = String(countryCode || "").trim().toUpperCase();
+    const metadata = buildSovereignMetadataForCountry(normalized);
+    if (!metadata) return false;
+
+    let changed = false;
+    changed = setAutoFilledField(dom.sovereignRegion, metadata.region) || changed;
+    changed = setAutoFilledField(dom.sovereignCurrency, metadata.currency) || changed;
+    changed = setAutoFilledField(dom.sovereignClassification, metadata.classification) || changed;
+    changed = setAutoFilledField(dom.sovereignBenchmark, metadata.benchmark) || changed;
+    if (Array.isArray(metadata.ratings) && metadata.ratings.length && !collectRatingsProfile().length) {
+      restoreRatingsProfile(metadata.ratings);
+      changed = true;
+    }
+    return changed;
+  }
+
+  function clearSovereignAutoFilledMetadata(options = {}) {
+    const force = Boolean(options.force);
+    return [
+      dom.sovereignRegion,
+      dom.sovereignCurrency,
+      dom.sovereignClassification,
+      dom.sovereignBenchmark
+    ].reduce((changed, input) => clearAutoFilledField(input, force) || changed, false);
+  }
+
+  function buildSovereignMetadataForCountry(countryCode) {
+    const normalized = String(countryCode || "").trim().toUpperCase();
+    if (!normalized) return null;
+
+    const specific = SOVEREIGN_METADATA_MAP[normalized] || {};
+    const countryLabel = getCoverageCountryLabel(normalized);
+    return {
+      region: specific.region || inferCountryRegion(normalized),
+      currency: specific.currency || "",
+      classification: specific.classification || classifyCountryMarket(normalized),
+      benchmark: specific.benchmark || `${countryLabel} 10Y sovereign benchmark`,
+      ratings: specific.ratings || []
+    };
+  }
+
+  function classifyCountryMarket(countryCode) {
+    const normalized = String(countryCode || "").trim().toUpperCase();
+    if (DEVELOPED_MARKET_COUNTRY_CODES.has(normalized)) return "Developed Market";
+    if (FRONTIER_MARKET_COUNTRY_CODES.has(normalized)) return "Frontier Market";
+    return "Emerging Market";
+  }
+
+  function inferCountryRegion(countryCode) {
+    const normalized = String(countryCode || "").trim().toUpperCase();
+    const match = Object.entries(REGION_COUNTRY_GROUPS).find(([, countrySet]) => countrySet.has(normalized));
+    return match?.[0] || "Global";
+  }
+
   function buildIssuerIdFromCountry(countryCode) {
     const normalized = String(countryCode || "").trim().toUpperCase();
     if (!normalized) return "";
@@ -951,7 +1548,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="field">
         <label>&nbsp;</label>
-        <button type="button" class="btn btn-ghost remove-coauthor">Remove</button>
+        <button type="button" class="btn btn-ghost remove-coauthor icon-action-btn" aria-label="Remove co-author" title="Remove co-author">&times;</button>
       </div>
     `;
 
@@ -1021,7 +1618,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (shouldAppend) {
       dom.bodySections.appendChild(fragment);
-      return dom.bodySections.querySelector(`[data-section-key='${key}']`);
+      const cardElement = dom.bodySections.querySelector(`[data-section-key='${key}']`);
+      const customTextarea = cardElement?.querySelector("textarea[data-custom-field='content']");
+      if (customTextarea) enhanceRichTextField(customTextarea);
+      return cardElement;
     }
 
     return card;
@@ -1056,12 +1656,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
 
-    if (
-      target.closest(".body-section-heading") ||
-      target.getAttribute("data-custom-field") === "heading"
-    ) {
-      syncFigurePlacementControls();
-    }
+    if (target.closest(".body-section-heading") || target.closest(".body-section-card")) syncFigurePlacementControls();
   }
 
   function getBodySectionContent(card) {
@@ -1242,7 +1837,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const actionButton = event.target.closest("[data-rating-action]");
     if (!actionButton) return;
 
-    if (actionButton.getAttribute("data-rating-action") === "remove") {
+    if (actionButton.getAttribute("data-rating-action") === "duplicate") {
+      const row = actionButton.closest(".ratings-profile-row");
+      if (!row) return;
+      addRatingProfileRow({
+        agency: String(row.querySelector("[data-rating-field='agency']")?.value || "").trim(),
+        shortTerm: String(row.querySelector("[data-rating-field='short']")?.value || "").trim(),
+        longTerm: String(row.querySelector("[data-rating-field='long']")?.value || "").trim()
+      });
+      updateAllUI();
+      queueDraftSave();
+    } else if (actionButton.getAttribute("data-rating-action") === "remove") {
       actionButton.closest(".ratings-profile-row")?.remove();
       updateAllUI();
       queueDraftSave();
@@ -1278,6 +1883,36 @@ document.addEventListener("DOMContentLoaded", () => {
     dom.shortTermRating.value = primaryRow?.shortTerm || "";
     dom.longTermRating.value = primaryRow?.longTerm || "";
     extraRows.forEach((row) => addRatingProfileRow(row));
+  }
+
+  function financialRowFormatOptionsHtml(selectedValue) {
+    const normalized = normalizeFinancialRowFormat(selectedValue);
+    return FINANCIAL_ROW_FORMATS.map((option) => {
+      const selected = option.value === normalized ? " selected" : "";
+      return `<option value="${option.value}"${selected}>${option.label}</option>`;
+    }).join("");
+  }
+
+  function normalizeFinancialRowFormat(value) {
+    const normalized = String(value || "").trim().toLowerCase();
+    return FINANCIAL_ROW_FORMATS.some((option) => option.value === normalized) ? normalized : "auto";
+  }
+
+  function inferFinancialRowFormat(label) {
+    const metricType = classifyFinancialMetric(label);
+    if (metricType === "percent") return "percentage";
+    if (metricType === "multiple") return "turns";
+    if (metricType === "monetary") return "currency";
+    return "number";
+  }
+
+  function getFinancialRowFormat(rowOrLabel) {
+    if (rowOrLabel && typeof rowOrLabel === "object") {
+      const explicitFormat = normalizeFinancialRowFormat(rowOrLabel.format);
+      return explicitFormat === "auto" ? inferFinancialRowFormat(rowOrLabel.label) : explicitFormat;
+    }
+
+    return inferFinancialRowFormat(rowOrLabel);
   }
 
   function initializeFinancialTableEditor(forceReset = false) {
@@ -1318,15 +1953,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 placeholder="FY26F"
               >
               <div class="financial-header-actions">
-                <button type="button" class="btn btn-ghost btn-xs" data-action="move-col-left" data-col-index="${index}" ${index === 0 ? "disabled" : ""}>&lt;</button>
-                <button type="button" class="btn btn-ghost btn-xs" data-action="move-col-right" data-col-index="${index}" ${index === matrix.headers.length - 1 ? "disabled" : ""}>&gt;</button>
-                <button type="button" class="btn btn-ghost btn-xs" data-action="delete-col" data-col-index="${index}" ${matrix.headers.length === 1 ? "disabled" : ""}>Del</button>
+                <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="move-col-left" data-col-index="${index}" aria-label="Move column left" title="Move column left" ${index === 0 ? "disabled" : ""}>&lt;</button>
+                <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="move-col-right" data-col-index="${index}" aria-label="Move column right" title="Move column right" ${index === matrix.headers.length - 1 ? "disabled" : ""}>&gt;</button>
+                <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="duplicate-col" data-col-index="${index}" aria-label="Duplicate column" title="Duplicate column" ${matrix.headers.length >= 6 ? "disabled" : ""}>&#x29C9;</button>
+                <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="delete-col" data-col-index="${index}" aria-label="Delete column" title="Delete column" ${matrix.headers.length === 1 ? "disabled" : ""}>&times;</button>
               </div>
             </div>
           </th>
         `).join("")}
         <th class="financial-grid-actions-col">
-          <span class="financial-grid-label">Row Order</span>
+          <span class="financial-grid-label">Row Tools</span>
         </th>
       </tr>
     `;
@@ -1335,7 +1971,6 @@ document.addEventListener("DOMContentLoaded", () => {
       <tr>
         <td class="financial-grid-metric-col">
           <div class="financial-row-cell">
-            <span class="financial-grid-label">Metric ${rowIndex + 1}</span>
             <input
               type="text"
               class="financial-row-label"
@@ -1344,13 +1979,21 @@ document.addEventListener("DOMContentLoaded", () => {
               data-row-index="${rowIndex}"
               placeholder="Revenue (mn)"
             >
+            <select
+              class="financial-row-format"
+              data-kind="row-format"
+              data-row-index="${rowIndex}"
+              aria-label="Row format"
+            >
+              ${financialRowFormatOptionsHtml(row.format)}
+            </select>
           </div>
         </td>
         ${row.values.map((value, colIndex) => `
           <td class="financial-grid-period-col">
             <input
               type="text"
-              class="financial-cell-input is-${classifyFinancialMetric(row.label)}"
+              class="financial-cell-input is-${getFinancialRowFormat(row)}"
               value="${escapeAttribute(value)}"
               data-kind="value"
               data-row-index="${rowIndex}"
@@ -1361,9 +2004,10 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join("")}
         <td class="financial-grid-actions-col">
           <div class="financial-row-actions">
-            <button type="button" class="btn btn-ghost btn-xs" data-action="move-row-up" data-row-index="${rowIndex}" ${rowIndex === 0 ? "disabled" : ""}>Up</button>
-            <button type="button" class="btn btn-ghost btn-xs" data-action="move-row-down" data-row-index="${rowIndex}" ${rowIndex === matrix.rows.length - 1 ? "disabled" : ""}>Dn</button>
-            <button type="button" class="btn btn-ghost btn-xs" data-action="delete-row" data-row-index="${rowIndex}" ${matrix.rows.length === 1 ? "disabled" : ""}>Del</button>
+            <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="move-row-up" data-row-index="${rowIndex}" aria-label="Move row up" title="Move row up" ${rowIndex === 0 ? "disabled" : ""}>&uarr;</button>
+            <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="move-row-down" data-row-index="${rowIndex}" aria-label="Move row down" title="Move row down" ${rowIndex === matrix.rows.length - 1 ? "disabled" : ""}>&darr;</button>
+            <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="duplicate-row" data-row-index="${rowIndex}" aria-label="Duplicate row" title="Duplicate row">&#x29C9;</button>
+            <button type="button" class="btn btn-ghost btn-xs icon-action-btn" data-action="delete-row" data-row-index="${rowIndex}" aria-label="Delete row" title="Delete row" ${matrix.rows.length === 1 ? "disabled" : ""}>&times;</button>
           </div>
         </td>
       </tr>
@@ -1374,7 +2018,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleFinancialGridInput(event) {
     const target = event.target;
-    if (!(target instanceof HTMLInputElement)) return;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) return;
 
     const kind = target.getAttribute("data-kind");
     if (!kind || !state.financialTable) return;
@@ -1386,6 +2030,14 @@ document.addEventListener("DOMContentLoaded", () => {
       state.financialTable.headers[colIndex] = target.value.trim() || `Period ${colIndex + 1}`;
     } else if (kind === "row-label" && Number.isInteger(rowIndex)) {
       state.financialTable.rows[rowIndex].label = target.value;
+    } else if (kind === "row-format" && Number.isInteger(rowIndex)) {
+      state.financialTable.rows[rowIndex].format = normalizeFinancialRowFormat(target.value);
+      formatFinancialRowValues(rowIndex);
+      syncFinancialTableStorage();
+      renderFinancialTableEditor();
+      updateAllUI();
+      queueDraftSave();
+      return;
     } else if (kind === "value" && Number.isInteger(rowIndex) && Number.isInteger(colIndex)) {
       state.financialTable.rows[rowIndex].values[colIndex] = target.value;
     }
@@ -1402,8 +2054,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const colIndex = Number(target.getAttribute("data-col-index"));
 
     if (kind === "value" && Number.isInteger(rowIndex) && Number.isInteger(colIndex)) {
-      const rowLabel = state.financialTable.rows[rowIndex]?.label || "";
-      const formattedValue = formatFinancialValueForDisplay(target.value, rowLabel);
+      const row = state.financialTable.rows[rowIndex] || {};
+      const formattedValue = formatFinancialValueForDisplay(target.value, row);
       state.financialTable.rows[rowIndex].values[colIndex] = formattedValue;
       target.value = formattedValue;
       syncFinancialTableStorage();
@@ -1431,12 +2083,16 @@ document.addEventListener("DOMContentLoaded", () => {
       moveFinancialColumn(colIndex, colIndex - 1);
     } else if (action === "move-col-right" && colIndex < state.financialTable.headers.length - 1) {
       moveFinancialColumn(colIndex, colIndex + 1);
+    } else if (action === "duplicate-col") {
+      duplicateFinancialColumn(colIndex);
     } else if (action === "delete-col") {
       removeFinancialColumn(colIndex);
     } else if (action === "move-row-up" && rowIndex > 0) {
       moveFinancialRow(rowIndex, rowIndex - 1);
     } else if (action === "move-row-down" && rowIndex < state.financialTable.rows.length - 1) {
       moveFinancialRow(rowIndex, rowIndex + 1);
+    } else if (action === "duplicate-row") {
+      duplicateFinancialRow(rowIndex);
     } else if (action === "delete-row") {
       removeFinancialRow(rowIndex);
     } else {
@@ -1469,6 +2125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!state.financialTable) initializeFinancialTableEditor();
     state.financialTable.rows.push({
       label: "",
+      format: "auto",
       values: Array.from({ length: state.financialTable.headers.length }, () => "")
     });
     syncFinancialTableStorage();
@@ -1496,7 +2153,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const matrix = pruneEmptyFinancialRows(normalizeFinancialMatrix(state.financialTable, publicationDate));
     const workbook = buildFinancialTemplateWorkbook(matrix, {
       title: dom.financialTableTitle.value.trim() || "Year-end 31 Dec",
-      sourceNote: dom.financialSourceNote.value.trim() || "Source: Company data, Cordoba Research Group estimates"
+      sourceNote: dom.financialSourceNote.value.trim() || "Source: Company data, Cordoba Research Group estimates",
+      tableNotes: dom.financialTableNotes?.value.trim() || ""
     });
     const tickerSlug = slugify(dom.ticker.value.trim() || "financial_forecast");
     window.XLSX.writeFile(workbook, `${tickerSlug}_forecast_template.xlsx`);
@@ -1550,7 +2208,8 @@ document.addEventListener("DOMContentLoaded", () => {
       ["5. Upload the completed workbook back into the research production tool."],
       [""],
       [`Caption: ${meta.title}`],
-      [`Source note: ${meta.sourceNote}`]
+      [`Source note: ${meta.sourceNote}`],
+      [`Table notes: ${meta.tableNotes || "None supplied"}`]
     ]);
     instructionsSheet["!cols"] = [{ wch: 88 }];
 
@@ -1564,7 +2223,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ["Metric", ...(matrix?.headers || [])],
       ...(matrix?.rows || []).map((row) => [
         row.label || "",
-        ...(row.values || []).map((value) => formatFinancialValueForDisplay(value, row.label))
+        ...(row.values || []).map((value) => formatFinancialValueForDisplay(value, row))
       ])
     ];
   }
@@ -1595,6 +2254,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .slice(1)
       .map((cells) => ({
         label: cells[0] || "",
+        format: "auto",
         values: normalizeFinancialValues(cells.slice(1), headers.length || buildDefaultFinancialHeaders(publicationDate).length)
       }));
 
@@ -1620,20 +2280,154 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function duplicateFinancialColumn(index) {
+    if (state.financialTable.headers.length >= 6) {
+      setMessage("error", "Financial forecast export supports up to six period columns in the current layout.");
+      return;
+    }
+
+    const sourceHeader = state.financialTable.headers[index] || `Period ${index + 1}`;
+    state.financialTable.headers.splice(index + 1, 0, `${sourceHeader} copy`);
+    state.financialTable.rows.forEach((row) => {
+      row.values.splice(index + 1, 0, row.values[index] || "");
+    });
+  }
+
   function moveFinancialRow(fromIndex, toIndex) {
     const [row] = state.financialTable.rows.splice(fromIndex, 1);
     state.financialTable.rows.splice(toIndex, 0, row);
+  }
+
+  function duplicateFinancialRow(index) {
+    const source = state.financialTable.rows[index];
+    if (!source) return;
+    state.financialTable.rows.splice(index + 1, 0, {
+      label: source.label ? `${source.label} copy` : "",
+      format: normalizeFinancialRowFormat(source.format),
+      values: [...(source.values || [])]
+    });
   }
 
   function removeFinancialRow(index) {
     if (state.financialTable.rows.length === 1) {
       state.financialTable.rows = [{
         label: "",
+        format: "auto",
         values: Array.from({ length: state.financialTable.headers.length }, () => "")
       }];
       return;
     }
     state.financialTable.rows.splice(index, 1);
+  }
+
+  function toggleFinancialHeaderLock() {
+    state.financialHeaderLocked = !state.financialHeaderLocked;
+    applyFinancialHeaderLockState();
+    queueDraftSave();
+  }
+
+  function applyFinancialHeaderLockState() {
+    if (!dom.financialTableEditor) return;
+    dom.financialTableEditor.classList.toggle("is-header-locked", state.financialHeaderLocked);
+    if (!dom.financialToggleHeaderLockBtn) return;
+    dom.financialToggleHeaderLockBtn.textContent = state.financialHeaderLocked ? "Unlock Header" : "Lock Header";
+    dom.financialToggleHeaderLockBtn.setAttribute("aria-pressed", String(state.financialHeaderLocked));
+  }
+
+  function handleFinancialGridPaste(event) {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const kind = target.getAttribute("data-kind");
+    if (!["header", "row-label", "value"].includes(kind)) return;
+
+    const pasteText = event.clipboardData?.getData("text/plain") || "";
+    if (!pasteText || !/[\t\r\n]/.test(pasteText)) return;
+
+    const range = parsePastedFinancialRange(pasteText);
+    if (!range.length) return;
+
+    event.preventDefault();
+    applyPastedFinancialRange(range, target);
+    syncFinancialTableStorage();
+    renderFinancialTableEditor();
+    updateAllUI();
+    queueDraftSave();
+  }
+
+  function parsePastedFinancialRange(text) {
+    return String(text || "")
+      .replace(/\r/g, "")
+      .split("\n")
+      .filter((line) => line.length)
+      .map((line) => splitDelimitedLine(line, detectTableDelimiter(line)).map((cell) => String(cell ?? "").trim()));
+  }
+
+  function ensureFinancialRows(count) {
+    if (!state.financialTable) return;
+    while (state.financialTable.rows.length < count) {
+      state.financialTable.rows.push({
+        label: "",
+        format: "auto",
+        values: Array.from({ length: state.financialTable.headers.length }, () => "")
+      });
+    }
+  }
+
+  function ensureFinancialColumns(count) {
+    if (!state.financialTable) return;
+    const safeCount = Math.min(Math.max(count, state.financialTable.headers.length), 6);
+    while (state.financialTable.headers.length < safeCount) {
+      state.financialTable.headers.push(buildNextFinancialHeaderLabel(state.financialTable.headers, parseInputDate(dom.publicationDate.value) || new Date()));
+      state.financialTable.rows.forEach((row) => row.values.push(""));
+    }
+  }
+
+  function applyPastedFinancialRange(range, target) {
+    if (!state.financialTable) initializeFinancialTableEditor();
+    const kind = target.getAttribute("data-kind");
+    const startRow = Number(target.getAttribute("data-row-index"));
+    const startCol = Number(target.getAttribute("data-col-index"));
+
+    if (kind === "header") {
+      const colIndex = Number.isInteger(startCol) ? startCol : 0;
+      ensureFinancialColumns(colIndex + range[0].length);
+      range[0].forEach((cell, offset) => {
+        const targetCol = colIndex + offset;
+        if (targetCol < state.financialTable.headers.length) state.financialTable.headers[targetCol] = cell || state.financialTable.headers[targetCol];
+      });
+      return;
+    }
+
+    if (kind === "row-label") {
+      const rowIndex = Number.isInteger(startRow) ? startRow : 0;
+      ensureFinancialRows(rowIndex + range.length);
+      const maxValueColumns = Math.max(...range.map((row) => Math.max(0, row.length - 1)));
+      ensureFinancialColumns(maxValueColumns);
+      range.forEach((cells, rowOffset) => {
+        const row = state.financialTable.rows[rowIndex + rowOffset];
+        row.label = cells[0] || row.label;
+        cells.slice(1).forEach((cell, colOffset) => {
+          if (colOffset < row.values.length) row.values[colOffset] = cell;
+        });
+        row.values = row.values.map((value) => formatFinancialValueForDisplay(value, row));
+      });
+      return;
+    }
+
+    if (kind === "value") {
+      const rowIndex = Number.isInteger(startRow) ? startRow : 0;
+      const colIndex = Number.isInteger(startCol) ? startCol : 0;
+      ensureFinancialRows(rowIndex + range.length);
+      ensureFinancialColumns(colIndex + Math.max(...range.map((row) => row.length)));
+      range.forEach((cells, rowOffset) => {
+        const row = state.financialTable.rows[rowIndex + rowOffset];
+        cells.forEach((cell, colOffset) => {
+          const targetCol = colIndex + colOffset;
+          if (targetCol < row.values.length) row.values[targetCol] = cell;
+        });
+        row.values = row.values.map((value) => formatFinancialValueForDisplay(value, row));
+      });
+    }
   }
 
   function buildNextFinancialHeaderLabel(headers, publicationDate) {
@@ -1652,7 +2446,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function formatFinancialRowValues(rowIndex) {
     const row = state.financialTable?.rows?.[rowIndex];
     if (!row) return;
-    row.values = row.values.map((value) => formatFinancialValueForDisplay(value, row.label));
+    row.values = row.values.map((value) => formatFinancialValueForDisplay(value, row));
   }
 
   function classifyFinancialMetric(label) {
@@ -1684,32 +2478,40 @@ document.addEventListener("DOMContentLoaded", () => {
     return "numeric";
   }
 
-  function formatFinancialValueForDisplay(value, rowLabel) {
+  function formatFinancialValueForDisplay(value, rowOrLabel) {
     const text = String(value ?? "").trim();
     if (!text || text === "-") return "";
     if (/^(n\/a|nm|n\.m\.|na)$/i.test(text)) return text.toUpperCase();
     if (/^[=]/.test(text)) return text;
 
-    const numericText = text.replace(/,/g, "").replace(/%/g, "").trim();
+    const numericText = text.replace(/,/g, "").replace(/[$€£¥]/g, "").replace(/%/g, "").replace(/\bbps\b/i, "").replace(/x$/i, "").trim();
     if (!/^-?\d*\.?\d+$/.test(numericText)) return text;
 
     const number = Number(numericText);
     if (!Number.isFinite(number)) return text;
 
-    const metricType = classifyFinancialMetric(rowLabel);
+    const metricType = getFinancialRowFormat(rowOrLabel);
     const decimalPart = numericText.includes(".") ? numericText.split(".")[1] : "";
     const decimals = decimalPart.length;
 
-    if (metricType === "percent") {
+    if (metricType === "percentage") {
       return `${formatNumericForDisplay(number, decimals)}%`;
     }
 
-    if (metricType === "monetary") {
+    if (metricType === "bps") {
+      return `${formatNumericForDisplay(number, decimals)}bps`;
+    }
+
+    if (metricType === "turns") {
+      return `${formatNumericForDisplay(number, decimals || 1)}x`;
+    }
+
+    if (metricType === "currency" || metricType === "number") {
       return formatNumericForDisplay(number, decimals);
     }
 
-    if (metricType === "eps" || metricType === "multiple" || metricType === "numeric") {
-      return formatNumericForDisplay(number, decimals);
+    if (metricType === "text") {
+      return text;
     }
 
     return text;
@@ -1746,6 +2548,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleEquitySection();
     toggleMacroFiPanel();
     syncIssuerId();
+    applySovereignMetadataFromCountry(dom.coverageCountry?.value || "");
     syncBodySectionVisibility();
   }
 
@@ -1775,7 +2578,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (element instanceof HTMLInputElement && element.type === "file") {
       return Array.from(element.files || []).length > 0;
     }
-    return String(element.value || "").trim().length > 0;
+    return richTextToPlainText(element.value).trim().length > 0;
   }
 
   function validateForm(showErrors = false) {
@@ -1815,7 +2618,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function normalizeComparableText(value) {
-    return String(value || "")
+    return richTextToPlainText(value)
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
@@ -1915,6 +2718,23 @@ document.addEventListener("DOMContentLoaded", () => {
           `Complete this ${entry.section.toLowerCase()} field before export.`,
           entry.section,
           { focusId: entry.id }
+        )
+      );
+    });
+
+    (data.imageFiles || []).forEach((file, index) => {
+      const figureKey = figureFileKey(file);
+      const quality = data.figureQuality?.[figureKey] || state.figureQuality?.[figureKey];
+      if (!quality?.lowResolution) return;
+
+      const detail = data.figureDetails?.[figureKey] || getFigureDetailForFile(file, index);
+      findings.push(
+        buildFinding(
+          "warning",
+          `${buildFigureLabel(detail, index + 1)} image resolution`,
+          `${file.name} is ${quality.width}x${quality.height}px. Use a sharper source image before publication if available.`,
+          "Exhibits",
+          { focusId: "figurePlacementPanel" }
         )
       );
     });
@@ -2355,6 +3175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dom.summaryOutputDetail.textContent = attachmentBits.length
       ? `${reviewSummary} Support pack includes ${attachmentBits.join(", ")}.`
       : reviewSummary;
+
   }
 
   function updatePreview(data) {
@@ -2423,6 +3244,45 @@ document.addEventListener("DOMContentLoaded", () => {
     state.saveTimer = window.setTimeout(saveDraft, 320);
   }
 
+  function collectAutofillState() {
+    const ids = [
+      "equityCompanyName",
+      "equitySecurityDisplay",
+      "priceCurrency",
+      "equitySectorLine",
+      "marketCapUsd",
+      "benchmarkName",
+      "benchmarkTicker",
+      "sovereignRegion",
+      "sovereignCurrency",
+      "sovereignClassification",
+      "sovereignBenchmark"
+    ];
+
+    return Object.fromEntries(ids.map((id) => {
+      const input = document.getElementById(id);
+      return [id, input?.dataset.autofill || ""];
+    }));
+  }
+
+  function restoreAutofillState(autofillState = {}) {
+    Object.entries(autofillState || {}).forEach(([id, value]) => {
+      const input = document.getElementById(id);
+      if (!input) return;
+      input.dataset.autofill = value === "false" ? "false" : "true";
+    });
+  }
+
+  function hasEquityAutofillValues() {
+    return [
+      dom.equityCompanyName,
+      dom.equitySecurityDisplay,
+      dom.priceCurrency,
+      dom.equitySectorLine,
+      dom.marketCapUsd
+    ].some((input) => String(input?.value || "").trim());
+  }
+
   function serializeDraft() {
     const values = {};
     draftFieldIds.forEach((id) => {
@@ -2435,6 +3295,9 @@ document.addEventListener("DOMContentLoaded", () => {
       coAuthors: getCoAuthors(),
       bodySectionLayout: collectBodySectionLayout(),
       ratingsProfile: collectRatingsProfile(),
+      financialHeaderLocked: state.financialHeaderLocked,
+      equityAutofillSymbol: getLastResolvedEquitySymbol(),
+      autofillState: collectAutofillState(),
       savedAt: new Date().toISOString()
     };
   }
@@ -2467,14 +3330,34 @@ document.addEventListener("DOMContentLoaded", () => {
       restoreBodySectionLayout(payload.bodySectionLayout || []);
       restoreRatingsProfile(payload.ratingsProfile || []);
       state.lastSavedAt = payload.savedAt || null;
+      state.financialHeaderLocked = Boolean(payload.financialHeaderLocked);
+      state.lastResolvedEquitySymbol = String(payload.equityAutofillSymbol || "").trim();
       dom.deskLine.dataset.autofill = "true";
       dom.equityCompanyName.dataset.autofill = dom.equityCompanyName.value.trim() ? "false" : "true";
+      dom.equitySecurityDisplay.dataset.autofill = dom.equitySecurityDisplay.value.trim() ? "false" : "true";
       dom.priceCurrency.dataset.autofill = dom.priceCurrency.value.trim() ? "false" : "true";
+      dom.marketCapUsd.dataset.autofill = dom.marketCapUsd.value.trim() ? "false" : "true";
+      dom.benchmarkName.dataset.autofill = dom.benchmarkName.value.trim() ? "false" : "true";
+      dom.benchmarkTicker.dataset.autofill = dom.benchmarkTicker.value.trim() ? "false" : "true";
+      [
+        dom.sovereignRegion,
+        dom.sovereignCurrency,
+        dom.sovereignClassification,
+        dom.sovereignBenchmark
+      ].forEach((input) => {
+        if (input) input.dataset.autofill = input.value.trim() ? "false" : "true";
+      });
+      restoreAutofillState(payload.autofillState || {});
+      if (!state.lastResolvedEquitySymbol && hasEquityAutofillValues()) {
+        state.lastResolvedEquitySymbol = marketDataSymbolFromTicker(dom.ticker.value);
+      }
       syncIssuerId();
+      applySovereignMetadataFromCountry(dom.coverageCountry?.value || "");
       updateCoverageCountryDisplayFromCode();
       renderIndustryOptions("");
       syncBodySectionVisibility();
       ensureDeskLineDefault(true);
+      applyFinancialHeaderLockState();
     } catch (error) {
       console.error("Draft restore failed:", error);
     }
@@ -2489,26 +3372,47 @@ document.addEventListener("DOMContentLoaded", () => {
     state.coAuthorCount = 0;
     state.lastSavedAt = null;
     state.customSectionCount = 0;
+    state.financialHeaderLocked = false;
+    state.lastResolvedEquitySymbol = "";
+    state.equityLookupRequestId += 1;
+    clearFigurePreviewUrls();
     state.figurePlacements = {};
     state.figureDetails = {};
     state.figureFiles = [];
+    state.figureQuality = {};
     syncPrimaryPhone();
     restoreRatingsProfile([]);
     dom.equityCompanyName.dataset.autofill = "true";
+    dom.equitySecurityDisplay.dataset.autofill = "true";
     dom.priceCurrency.dataset.autofill = "true";
+    dom.marketCapUsd.dataset.autofill = "true";
+    dom.benchmarkName.dataset.autofill = "true";
+    dom.benchmarkTicker.dataset.autofill = "true";
+    [
+      dom.sovereignRegion,
+      dom.sovereignCurrency,
+      dom.sovereignClassification,
+      dom.sovereignBenchmark
+    ].forEach((input) => {
+      if (input) input.dataset.autofill = "true";
+    });
     resetChartState({ keepStatusText: false });
     window.localStorage.removeItem(STORAGE_KEY);
     ensurePublicationDate();
     initializeFinancialTableEditor(true);
+    applyFinancialHeaderLockState();
     ensureDeskLineDefault(true);
     updateCoverageCountryDisplayFromCode();
     renderIndustryOptions("");
     restoreBodySectionLayout([]);
+    initializeRichTextEditors();
+    refreshRichTextEditorsFromSources();
     updateFileSummary(dom.modelFiles, dom.modelSummaryHead, dom.modelSummaryList, "No supporting files attached.");
     updateFigureSummary();
     syncFigurePlacementControls();
     toggleNoteTypeSections();
     closePreviewModal();
+    closeSummaryModal();
     clearMessage();
     updateAllUI();
   }
@@ -2542,6 +3446,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "No figures attached.";
 
     dom.imageSummaryList.innerHTML = "";
+    dom.imageSummaryList.classList.toggle("figure-summary-list", files.length > 0);
     if (!files.length) {
       dom.imageSummaryList.hidden = true;
       return;
@@ -2549,13 +3454,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
     files.forEach((file, index) => {
       const item = document.createElement("li");
+      item.className = "figure-summary-item";
+      const thumbnail = document.createElement("img");
+      thumbnail.className = "figure-summary-thumb";
+      thumbnail.src = getFigurePreviewUrl(file);
+      thumbnail.alt = `${file.name} preview`;
+      thumbnail.loading = "lazy";
+      item.appendChild(thumbnail);
+
+      const copy = document.createElement("span");
+      copy.className = "figure-summary-copy";
       const meta = getFigureDetailForFile(file, index);
       const label = `${meta.labelType} ${meta.labelNumber}`;
-      item.textContent = `${label} - ${meta.caption || file.name.replace(/\.[^.]+$/, "")}`;
+      copy.textContent = `${label} - ${meta.caption || file.name.replace(/\.[^.]+$/, "")}`;
+      item.appendChild(copy);
       dom.imageSummaryList.appendChild(item);
     });
 
     dom.imageSummaryList.hidden = false;
+  }
+
+  function getFigurePreviewUrl(file) {
+    const key = figureFileKey(file);
+    if (!state.figurePreviewUrls[key]) {
+      state.figurePreviewUrls[key] = URL.createObjectURL(file);
+    }
+    return state.figurePreviewUrls[key];
+  }
+
+  function syncFigurePreviewUrls(files = state.figureFiles || []) {
+    const activeKeys = new Set(files.map((file) => figureFileKey(file)));
+    Object.entries(state.figurePreviewUrls || {}).forEach(([key, objectUrl]) => {
+      if (!activeKeys.has(key)) {
+        URL.revokeObjectURL(objectUrl);
+        delete state.figurePreviewUrls[key];
+      }
+    });
+  }
+
+  function clearFigurePreviewUrls() {
+    Object.values(state.figurePreviewUrls || {}).forEach((objectUrl) => URL.revokeObjectURL(objectUrl));
+    state.figurePreviewUrls = {};
+  }
+
+  function readFigureQuality(file) {
+    return new Promise((resolve) => {
+      const objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const width = image.naturalWidth || 0;
+        const height = image.naturalHeight || 0;
+        resolve({
+          width,
+          height,
+          lowResolution: width > 0 && height > 0 && (width < MIN_FIGURE_QUALITY.width || height < MIN_FIGURE_QUALITY.height)
+        });
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve({ width: 0, height: 0, lowResolution: false, unreadable: true });
+      };
+
+      image.src = objectUrl;
+    });
+  }
+
+  async function refreshFigureQualityForFiles(files = state.figureFiles || []) {
+    const nextQuality = {};
+    await Promise.all(files.map(async (file) => {
+      nextQuality[figureFileKey(file)] = await readFigureQuality(file);
+    }));
+    state.figureQuality = nextQuality;
+    syncFigurePlacementQualityBadges();
+    updateAllUI();
+  }
+
+  function formatFigureQualityLabel(quality) {
+    if (!quality || quality.unreadable) return "Quality pending";
+    if (!quality.width || !quality.height) return "Quality pending";
+    const status = quality.lowResolution ? "Check resolution" : "Export quality";
+    return `${status} - ${quality.width}x${quality.height}px`;
+  }
+
+  function syncFigurePlacementQualityBadges() {
+    Object.entries(state.figureQuality || {}).forEach(([key, quality]) => {
+      const badge = Array.from(dom.figurePlacementList?.querySelectorAll("[data-figure-quality]") || [])
+        .find((element) => element.getAttribute("data-figure-quality") === key);
+      if (!badge) return;
+      badge.textContent = formatFigureQualityLabel(quality);
+      badge.classList.toggle("is-warning", Boolean(quality?.lowResolution));
+    });
   }
 
   function figureFileKey(file) {
@@ -2575,19 +3566,229 @@ document.addEventListener("DOMContentLoaded", () => {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
   }
 
+  function sanitizeFigureDisplayMode(value) {
+    const normalized = String(value || "").trim();
+    return FIGURE_DISPLAY_MODES.some((option) => option.value === normalized) ? normalized : "full";
+  }
+
+  function sanitizeFigureSize(value) {
+    const normalized = String(value || "").trim();
+    return FIGURE_SIZE_OPTIONS.some((option) => option.value === normalized) ? normalized : "medium";
+  }
+
+  function sanitizeFigureCropMode(value) {
+    const normalized = String(value || "").trim();
+    return FIGURE_CROP_MODES.some((option) => option.value === normalized) ? normalized : "fill";
+  }
+
+  function buildFigureLabel(detail, fallbackNumber) {
+    const labelType = detail.labelType || "Figure";
+    const labelNumber = sanitizeFigureNumber(detail.labelNumber, fallbackNumber);
+    return `${labelType} ${labelNumber}`;
+  }
+
+  function buildFigureCaptionText(detail, file, fallbackNumber) {
+    return `${buildFigureLabel(detail, fallbackNumber)}: ${detail.caption || defaultFigureCaption(file)}`;
+  }
+
+  function buildFigureTitleText(detail, file) {
+    return String(detail.caption || "").trim() || defaultFigureCaption(file);
+  }
+
+  function figureReferenceId(figureKey) {
+    let hash = 0;
+    String(figureKey || "").split("").forEach((char) => {
+      hash = ((hash << 5) - hash) + char.charCodeAt(0);
+      hash |= 0;
+    });
+    return Math.abs(hash).toString(36);
+  }
+
+  function figureReferenceToken(figureKey) {
+    return `{{fig:${figureReferenceId(figureKey)}}}`;
+  }
+
+  function buildFigureNumberLookup(data, availablePlacements) {
+    const lookup = {};
+    let nextNumber = 1;
+    Array.from(availablePlacements || ["end"]).forEach((placement) => {
+      getFigureFilesForPlacement(data, placement, availablePlacements).forEach((file) => {
+        const key = figureFileKey(file);
+        if (!lookup[key]) {
+          lookup[key] = nextNumber;
+          nextNumber += 1;
+        }
+      });
+    });
+    (data.imageFiles || []).forEach((file) => {
+      const key = figureFileKey(file);
+      if (!lookup[key]) {
+        lookup[key] = nextNumber;
+        nextNumber += 1;
+      }
+    });
+    return lookup;
+  }
+
+  function resolveFigureDetailForOutput(file, autoNumber, figureDetails = {}) {
+    const figureKey = figureFileKey(file);
+    const detail = {
+      ...getFigureDetailForFile(file, autoNumber - 1),
+      ...(figureDetails[figureKey] || {})
+    };
+    detail.labelType = detail.labelType || defaultFigureLabelType(file);
+    detail.labelNumber = detail.labelNumberManual
+      ? sanitizeFigureNumber(detail.labelNumber, autoNumber)
+      : autoNumber;
+    detail.caption = buildFigureTitleText(detail, file);
+    detail.subtitle = String(detail.subtitle || "").trim();
+    detail.takeaway = String(detail.takeaway || "").trim();
+    detail.source = String(detail.source || "").trim();
+    detail.notes = String(detail.notes || "").trim();
+    detail.displayMode = sanitizeFigureDisplayMode(detail.displayMode);
+    detail.size = sanitizeFigureSize(detail.size);
+    detail.cropMode = sanitizeFigureCropMode(detail.cropMode);
+    detail.pairWithNext = Boolean(detail.pairWithNext);
+    detail.pairWithKey = String(detail.pairWithKey || "").trim();
+    return detail;
+  }
+
+  function buildFigureReferenceIndex(data, availablePlacements) {
+    const numberLookup = buildFigureNumberLookup(data, availablePlacements);
+    return Object.fromEntries((data.imageFiles || []).map((file, index) => {
+      const key = figureFileKey(file);
+      const autoNumber = numberLookup[key] || index + 1;
+      const detail = resolveFigureDetailForOutput(file, autoNumber, data.figureDetails || {});
+      return [figureReferenceToken(key), buildFigureLabel(detail, autoNumber)];
+    }));
+  }
+
+  function replaceFigureReferenceTokens(value, data, availablePlacements) {
+    let output = String(value || "");
+    Object.entries(buildFigureReferenceIndex(data || {}, availablePlacements || new Set(["end"]))).forEach(([token, label]) => {
+      output = output.split(token).join(label);
+    });
+    return output;
+  }
+
+  function formatFigureSourceLine(value) {
+    const source = String(value || "").replace(/\s*\n\s*/g, " ").trim();
+    if (!source) return "";
+    return /^source\s*:/i.test(source) ? source : `Source: ${source}`;
+  }
+
+  function formatFigureNotesLine(value) {
+    const notes = String(value || "").replace(/\s*\n\s*/g, " ").trim();
+    if (!notes) return "";
+    return /^note\s*:/i.test(notes) ? notes : `Note: ${notes}`;
+  }
+
+  function buildFigureFooterText(source, notes) {
+    return [formatFigureSourceLine(source), formatFigureNotesLine(notes)].filter(Boolean).join("  ");
+  }
+
+  function buildInfoHelpElement(label, tooltipText) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "info-help figure-info-help";
+
+    const dot = document.createElement("span");
+    dot.className = "info-dot";
+    dot.tabIndex = 0;
+    dot.setAttribute("aria-label", label);
+    dot.textContent = "i";
+    wrapper.appendChild(dot);
+
+    const tooltip = document.createElement("span");
+    tooltip.className = "info-tooltip";
+    tooltip.textContent = tooltipText;
+    wrapper.appendChild(tooltip);
+
+    return wrapper;
+  }
+
+  function buildFigurePairOptions(figureKey) {
+    return (state.figureFiles || [])
+      .map((file, index) => {
+        const key = figureFileKey(file);
+        if (key === figureKey) return null;
+        const detail = getFigureDetailForFile(file, index);
+        return {
+          value: key,
+          label: `${buildFigureLabel(detail, index + 1)}: ${detail.caption || defaultFigureCaption(file)}`
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function figurePlacementValue(figureKey, fallback = "end") {
+    return state.figurePlacements[figureKey] || state.figureDetails[figureKey]?.placement || fallback || "end";
+  }
+
+  function applyFigurePlacementToKey(figureKey, placement) {
+    if (!figureKey) return;
+    const nextPlacement = placement || "end";
+    state.figurePlacements[figureKey] = nextPlacement;
+    state.figureDetails[figureKey] = {
+      ...(state.figureDetails[figureKey] || {}),
+      placement: nextPlacement
+    };
+  }
+
+  function syncFigurePairPlacementGroup(changedKey) {
+    const changedDetail = state.figureDetails[changedKey] || {};
+
+    if (changedDetail.pairWithKey) {
+      applyFigurePlacementToKey(changedKey, figurePlacementValue(changedDetail.pairWithKey, changedDetail.placement || "end"));
+    }
+
+    Object.entries(state.figureDetails || {}).forEach(([candidateKey, detail]) => {
+      if (candidateKey === changedKey || detail?.pairWithKey !== changedKey) return;
+      applyFigurePlacementToKey(candidateKey, figurePlacementValue(changedKey, detail.placement || "end"));
+    });
+  }
+
+  function buildPreviewFigureFooterHtml(source, notes) {
+    const sourceLine = formatFigureSourceLine(source);
+    const notesLine = formatFigureNotesLine(notes);
+    return [
+      sourceLine ? `<span class="preview-figure-source">${escapeHtml(sourceLine)}</span>` : "",
+      notesLine ? `<span class="preview-figure-notes">${escapeHtml(notesLine)}</span>` : ""
+    ].filter(Boolean).join(" ");
+  }
+
+  function figureSelectOptionsHtml(options, selectedValue) {
+    return options.map((option) => {
+      const selected = option.value === selectedValue ? " selected" : "";
+      return `<option value="${option.value}"${selected}>${option.label}</option>`;
+    }).join("");
+  }
+
   function getFigureDetailForFile(file, index = 0) {
     const key = figureFileKey(file);
     const existing = state.figureDetails[key] || {};
+    const fallbackNumber = index + 1;
+    const hasManualNumber = Boolean(existing.labelNumberManual);
     return {
       placement: state.figurePlacements[key] || existing.placement || "end",
       labelType: existing.labelType || defaultFigureLabelType(file),
-      labelNumber: sanitizeFigureNumber(existing.labelNumber, index + 1),
-      caption: String(existing.caption || "").trim() || defaultFigureCaption(file)
+      labelNumber: hasManualNumber ? sanitizeFigureNumber(existing.labelNumber, fallbackNumber) : fallbackNumber,
+      labelNumberManual: hasManualNumber,
+      caption: String(existing.caption || "").trim() || defaultFigureCaption(file),
+      subtitle: String(existing.subtitle || "").trim(),
+      takeaway: String(existing.takeaway || "").trim(),
+      source: String(existing.source || "").trim(),
+      notes: String(existing.notes || "").trim(),
+      displayMode: sanitizeFigureDisplayMode(existing.displayMode),
+      size: sanitizeFigureSize(existing.size),
+      cropMode: sanitizeFigureCropMode(existing.cropMode),
+      pairWithNext: Boolean(existing.pairWithNext),
+      pairWithKey: String(existing.pairWithKey || "").trim()
     };
   }
 
   function setManagedFigureFiles(files) {
     state.figureFiles = files;
+    syncFigurePreviewUrls(state.figureFiles);
     const nextDetails = {};
 
     state.figureFiles.forEach((file, index) => {
@@ -2599,7 +3800,10 @@ document.addEventListener("DOMContentLoaded", () => {
     state.figurePlacements = Object.fromEntries(
       Object.entries(nextDetails).map(([key, detail]) => [key, detail.placement || "end"])
     );
+    Object.keys(nextDetails).forEach((key) => syncFigurePairPlacementGroup(key));
     updateFigureSummary();
+    refreshFigureTokenControls();
+    refreshFigureQualityForFiles(state.figureFiles);
   }
 
   function handleFigureUploadChange() {
@@ -2627,6 +3831,16 @@ document.addEventListener("DOMContentLoaded", () => {
     queueDraftSave();
   }
 
+  function appendFigureParagraphAnchorOptions(options, sectionKey, label, content) {
+    const paragraphBlocks = parseRichTextBlocks(content).filter((block) => block.type !== "spacer");
+    paragraphBlocks.slice(0, 6).forEach((_, index) => {
+      options.push({
+        value: `after-${sectionKey}-p${index + 1}`,
+        label: `After ${label} ¶${index + 1}`
+      });
+    });
+  }
+
   function getFigurePlacementOptions(noteType = dom.noteType.value) {
     const options = [];
     const layout = collectBodySectionLayout().filter((entry) => !entry.hidden);
@@ -2635,14 +3849,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const middle = layout.filter((entry) => entry.key !== "keyTakeaways" && entry.key !== "cordobaView");
 
     if (noteType === "Equity Research") {
+      appendFigureParagraphAnchorOptions(options, "businessDescription", "Business Description", dom.businessDescription?.value || "");
+      options.push({ value: "after-businessDescription", label: "After Business Description" });
+      appendFigureParagraphAnchorOptions(options, "valuationSummary", "Valuation Summary", dom.valuationSummary?.value || "");
       options.push(
-        { value: "after-businessDescription", label: "After Business Description" },
         { value: "after-valuationSummary", label: "After Valuation Summary" }
       );
 
       middle.forEach((entry) => {
+        appendFigureParagraphAnchorOptions(options, entry.key, entry.label, entry.content);
         options.push({ value: `after-${entry.key}`, label: `After ${entry.label}` });
       });
+      if (cordobaView) appendFigureParagraphAnchorOptions(options, "cordobaView", cordobaView.label, cordobaView.content);
       if (cordobaView) options.push({ value: "after-cordobaView", label: `After ${cordobaView.label}` });
 
       options.push({ value: "end", label: "End of Note" });
@@ -2656,8 +3874,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (keyTakeaways) options.push({ value: "after-keyTakeaways", label: `After ${keyTakeaways.label}` });
     middle.forEach((entry) => {
+      appendFigureParagraphAnchorOptions(options, entry.key, entry.label, entry.content);
       options.push({ value: `after-${entry.key}`, label: `After ${entry.label}` });
     });
+    if (cordobaView) appendFigureParagraphAnchorOptions(options, "cordobaView", cordobaView.label, cordobaView.content);
     if (cordobaView) options.push({ value: "after-cordobaView", label: `After ${cordobaView.label}` });
 
     options.push({ value: "end", label: "End of Note" });
@@ -2673,6 +3893,7 @@ document.addEventListener("DOMContentLoaded", () => {
       dom.figurePlacementList.innerHTML = "";
       state.figurePlacements = {};
       state.figureDetails = {};
+      state.figureQuality = {};
       return;
     }
 
@@ -2692,33 +3913,67 @@ document.addEventListener("DOMContentLoaded", () => {
       row.setAttribute("data-figure-row", key);
 
       const nameWrap = document.createElement("div");
+      nameWrap.className = "figure-placement-summary";
+      const nameCopy = document.createElement("div");
       const name = document.createElement("div");
       name.className = "figure-placement-name";
-      name.textContent = `${detail.labelType} ${detail.labelNumber}: ${detail.caption}`;
-      nameWrap.appendChild(name);
+      name.textContent = `${buildFigureLabel(detail, index + 1)}: ${detail.caption}`;
+      nameCopy.appendChild(name);
 
       const origin = document.createElement("div");
       origin.className = "figure-placement-origin";
       origin.textContent = file.name;
-      nameWrap.appendChild(origin);
+      nameCopy.appendChild(origin);
+      const quality = document.createElement("div");
+      quality.className = "figure-placement-quality";
+      quality.setAttribute("data-figure-quality", key);
+      quality.textContent = formatFigureQualityLabel(state.figureQuality?.[key]);
+      quality.classList.toggle("is-warning", Boolean(state.figureQuality?.[key]?.lowResolution));
+      nameCopy.appendChild(quality);
+      nameWrap.appendChild(nameCopy);
+
+      const thumb = document.createElement("img");
+      thumb.className = "figure-placement-thumb";
+      thumb.src = getFigurePreviewUrl(file);
+      thumb.alt = `${detail.caption || file.name} preview`;
+      thumb.loading = "lazy";
+      nameWrap.appendChild(thumb);
       row.appendChild(nameWrap);
 
       const meta = document.createElement("div");
       meta.className = "figure-placement-meta";
 
+      const buildSelect = (field, optionList, value, ariaLabel = "") => {
+        const control = document.createElement("select");
+        control.setAttribute("data-figure-key", key);
+        control.setAttribute("data-figure-field", field);
+        if (ariaLabel) control.setAttribute("aria-label", ariaLabel);
+        optionList.forEach((option) => {
+          const optionEl = document.createElement("option");
+          const optionValue = typeof option === "string" ? option : option.value;
+          optionEl.value = optionValue;
+          optionEl.textContent = typeof option === "string" ? option : option.label;
+          if (optionValue === value) optionEl.selected = true;
+          control.appendChild(optionEl);
+        });
+        return control;
+      };
+
+      const buildTextInput = (field, value, placeholder, className = "") => {
+        const control = document.createElement("input");
+        control.type = "text";
+        control.value = value || "";
+        control.placeholder = placeholder;
+        control.setAttribute("data-figure-key", key);
+        control.setAttribute("data-figure-field", field);
+        if (className) control.className = className;
+        return control;
+      };
+
       const metaGrid = document.createElement("div");
       metaGrid.className = "figure-placement-meta-grid";
 
-      const kindSelect = document.createElement("select");
-      kindSelect.setAttribute("data-figure-key", key);
-      kindSelect.setAttribute("data-figure-field", "labelType");
-      ["Figure", "Chart", "Exhibit"].forEach((labelType) => {
-        const optionEl = document.createElement("option");
-        optionEl.value = labelType;
-        optionEl.textContent = labelType;
-        if (labelType === detail.labelType) optionEl.selected = true;
-        kindSelect.appendChild(optionEl);
-      });
+      const kindSelect = buildSelect("labelType", FIGURE_LABEL_TYPES, detail.labelType, "Figure label type");
       metaGrid.appendChild(kindSelect);
 
       const numberInput = document.createElement("input");
@@ -2730,37 +3985,106 @@ document.addEventListener("DOMContentLoaded", () => {
       numberInput.setAttribute("aria-label", "Figure number");
       metaGrid.appendChild(numberInput);
 
-      const select = document.createElement("select");
-      select.setAttribute("data-figure-key", key);
-      select.setAttribute("data-figure-field", "placement");
-      options.forEach((option) => {
-        const optionEl = document.createElement("option");
-        optionEl.value = option.value;
-        optionEl.textContent = option.label;
-        if (option.value === currentValue) optionEl.selected = true;
-        select.appendChild(optionEl);
-      });
+      const select = buildSelect("placement", options, currentValue, "Figure placement");
       metaGrid.appendChild(select);
       meta.appendChild(metaGrid);
 
-      const captionInput = document.createElement("input");
-      captionInput.type = "text";
-      captionInput.value = detail.caption;
-      captionInput.placeholder = "Figure caption";
-      captionInput.setAttribute("data-figure-key", key);
-      captionInput.setAttribute("data-figure-field", "caption");
-      meta.appendChild(captionInput);
+      const layoutGrid = document.createElement("div");
+      layoutGrid.className = "figure-placement-layout-grid";
+
+      const displaySelect = buildSelect("displayMode", FIGURE_DISPLAY_MODES, detail.displayMode, "Figure display mode");
+      layoutGrid.appendChild(displaySelect);
+
+      const sizeSelect = buildSelect("size", FIGURE_SIZE_OPTIONS, detail.size, "Figure size");
+      layoutGrid.appendChild(sizeSelect);
+
+      const cropSelect = buildSelect("cropMode", FIGURE_CROP_MODES, detail.cropMode, "Image crop mode");
+      layoutGrid.appendChild(cropSelect);
+      meta.appendChild(layoutGrid);
+
+      const headerGrid = document.createElement("div");
+      headerGrid.className = "figure-placement-header-grid";
+
+      const captionInput = buildTextInput("caption", detail.caption, "Title");
+      headerGrid.appendChild(captionInput);
+
+      const subtitleInput = buildTextInput("subtitle", detail.subtitle, "Subtitle");
+      headerGrid.appendChild(subtitleInput);
+      meta.appendChild(headerGrid);
+
+      const takeawayInput = buildTextInput("takeaway", detail.takeaway, "Optional one-line takeaway");
+      meta.appendChild(takeawayInput);
+
+      const sourceInput = buildTextInput("source", detail.source, "Source: Bloomberg, Cordoba Research Group calculations");
+      meta.appendChild(sourceInput);
+
+      const notesInput = document.createElement("textarea");
+      notesInput.rows = 2;
+      notesInput.value = detail.notes;
+      notesInput.placeholder = "Note or calculation caveat";
+      notesInput.setAttribute("data-figure-key", key);
+      notesInput.setAttribute("data-figure-field", "notes");
+      meta.appendChild(notesInput);
+
+      const utilityRow = document.createElement("div");
+      utilityRow.className = "figure-placement-utility-row";
+
+      const tokenWrap = document.createElement("div");
+      tokenWrap.className = "figure-token-control";
+      const refToken = document.createElement("input");
+      refToken.type = "text";
+      refToken.readOnly = true;
+      refToken.className = "figure-reference-token";
+      refToken.value = figureReferenceToken(key);
+      refToken.setAttribute("aria-label", "Figure reference token");
+      refToken.setAttribute("title", "Use this token in the note text to keep the figure reference synced.");
+      tokenWrap.appendChild(refToken);
+      tokenWrap.appendChild(buildInfoHelpElement(
+        "Figure reference token guidance",
+        "Insert this token into the note text where you want the figure reference to update automatically."
+      ));
+      utilityRow.appendChild(tokenWrap);
+
+      const pairWrap = document.createElement("div");
+      pairWrap.className = "figure-pair-control";
+      const pairLabel = document.createElement("label");
+      pairLabel.className = "figure-pair-toggle";
+      const pairInput = document.createElement("input");
+      pairInput.type = "checkbox";
+      const pairableOptions = buildFigurePairOptions(key);
+      pairInput.checked = Boolean(detail.pairWithNext);
+      pairInput.disabled = !pairableOptions.length;
+      pairInput.setAttribute("data-figure-key", key);
+      pairInput.setAttribute("data-figure-field", "pairWithNext");
+      pairLabel.appendChild(pairInput);
+      pairLabel.appendChild(document.createTextNode("Pair"));
+      pairWrap.appendChild(pairLabel);
+      pairWrap.appendChild(buildInfoHelpElement(
+        "Pairing guidance",
+        "Use this to place two figures side by side. After enabling it, choose which figure this should sit next to."
+      ));
+      utilityRow.appendChild(pairWrap);
+
+      if (detail.pairWithNext) {
+        const pairOptions = [{ value: "", label: "Choose paired figure" }, ...pairableOptions];
+        const pairSelect = buildSelect("pairWithKey", pairOptions, detail.pairWithKey, "Choose paired figure");
+        pairSelect.className = "figure-pair-select";
+        utilityRow.appendChild(pairSelect);
+      }
 
       const actionRow = document.createElement("div");
       actionRow.className = "figure-placement-actions";
       const removeBtn = document.createElement("button");
       removeBtn.type = "button";
-      removeBtn.className = "btn btn-ghost btn-xs";
+      removeBtn.className = "btn btn-ghost btn-xs icon-action-btn";
       removeBtn.setAttribute("data-figure-action", "remove");
       removeBtn.setAttribute("data-figure-key", key);
-      removeBtn.textContent = "Remove";
+      removeBtn.setAttribute("aria-label", "Remove figure");
+      removeBtn.setAttribute("title", "Remove figure");
+      removeBtn.innerHTML = "&times;";
       actionRow.appendChild(removeBtn);
-      meta.appendChild(actionRow);
+      utilityRow.appendChild(actionRow);
+      meta.appendChild(utilityRow);
 
       row.appendChild(meta);
       dom.figurePlacementList.appendChild(row);
@@ -2772,43 +4096,92 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleFigurePlacementChange(event) {
     const target = event.target;
-    if (!(target instanceof HTMLSelectElement || target instanceof HTMLInputElement)) return;
+    if (!(target instanceof HTMLSelectElement || target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
     const figureKey = target.getAttribute("data-figure-key");
     if (!figureKey) return;
     const field = target.getAttribute("data-figure-field");
     if (!field) return;
 
-    const current = state.figureDetails[figureKey] || {};
+    const fileIndex = (state.figureFiles || []).findIndex((file) => figureFileKey(file) === figureKey);
+    const file = fileIndex >= 0 ? state.figureFiles[fileIndex] : null;
+    const current = {
+      ...(file ? getFigureDetailForFile(file, fileIndex) : {}),
+      ...(state.figureDetails[figureKey] || {})
+    };
     if (field === "labelNumber") {
       current.labelNumber = sanitizeFigureNumber(target.value, current.labelNumber || 1);
+      current.labelNumberManual = true;
       target.value = String(current.labelNumber);
+    } else if (field === "displayMode") {
+      current.displayMode = sanitizeFigureDisplayMode(target.value);
+      target.value = current.displayMode;
+    } else if (field === "size") {
+      current.size = sanitizeFigureSize(target.value);
+      target.value = current.size;
+    } else if (field === "cropMode") {
+      current.cropMode = sanitizeFigureCropMode(target.value);
+      target.value = current.cropMode;
+    } else if (field === "pairWithNext") {
+      current.pairWithNext = target instanceof HTMLInputElement ? target.checked : Boolean(target.value);
+      if (current.pairWithNext && !current.pairWithKey) {
+        current.pairWithKey = buildFigurePairOptions(figureKey)[0]?.value || "";
+      }
+      if (!current.pairWithNext) current.pairWithKey = "";
+    } else if (field === "pairWithKey") {
+      current.pairWithKey = String(target.value || "").trim();
+      current.pairWithNext = Boolean(current.pairWithKey);
     } else {
       current[field] = target.value;
     }
     if (field === "placement") state.figurePlacements[figureKey] = current.placement || "end";
     state.figureDetails[figureKey] = current;
+    if (field === "placement" || field === "pairWithKey" || field === "pairWithNext") {
+      syncFigurePairPlacementGroup(figureKey);
+    }
+    refreshFigureTokenControls();
     const nameEl = target.closest(".figure-placement-row")?.querySelector(".figure-placement-name");
     if (nameEl) {
-      const labelType = current.labelType || "Figure";
-      const labelNumber = sanitizeFigureNumber(current.labelNumber, 1);
       const caption = String(current.caption || "").trim() || "Untitled figure";
-      nameEl.textContent = `${labelType} ${labelNumber}: ${caption}`;
+      nameEl.textContent = `${buildFigureLabel(current, fileIndex + 1 || 1)}: ${caption}`;
     }
     updateFigureSummary();
     updateAllUI();
+    queueDraftSave();
+    if (field === "pairWithNext" || field === "pairWithKey" || field === "placement") syncFigurePlacementControls();
   }
 
   function handleFigurePlacementActions(event) {
+    const tokenInput = event.target.closest(".figure-reference-token");
+    if (tokenInput) {
+      tokenInput.select();
+      try {
+        navigator.clipboard?.writeText(tokenInput.value);
+      } catch (_) {
+        // Selecting the token is enough for keyboard copy if clipboard access is unavailable.
+      }
+      return;
+    }
+
     const actionButton = event.target.closest("[data-figure-action='remove']");
     if (!actionButton) return;
     removeFigureByKey(actionButton.getAttribute("data-figure-key"));
   }
 
   function buildCurrentFigurePlacements(files) {
-    return files.reduce((acc, file) => {
-      acc[figureFileKey(file)] = getFigureDetailForFile(file).placement || state.figurePlacements[figureFileKey(file)] || "end";
+    const placements = files.reduce((acc, file, index) => {
+      const key = figureFileKey(file);
+      const detail = getFigureDetailForFile(file, index);
+      acc[key] = detail.placement || state.figurePlacements[key] || "end";
       return acc;
     }, {});
+    files.forEach((file, index) => {
+      const key = figureFileKey(file);
+      const detail = getFigureDetailForFile(file, index);
+      if (detail.pairWithNext && detail.pairWithKey && placements[detail.pairWithKey]) {
+        placements[key] = placements[detail.pairWithKey];
+      }
+    });
+    return placements;
   }
 
   function buildCurrentFigureDetails(files) {
@@ -2820,11 +4193,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resolveFigurePlacementForFile(file, data, availablePlacements) {
     const requested = data.figurePlacements?.[figureFileKey(file)] || "end";
-    return availablePlacements.has(requested) ? requested : "end";
+    const allowedPlacements = availablePlacements || new Set(["end"]);
+    return allowedPlacements.has(requested) ? requested : "end";
   }
 
   function getFigureFilesForPlacement(data, placement, availablePlacements) {
     return (data.imageFiles || []).filter((file) => resolveFigurePlacementForFile(file, data, availablePlacements) === placement);
+  }
+
+  function findFigurePairForFile(file, files, figureDetails, numberLookup, consumedKeys) {
+    const key = figureFileKey(file);
+    const detail = resolveFigureDetailForOutput(file, numberLookup[key] || 1, figureDetails || {});
+    if (detail.pairWithNext && detail.pairWithKey && !consumedKeys.has(detail.pairWithKey)) {
+      const pairedFile = files.find((candidate) => figureFileKey(candidate) === detail.pairWithKey);
+      if (pairedFile) return { first: file, second: pairedFile };
+    }
+
+    const incomingFile = files.find((candidate) => {
+      const candidateKey = figureFileKey(candidate);
+      if (candidateKey === key || consumedKeys.has(candidateKey)) return false;
+      const candidateDetail = resolveFigureDetailForOutput(candidate, numberLookup[candidateKey] || 1, figureDetails || {});
+      return candidateDetail.pairWithNext && candidateDetail.pairWithKey === key;
+    });
+
+    return incomingFile ? { first: incomingFile, second: file } : null;
   }
 
   async function appendPlacedFigures(children, docxLib, colors, files, figureCounterRef, options = {}) {
@@ -2834,10 +4226,39 @@ document.addEventListener("DOMContentLoaded", () => {
     figureCounterRef.value += files.length;
 
     if (options.withHeading) {
-      children.push(buildNomuraSubhead(docxLib, colors, options.heading || "Figures / Screenshots"));
+      children.push(buildNomuraSubhead(docxLib, colors, options.heading || "Figures"));
     }
 
     children.push(...imageParagraphs);
+  }
+
+  async function appendNarrativeSectionWithFigures(children, docxLib, colors, section, data, availablePlacements, figureCounterRef) {
+    const label = String(section?.label || defaultHeadingForSection(section?.key)).trim();
+    const sectionKey = String(section?.key || "").trim();
+    const content = replaceFigureReferenceTokens(section?.content || "", data, availablePlacements);
+    if (!label || !content) return;
+
+    children.push(buildNomuraSubhead(docxLib, colors, label));
+    const blocks = parseRichTextBlocks(content);
+    if (!blocks.length) {
+      children.push(...buildNomuraBodyParagraphs(docxLib, ""));
+      return;
+    }
+
+    let paragraphIndex = 0;
+    for (const block of blocks) {
+      children.push(...buildNomuraBodyParagraphs(docxLib, [block]));
+      if (!sectionKey || block.type === "spacer") continue;
+      paragraphIndex += 1;
+      await appendPlacedFigures(
+        children,
+        docxLib,
+        colors,
+        getFigureFilesForPlacement(data, `after-${sectionKey}-p${paragraphIndex}`, availablePlacements),
+        figureCounterRef,
+        { figureDetails: data.figureDetails }
+      );
+    }
   }
 
   function setMetric(element, value) {
@@ -2900,6 +4321,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await loadEquityMarketSnapshot();
     } catch (error) {
+      if (error?.code === "STALE_EQUITY_LOOKUP") return;
       resetChartState({ keepStatusText: true });
       dom.chartStatus.textContent = error.message;
       setMessage("error", `Unable to build the tear sheet: ${error.message}`);
@@ -2914,6 +4336,8 @@ document.addEventListener("DOMContentLoaded", () => {
       throw new Error("Chart.js is unavailable, so the equity tear sheet cannot be rendered in this session.");
     }
 
+    const requestId = state.equityLookupRequestId + 1;
+    state.equityLookupRequestId = requestId;
     const ticker = dom.ticker.value.trim();
     if (!ticker) {
       dom.ticker.classList.add("is-invalid");
@@ -2925,6 +4349,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const range = dom.chartRange.value || "6mo";
     const symbol = marketDataSymbolFromTicker(ticker);
+    const previousSymbol = getLastResolvedEquitySymbol();
+    const shouldForceMetadataRefresh = Boolean(previousSymbol && previousSymbol !== symbol);
+    clearEquityAutoFilledMetadata({ clearBenchmark: true, force: shouldForceMetadataRefresh });
     const benchmarkInput = dom.benchmarkTicker.value.trim();
     const benchmarkSymbol = benchmarkInput ? marketDataSymbolFromTicker(benchmarkInput) : "";
     const benchmarkLabel = dom.benchmarkName.value.trim() || benchmarkSymbol || benchmarkInput.toUpperCase();
@@ -2934,13 +4361,16 @@ document.addEventListener("DOMContentLoaded", () => {
       : "Fetching security history for the tear sheet...";
 
     const securityResult = await fetchMarketHistory(symbol, range);
+    assertCurrentEquityLookup(requestId, symbol);
     const filteredSecurity = securityResult.rows;
     if (filteredSecurity.length < 10) {
       throw new Error("Not enough price history returned for the selected range.");
     }
 
     const resolvedProfile = await resolveMarketSecurityProfile(symbol, securityResult.meta);
-    applyResolvedSecurityProfile(resolvedProfile);
+    assertCurrentEquityLookup(requestId, symbol);
+    applyResolvedSecurityProfile(resolvedProfile, { force: shouldForceMetadataRefresh, sourceSymbol: symbol });
+    state.lastResolvedEquitySymbol = symbol;
 
     let filteredBenchmark = null;
     let benchmarkNotice = "";
@@ -2948,6 +4378,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (benchmarkSymbol) {
       try {
         const benchmarkResult = await fetchMarketHistory(benchmarkSymbol, range);
+        assertCurrentEquityLookup(requestId, symbol);
         const candidateSeries = benchmarkResult.rows;
         if (candidateSeries.length >= 10) {
           filteredBenchmark = candidateSeries;
@@ -2959,6 +4390,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    assertCurrentEquityLookup(requestId, symbol);
     const chartConfig = buildEquityChartConfig({
       securitySeries: filteredSecurity,
       benchmarkSeries: filteredBenchmark,
@@ -3106,7 +4538,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function resolveMarketSecurityProfile(symbol, chartMeta = {}) {
     const baseProfile = buildMarketSecurityProfile(chartMeta, symbol);
-    const needsQuoteLookup = !baseProfile.companyName || !baseProfile.currency || !baseProfile.exchangeName;
+    const needsQuoteLookup = !baseProfile.companyName || !baseProfile.currency || !baseProfile.exchangeName || !baseProfile.marketCap || !baseProfile.sector || !baseProfile.industry;
 
     if (!needsQuoteLookup) return baseProfile;
 
@@ -3115,7 +4547,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return {
         companyName: quoteProfile.companyName || baseProfile.companyName,
         exchangeName: quoteProfile.exchangeName || baseProfile.exchangeName,
-        currency: quoteProfile.currency || baseProfile.currency
+        currency: quoteProfile.currency || baseProfile.currency,
+        marketCap: quoteProfile.marketCap || baseProfile.marketCap,
+        sector: quoteProfile.sector || baseProfile.sector,
+        industry: quoteProfile.industry || baseProfile.industry,
+        market: quoteProfile.market || baseProfile.market,
+        quoteType: quoteProfile.quoteType || baseProfile.quoteType,
+        symbol: quoteProfile.symbol || baseProfile.symbol
       };
     } catch (error) {
       console.warn(`Unable to resolve quote profile for ${symbol}:`, error);
@@ -3128,6 +4566,11 @@ document.addEventListener("DOMContentLoaded", () => {
       companyName: String(meta.longName || meta.shortName || meta.displayName || "").trim(),
       exchangeName: String(meta.fullExchangeName || meta.exchangeName || meta.exchange || "").trim(),
       currency: normalizeMarketCurrency(meta.currency || ""),
+      marketCap: Number(meta.marketCap) || null,
+      sector: String(meta.sector || "").trim(),
+      industry: String(meta.industry || "").trim(),
+      market: String(meta.market || "").trim(),
+      quoteType: String(meta.quoteType || "").trim(),
       symbol: String(meta.symbol || fallbackSymbol || "").trim()
     };
   }
@@ -3182,9 +4625,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     return {
+      symbol: String(quote.symbol || symbol || "").trim(),
       companyName: String(quote.longName || quote.shortName || quote.displayName || "").trim(),
       exchangeName: String(quote.fullExchangeName || quote.exchange || quote.exchangeName || "").trim(),
-      currency: normalizeMarketCurrency(quote.currency || "")
+      currency: normalizeMarketCurrency(quote.currency || ""),
+      marketCap: Number(quote.marketCap) || null,
+      sector: String(quote.sector || "").trim(),
+      industry: String(quote.industry || "").trim(),
+      market: String(quote.market || "").trim(),
+      quoteType: String(quote.quoteType || "").trim()
     };
   }
 
@@ -3315,6 +4764,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return currencyMap[normalized] || normalized;
   }
 
+  function getLastResolvedEquitySymbol() {
+    return String(state.lastResolvedEquitySymbol || state.equityStats?.symbol || "").trim();
+  }
+
+  function assertCurrentEquityLookup(requestId, symbol) {
+    const activeSymbol = marketDataSymbolFromTicker(dom.ticker.value);
+    if (state.equityLookupRequestId === requestId && activeSymbol === symbol) return;
+    const error = new Error("Stale equity metadata response ignored.");
+    error.code = "STALE_EQUITY_LOOKUP";
+    throw error;
+  }
+
   function canAutoFillField(input) {
     if (!input) return false;
     const currentValue = input.value.trim();
@@ -3322,9 +4783,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return input.dataset.autofill === "true";
   }
 
-  function setAutoFilledField(input, value) {
+  function setAutoFilledField(input, value, options = {}) {
     const resolvedValue = String(value || "").trim();
-    if (!input || !resolvedValue || !canAutoFillField(input)) return false;
+    if (!input || !resolvedValue || (!options.force && !canAutoFillField(input))) return false;
 
     const changed = input.value !== resolvedValue;
     input.value = resolvedValue;
@@ -3332,21 +4793,78 @@ document.addEventListener("DOMContentLoaded", () => {
     return changed;
   }
 
-  function applyResolvedSecurityProfile(profile = {}) {
+  function clearAutoFilledField(input, force = false) {
+    if (!input || (!force && input.dataset.autofill === "false")) return false;
+    const changed = String(input.value || "").trim().length > 0;
+    input.value = "";
+    input.dataset.autofill = "true";
+    return changed;
+  }
+
+  function clearEquityAutoFilledMetadata(options = {}) {
+    const force = Boolean(options.force);
+    const fields = [
+      dom.equityCompanyName,
+      dom.equitySecurityDisplay,
+      dom.priceCurrency,
+      dom.equitySectorLine,
+      dom.marketCapUsd
+    ];
+
+    if (options.clearBenchmark) {
+      fields.push(dom.benchmarkName, dom.benchmarkTicker);
+    }
+
+    const changed = fields.reduce((didChange, input) => clearAutoFilledField(input, force && input !== dom.benchmarkName && input !== dom.benchmarkTicker) || didChange, false);
+    if (changed) renderIndustryOptions("");
+    return changed;
+  }
+
+  function applyResolvedSecurityProfile(profile = {}, options = {}) {
     let changed = false;
+    const autofillOptions = { force: Boolean(options.force) };
 
     if (profile.companyName) {
-      changed = setAutoFilledField(dom.equityCompanyName, profile.companyName) || changed;
+      changed = setAutoFilledField(dom.equityCompanyName, profile.companyName, autofillOptions) || changed;
+    }
+
+    const securityDisplay = buildSecurityDisplayFromProfile(profile);
+    if (securityDisplay) {
+      changed = setAutoFilledField(dom.equitySecurityDisplay, securityDisplay, autofillOptions) || changed;
     }
 
     if (profile.currency) {
-      changed = setAutoFilledField(dom.priceCurrency, profile.currency) || changed;
+      changed = setAutoFilledField(dom.priceCurrency, profile.currency, autofillOptions) || changed;
     }
+
+    const sectorLine = [profile.sector, profile.industry].filter(Boolean).join(" - ");
+    if (sectorLine) {
+      changed = setAutoFilledField(dom.equitySectorLine, sectorLine, autofillOptions) || changed;
+      renderIndustryOptions("");
+    }
+
+    if (profile.marketCap && profile.currency === "USD") {
+      changed = setAutoFilledField(dom.marketCapUsd, formatMarketCapMillions(profile.marketCap), autofillOptions) || changed;
+    }
+
+    if (options.sourceSymbol) state.lastResolvedEquitySymbol = options.sourceSymbol;
 
     if (changed) {
       updateAllUI();
       queueDraftSave();
     }
+  }
+
+  function buildSecurityDisplayFromProfile(profile = {}) {
+    const symbol = String(profile.symbol || "").trim().toUpperCase();
+    const exchangeName = String(profile.exchangeName || "").trim();
+    return [symbol, exchangeName].filter(Boolean).join(" | ");
+  }
+
+  function formatMarketCapMillions(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric) || numeric <= 0) return "";
+    return formatNumericForDisplay(numeric / 1000000, 1);
   }
 
   function resolvePriceCurrency(data) {
@@ -3745,6 +5263,7 @@ document.addEventListener("DOMContentLoaded", () => {
           await loadEquityMarketSnapshot();
         }
       }
+      if ((state.figureFiles || []).length) await refreshFigureQualityForFiles(state.figureFiles);
       const data = collectFormData();
       data.noteId = buildNoteId(data);
       const review = buildPrePublishReview(data, validateForm(false));
@@ -3799,9 +5318,14 @@ document.addEventListener("DOMContentLoaded", () => {
       coverageCountry: dom.coverageCountry.value.trim(),
       issuerId: dom.issuerId.value.trim(),
       macroFiHeading: dom.macroFiHeading.value.trim(),
+      sovereignRegion: dom.sovereignRegion?.value.trim() || "",
+      sovereignCurrency: dom.sovereignCurrency?.value.trim() || "",
+      sovereignClassification: dom.sovereignClassification?.value.trim() || "",
+      sovereignBenchmark: dom.sovereignBenchmark?.value.trim() || "",
       agencyRating: dom.agencyRating.value.trim(),
       shortTermRating: dom.shortTermRating.value.trim(),
       longTermRating: dom.longTermRating.value.trim(),
+      ratingsProfileNotes: dom.ratingsProfileNotes?.value.trim() || "",
       ratingsProfile: collectRatingsProfile(),
       authorLastName: dom.authorLastName.value.trim(),
       authorFirstName: dom.authorFirstName.value.trim(),
@@ -3822,6 +5346,7 @@ document.addEventListener("DOMContentLoaded", () => {
       valuationSummary: dom.valuationSummary.value.trim(),
       financialTableTitle: dom.financialTableTitle.value.trim(),
       financialSourceNote: dom.financialSourceNote.value.trim(),
+      financialTableNotes: dom.financialTableNotes?.value.trim() || "",
       financialTableInput: dom.financialTableInput.value.trim(),
       modelLink: dom.modelLink.value.trim(),
       bodySectionLayout: collectBodySectionLayout(),
@@ -3834,6 +5359,7 @@ document.addEventListener("DOMContentLoaded", () => {
       imageFiles,
       figurePlacements: buildCurrentFigurePlacements(imageFiles),
       figureDetails: buildCurrentFigureDetails(imageFiles),
+      figureQuality: { ...state.figureQuality },
       modelFiles: Array.from(dom.modelFiles.files || []),
       priceChartImageBytes: state.priceChartImageBytes,
       equityStats: { ...state.equityStats },
@@ -3959,19 +5485,383 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/'/g, "&#39;");
   }
 
+  function isHtmlLike(value) {
+    return /<[^>]+>/.test(String(value || ""));
+  }
+
+  function plainTextToRichTextHtml(text) {
+    const normalized = String(text || "").replace(/\r\n/g, "\n");
+    const lines = normalized.split("\n");
+    const blocks = [];
+    let currentParagraph = [];
+    let spacerPending = false;
+
+    const pushParagraph = () => {
+      const paragraphText = currentParagraph.join("\n").trim();
+      if (!paragraphText) return;
+      blocks.push({
+        type: "paragraph",
+        runs: [{ text: paragraphText }]
+      });
+      currentParagraph = [];
+    };
+
+    lines.forEach((line) => {
+      if (line.trim()) {
+        if (spacerPending && blocks.length && blocks[blocks.length - 1]?.type !== "spacer") {
+          blocks.push({ type: "spacer" });
+        }
+        spacerPending = false;
+        currentParagraph.push(line);
+        return;
+      }
+
+      if (currentParagraph.length) {
+        pushParagraph();
+      }
+      spacerPending = true;
+    });
+
+    if (currentParagraph.length) {
+      pushParagraph();
+    }
+
+    return blocks.map((block) => {
+      if (block.type === "spacer") return "<p><br></p>";
+      const paragraphText = block.runs?.[0]?.text || "";
+      return `<p>${escapeHtml(paragraphText).replace(/\n/g, "<br>")}</p>`;
+    }).join("");
+  }
+
+  function sanitizeRichTextHtml(html) {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = String(html || "");
+    const output = document.createElement("div");
+    const allowedTags = new Set(["P", "DIV", "BR", "UL", "OL", "LI", "STRONG", "EM", "U"]);
+
+    function elementHasVisibleContent(element) {
+      if (!element) return false;
+      if ((element.textContent || "").replace(/\u00A0/g, " ").trim()) return true;
+      return Boolean(element.querySelector("br, strong, em, u"));
+    }
+
+    function sanitizeNode(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return document.createTextNode((node.textContent || "").replace(/\u00A0/g, " "));
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return document.createDocumentFragment();
+      }
+
+      const originalTag = node.tagName.toUpperCase();
+      if (["SCRIPT", "STYLE", "META", "LINK"].includes(originalTag)) {
+        return document.createDocumentFragment();
+      }
+
+      const mappedTag = originalTag === "B"
+        ? "STRONG"
+        : originalTag === "I"
+          ? "EM"
+          : originalTag === "DIV"
+            ? "P"
+          : originalTag;
+
+      const fragment = document.createDocumentFragment();
+      Array.from(node.childNodes).forEach((child) => {
+        fragment.appendChild(sanitizeNode(child));
+      });
+
+      if (!allowedTags.has(mappedTag)) {
+        return fragment;
+      }
+
+      const clean = document.createElement(mappedTag.toLowerCase());
+      Array.from(fragment.childNodes).forEach((child) => clean.appendChild(child));
+
+      if (mappedTag === "P") {
+        const paragraphStyle = normalizeParagraphStyle(node.getAttribute("data-paragraph-style"));
+        const paragraphAlign = normalizeParagraphAlignment(
+          node.getAttribute("data-align") || node.style?.textAlign || node.getAttribute("align")
+        );
+
+        if (paragraphStyle !== "body") clean.setAttribute("data-paragraph-style", paragraphStyle);
+        if (paragraphAlign !== "left") clean.setAttribute("data-align", paragraphAlign);
+      }
+
+      if (mappedTag === "UL" || mappedTag === "OL") {
+        const paragraphAlign = normalizeParagraphAlignment(
+          node.getAttribute("data-align") || node.style?.textAlign || node.getAttribute("align")
+        );
+        if (paragraphAlign !== "left") clean.setAttribute("data-align", paragraphAlign);
+      }
+
+      if ((mappedTag === "P" || mappedTag === "DIV") && !elementHasVisibleContent(clean)) {
+        clean.innerHTML = "<br>";
+      }
+
+      if (mappedTag === "LI" && !elementHasVisibleContent(clean)) {
+        clean.innerHTML = "<br>";
+      }
+
+      return clean;
+    }
+
+    Array.from(wrapper.childNodes).forEach((child) => {
+      output.appendChild(sanitizeNode(child));
+    });
+
+    return output.innerHTML.trim();
+  }
+
+  function buildRichTextStorageValue(value) {
+    const text = String(value || "").trim();
+    if (!text) return "";
+    return sanitizeRichTextHtml(isHtmlLike(text) ? text : plainTextToRichTextHtml(text));
+  }
+
+  function parseInlineRuns(nodes, formatState = { bold: false, italic: false, underline: false }) {
+    const runs = [];
+
+    function pushRun(text, formats) {
+      const cleanText = String(text || "").replace(/\u00A0/g, " ");
+      if (!cleanText) return;
+      const previous = runs[runs.length - 1];
+      if (
+        previous &&
+        !previous.break &&
+        previous.bold === formats.bold &&
+        previous.italic === formats.italic &&
+        previous.underline === formats.underline
+      ) {
+        previous.text += cleanText;
+        return;
+      }
+
+      runs.push({
+        text: cleanText,
+        bold: formats.bold,
+        italic: formats.italic,
+        underline: formats.underline
+      });
+    }
+
+    function walk(node, formats) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        pushRun(node.textContent || "", formats);
+        return;
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+      const tag = node.tagName.toUpperCase();
+      if (tag === "BR") {
+        runs.push({ break: true });
+        return;
+      }
+
+      const nextFormats = {
+        bold: formats.bold || tag === "STRONG" || tag === "B",
+        italic: formats.italic || tag === "EM" || tag === "I",
+        underline: formats.underline || tag === "U"
+      };
+
+      Array.from(node.childNodes).forEach((child) => walk(child, nextFormats));
+    }
+
+    Array.from(nodes || []).forEach((node) => walk(node, formatState));
+    return runs;
+  }
+
+  function inlineRunsToPlainText(runs) {
+    return (runs || [])
+      .map((run) => (run.break ? "\n" : run.text))
+      .join("")
+      .replace(/\n{3,}/g, "\n\n");
+  }
+
+  function hasVisibleRuns(runs) {
+    return inlineRunsToPlainText(runs).trim().length > 0;
+  }
+
+  function parseRichTextBlocks(value) {
+    const storedHtml = buildRichTextStorageValue(value);
+    if (!storedHtml) return [];
+
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = storedHtml;
+    const blocks = [];
+    let rootRuns = [];
+
+    function flushRootRuns() {
+      if (!hasVisibleRuns(rootRuns)) {
+        rootRuns = [];
+        return;
+      }
+      blocks.push({ type: "paragraph", runs: rootRuns, style: "body", align: "left" });
+      rootRuns = [];
+    }
+
+    Array.from(wrapper.childNodes).forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        rootRuns.push(...parseInlineRuns([node]));
+        return;
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+      const tag = node.tagName.toUpperCase();
+      if (tag === "P" || tag === "DIV") {
+        flushRootRuns();
+        const runs = parseInlineRuns(node.childNodes);
+        if (hasVisibleRuns(runs)) {
+          blocks.push({
+            type: "paragraph",
+            runs,
+            style: getBlockStyleFromElement(node),
+            align: getBlockAlignmentFromElement(node)
+          });
+        }
+        else if ((node.innerHTML || "").match(/<br\s*\/?>/i)) blocks.push({ type: "spacer" });
+        return;
+      }
+
+      if (tag === "UL" || tag === "OL") {
+        flushRootRuns();
+        const items = Array.from(node.children)
+          .filter((child) => child.tagName.toUpperCase() === "LI")
+          .map((item) => ({ runs: parseInlineRuns(item.childNodes) }))
+          .filter((item) => hasVisibleRuns(item.runs));
+        if (items.length) blocks.push({ type: "list", ordered: tag === "OL", items, style: "body", align: getBlockAlignmentFromElement(node) });
+        return;
+      }
+
+      if (tag === "BR") {
+        flushRootRuns();
+        blocks.push({ type: "spacer" });
+        return;
+      }
+
+      rootRuns.push(...parseInlineRuns([node]));
+    });
+
+    flushRootRuns();
+    return blocks;
+  }
+
+  function richTextToPlainText(value) {
+    const blocks = parseRichTextBlocks(value);
+    if (!blocks.length) return String(value || "").trim();
+
+    return blocks
+      .flatMap((block) => {
+        if (block.type === "spacer") return [""];
+        if (block.type === "list") {
+          return block.items.map((item) => inlineRunsToPlainText(item.runs).trim()).filter(Boolean);
+        }
+        return [inlineRunsToPlainText(block.runs).trim()].filter(Boolean);
+      })
+      .join("\n\n")
+      .trim();
+  }
+
+  function serializeInlineRunsToHtml(runs) {
+    return (runs || []).map((run) => {
+      if (run.break) return "<br>";
+      let html = escapeHtml(run.text);
+      if (run.underline) html = `<u>${html}</u>`;
+      if (run.italic) html = `<em>${html}</em>`;
+      if (run.bold) html = `<strong>${html}</strong>`;
+      return html;
+    }).join("");
+  }
+
+  function serializeRichTextBlocksToHtml(blocks) {
+    return (blocks || []).map((block) => {
+      if (block.type === "spacer") return '<p class="rich-text-spacer"><br></p>';
+      if (block.type === "list") {
+        const tag = block.ordered ? "ol" : "ul";
+        const align = normalizeParagraphAlignment(block.align);
+        const classes = align !== "left" ? ` class="rt-align-${align}"` : "";
+        const attrs = align !== "left" ? ` data-align="${escapeAttribute(align)}"` : "";
+        return `<${tag}${classes}${attrs}>${block.items.map((item) => `<li>${serializeInlineRunsToHtml(item.runs)}</li>`).join("")}</${tag}>`;
+      }
+
+      const style = normalizeParagraphStyle(block.style);
+      const align = normalizeParagraphAlignment(block.align);
+      const classes = [
+        style !== "body" ? `rich-text-${style}` : "",
+        align !== "left" ? `rt-align-${align}` : ""
+      ].filter(Boolean).join(" ");
+      const classAttr = classes ? ` class="${classes}"` : "";
+      const styleAttr = style !== "body" ? ` data-paragraph-style="${escapeAttribute(style)}"` : "";
+      const alignAttr = align !== "left" ? ` data-align="${escapeAttribute(align)}"` : "";
+      return `<p${classAttr}${styleAttr}${alignAttr}>${serializeInlineRunsToHtml(block.runs)}</p>`;
+    }).join("");
+  }
+
+  function serializeRichTextBlocksToPreviewHtml(blocks) {
+    return (blocks || []).map((block) => {
+      if (block.type === "spacer") return "";
+      if (block.type === "list") {
+        const tag = block.ordered ? "ol" : "ul";
+        const align = normalizeParagraphAlignment(block.align);
+        const classes = align !== "left" ? ` class="rt-align-${align}"` : "";
+        const attrs = align !== "left" ? ` data-align="${escapeAttribute(align)}"` : "";
+        return `<${tag}${classes}${attrs}>${block.items.map((item) => `<li>${serializeInlineRunsToHtml(item.runs)}</li>`).join("")}</${tag}>`;
+      }
+
+      const style = normalizeParagraphStyle(block.style);
+      const align = normalizeParagraphAlignment(block.align);
+      const classes = [
+        style !== "body" ? `rich-text-${style}` : "",
+        align !== "left" ? `rt-align-${align}` : ""
+      ].filter(Boolean).join(" ");
+      const classAttr = classes ? ` class="${classes}"` : "";
+      const styleAttr = style !== "body" ? ` data-paragraph-style="${escapeAttribute(style)}"` : "";
+      const alignAttr = align !== "left" ? ` data-align="${escapeAttribute(align)}"` : "";
+      return `<p${classAttr}${styleAttr}${alignAttr}>${serializeInlineRunsToHtml(block.runs)}</p>`;
+    }).join("");
+  }
+
+  function serializeRichTextBlocksToEditorHtml(blocks) {
+    return (blocks || []).map((block) => {
+      if (block.type === "spacer") return '<p class="rich-text-spacer"><br></p>';
+      return serializeRichTextBlocksToHtml([block]);
+    }).join("");
+  }
+
   function lineItems(text) {
-    return String(text || "")
-      .split("\n")
-      .map((line) => line.replace(/^[-*•]\s*/, "").trim())
+    const blocks = parseRichTextBlocks(text);
+    if (!blocks.length) {
+      return String(text || "")
+        .split("\n")
+        .map((line) => line.replace(/^[-*•]\s*/, "").trim())
+        .filter(Boolean);
+    }
+
+    return blocks
+      .flatMap((block) => {
+        if (block.type === "spacer") return [];
+        if (block.type === "list") {
+          return block.items.map((item) => inlineRunsToPlainText(item.runs).trim());
+        }
+        return inlineRunsToPlainText(block.runs)
+          .split("\n")
+          .map((line) => line.replace(/^[-*•]\s*/, "").trim());
+      })
       .filter(Boolean);
   }
 
   function paragraphBlocks(text) {
-    return String(text || "")
-      .replace(/\r\n/g, "\n")
-      .split(/\n+/)
-      .map((block) => block.trim())
-      .filter(Boolean);
+    return parseRichTextBlocks(text)
+      .flatMap((block) => {
+        if (block.type === "spacer") return [];
+        if (block.type === "list") {
+          return block.items.map((item) => inlineRunsToPlainText(item.runs).trim()).filter(Boolean);
+        }
+        return [inlineRunsToPlainText(block.runs).trim()].filter(Boolean);
+      });
   }
 
   function cleanupPreviewAssets() {
@@ -4042,12 +5932,23 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  function buildPreviewNarrativeHtml(label, content) {
+  function buildPreviewNarrativeHtml(label, content, options = {}) {
     if (!content) return "";
+    const resolvedContent = options.data
+      ? replaceFigureReferenceTokens(content, options.data, options.availablePlacements)
+      : content;
+    const blocks = parseRichTextBlocks(resolvedContent);
+    let paragraphIndex = 0;
+    const richHtml = blocks.map((block) => {
+      const blockHtml = serializeRichTextBlocksToPreviewHtml([block]);
+      if (!options.data || !options.availablePlacements || !options.sectionKey || block.type === "spacer") return blockHtml;
+      paragraphIndex += 1;
+      return `${blockHtml}${buildPreviewFigureMarkup(options.data.imageFiles, options.data, options.availablePlacements, `after-${options.sectionKey}-p${paragraphIndex}`)}`;
+    }).join("");
     return `
       <section class="preview-export-section">
         <h3>${escapeHtml(label)}</h3>
-        ${paragraphBlocks(content).map((block) => `<p>${escapeHtml(block).replace(/\n/g, "<br>")}</p>`).join("")}
+        ${richHtml || "<p>No content supplied.</p>"}
       </section>
     `;
   }
@@ -4087,34 +5988,78 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
+  function buildPreviewFigureItemHtml(file, data, availablePlacements, autoNumber, options = {}) {
+    const objectUrl = URL.createObjectURL(file);
+    state.previewObjectUrls.push(objectUrl);
+    const detail = resolveFigureDetailForOutput(file, autoNumber, data.figureDetails || {});
+    const label = buildFigureLabel(detail, autoNumber);
+    const title = buildFigureTitleText(detail, file);
+    const displayTitle = `${label}: ${title}`;
+    const footerHtml = buildPreviewFigureFooterHtml(detail.source, detail.notes);
+    const displayMode = options.paired ? "inline" : sanitizeFigureDisplayMode(detail.displayMode);
+    const size = sanitizeFigureSize(options.paired ? "small" : detail.size);
+    const cropMode = sanitizeFigureCropMode(detail.cropMode);
+
+    return `
+      <figure class="preview-figure preview-figure-${displayMode} preview-figure-${size} preview-figure-crop-${cropMode}${options.paired ? " is-paired" : ""}">
+        <div class="preview-figure-header">
+          <div class="preview-figure-title">${escapeHtml(displayTitle)}</div>
+          ${detail.subtitle ? `<div class="preview-figure-subtitle">${escapeHtml(detail.subtitle)}</div>` : ""}
+          ${detail.takeaway ? `<div class="preview-figure-takeaway">${escapeHtml(detail.takeaway)}</div>` : ""}
+        </div>
+        <div class="preview-figure-image-frame">
+          <img src="${escapeAttribute(objectUrl)}" alt="${escapeAttribute(displayTitle)}">
+        </div>
+        ${footerHtml ? `<figcaption class="preview-figure-footer">${footerHtml}</figcaption>` : ""}
+      </figure>
+    `;
+  }
+
   function buildPreviewFigureMarkup(files, data, availablePlacements, placement) {
     const placedFiles = getFigureFilesForPlacement(data, placement, availablePlacements);
-    return placedFiles.map((file, index) => {
-      const objectUrl = URL.createObjectURL(file);
-      state.previewObjectUrls.push(objectUrl);
-      const detail = data.figureDetails?.[figureFileKey(file)] || getFigureDetailForFile(file, index);
-      const caption = `${detail.labelType || "Figure"} ${sanitizeFigureNumber(detail.labelNumber, index + 1)}. ${detail.caption || defaultFigureCaption(file)}`;
-      return `
-        <figure class="preview-figure">
-          <img src="${objectUrl}" alt="${escapeAttribute(caption)}">
-          <figcaption>${escapeHtml(caption)}</figcaption>
-        </figure>
-      `;
-    }).join("");
+    const numberLookup = buildFigureNumberLookup(data, availablePlacements);
+    const output = [];
+    const consumed = new Set();
+
+    for (const file of placedFiles) {
+      const key = figureFileKey(file);
+      if (consumed.has(key)) continue;
+      const autoNumber = numberLookup[key] || placedFiles.indexOf(file) + 1;
+      const pair = findFigurePairForFile(file, placedFiles, data.figureDetails || {}, numberLookup, consumed);
+
+      if (pair) {
+        const firstKey = figureFileKey(pair.first);
+        const secondKey = figureFileKey(pair.second);
+        output.push(`
+          <div class="preview-figure-pair">
+            ${buildPreviewFigureItemHtml(pair.first, data, availablePlacements, numberLookup[firstKey] || autoNumber, { paired: true })}
+            ${buildPreviewFigureItemHtml(pair.second, data, availablePlacements, numberLookup[secondKey] || autoNumber + 1, { paired: true })}
+          </div>
+        `);
+        consumed.add(firstKey);
+        consumed.add(secondKey);
+        continue;
+      }
+
+      output.push(buildPreviewFigureItemHtml(file, data, availablePlacements, autoNumber));
+      consumed.add(key);
+    }
+
+    return output.join("");
   }
 
   function buildPreviewMacroFiProfileHtml(data) {
     const heading = data.macroFiHeading || (data.noteType === "Fixed Income Research" ? "Ratings Overview" : "Sovereign Ratings");
     const ratingsRows = (data.ratingsProfile || []).filter((row) => row.agency || row.shortTerm || row.longTerm);
-    const showMeta = data.noteType === "Macro Research" || data.coverageCountry || data.issuerId;
+    const metadataItems = buildMacroFiMetadataItems(data);
+    const showMeta = data.noteType === "Macro Research" || metadataItems.length;
 
     return `
       <section class="preview-export-section">
         <h3>${escapeHtml(heading)}</h3>
         ${showMeta ? `
           <div class="preview-macro-meta">
-            <div><strong>Coverage Country</strong><span>${escapeHtml(data.coverageCountry ? getCoverageCountryLabel(data.coverageCountry) : "N/A")}</span></div>
-            <div><strong>Issuer Number</strong><span>${escapeHtml(data.issuerId || "N/A")}</span></div>
+            ${metadataItems.map((item) => `<div><strong>${escapeHtml(item.label)}</strong><span>${escapeHtml(item.value)}</span></div>`).join("")}
           </div>
         ` : ""}
         <table class="preview-ratings-table">
@@ -4131,8 +6076,20 @@ document.addEventListener("DOMContentLoaded", () => {
             `).join("")}
           </tbody>
         </table>
+        ${data.ratingsProfileNotes ? `<div class="preview-ratings-notes">${serializeRichTextBlocksToPreviewHtml(parseRichTextBlocks(data.ratingsProfileNotes))}</div>` : ""}
       </section>
     `;
+  }
+
+  function buildMacroFiMetadataItems(data) {
+    return [
+      { label: "Coverage Country", value: data.coverageCountry ? getCoverageCountryLabel(data.coverageCountry) : "" },
+      { label: "Issuer Number", value: data.issuerId || "" },
+      { label: "Region", value: data.sovereignRegion || "" },
+      { label: "Currency", value: data.sovereignCurrency || "" },
+      { label: "Classification", value: data.sovereignClassification || "" },
+      { label: "Benchmark Reference", value: data.sovereignBenchmark || "" }
+    ].filter((item) => item.value);
   }
 
   function buildPreviewEquityTearSheetHtml(data, publicationDate) {
@@ -4203,12 +6160,13 @@ document.addEventListener("DOMContentLoaded", () => {
             ${matrix.rows.map((row) => `
               <tr>
                 <td>${escapeHtml(row.label || "-")}</td>
-                ${(row.values || []).map((value) => `<td>${escapeHtml(formatFinancialCellForExport(value, row.label))}</td>`).join("")}
+                ${(row.values || []).map((value) => `<td>${escapeHtml(formatFinancialCellForExport(value, row))}</td>`).join("")}
               </tr>
             `).join("")}
           </tbody>
         </table>
         <div class="preview-financial-source">${escapeHtml(sourceNote)}</div>
+        ${data.financialTableNotes ? `<div class="preview-financial-notes">${serializeRichTextBlocksToPreviewHtml(parseRichTextBlocks(data.financialTableNotes))}</div>` : ""}
       </section>
     `;
   }
@@ -4270,6 +6228,368 @@ document.addEventListener("DOMContentLoaded", () => {
         <span>Page ${pageNumber} of ${totalPages}</span>
       </footer>
     `;
+  }
+
+  function buildSummarySourceSections(data) {
+    const sections = [];
+
+    if (data.deck) {
+      sections.push({
+        key: "deck",
+        label: "Overview",
+        blocks: parseRichTextBlocks(data.deck),
+        suppressHeading: true
+      });
+    }
+
+    if (data.noteType === "Equity Research") {
+      if (data.businessDescription) {
+        sections.push({ key: "businessDescription", label: "Business Description", blocks: parseRichTextBlocks(data.businessDescription) });
+      }
+      if (data.valuationSummary) {
+        sections.push({ key: "valuationSummary", label: "Valuation Summary", blocks: parseRichTextBlocks(data.valuationSummary) });
+      }
+    }
+
+    normalizeBodySectionLayoutForExport(data)
+      .filter((entry) => !entry.hidden && entry.content)
+      .forEach((entry) => {
+        if (entry.key === "keyTakeaways") {
+          sections.push({
+            key: entry.key,
+            label: entry.label,
+            items: lineItems(entry.content)
+          });
+          return;
+        }
+
+        sections.push({
+          key: entry.key,
+          label: entry.label,
+          blocks: parseRichTextBlocks(entry.content)
+        });
+      });
+
+    return sections;
+  }
+
+  function summarySectionPriority(sectionKey) {
+    const priorities = {
+      deck: 9.5,
+      keyTakeaways: 10,
+      cordobaView: 8.8,
+      fiveYearRationale: 8.5,
+      valuationSummary: 8.2,
+      analysis: 7.2,
+      esgSummary: 6.6,
+      content: 5.9,
+      businessDescription: 5.2
+    };
+
+    return priorities[sectionKey] || 5;
+  }
+
+  function isLowValueSummaryText(text, sectionKey = "") {
+    const normalized = normalizeComparableText(text);
+    if (!normalized) return true;
+
+    const genericPhrases = [
+      "the company is",
+      "the business is",
+      "the sector is",
+      "was established",
+      "operates in",
+      "provides products",
+      "important part of",
+      "in recent years",
+      "it is worth noting",
+      "should be noted",
+      "for context",
+      "more detail below",
+      "we discuss below",
+      "the note outlines",
+      "the note discusses"
+    ];
+
+    const genericHitCount = genericPhrases.filter((phrase) => normalized.includes(phrase)).length;
+    if (sectionKey === "businessDescription" && genericHitCount >= 1 && !/[0-9%$£€]/.test(text)) return true;
+    return genericHitCount >= 2;
+  }
+
+  function scoreSummaryText(text, sectionKey = "", options = {}) {
+    const wordCount = countMeaningfulWords(text);
+    if (!wordCount) return -Infinity;
+
+    const normalized = normalizeComparableText(text);
+    let score = summarySectionPriority(sectionKey);
+
+    const thesisKeywords = ["thesis", "conviction", "view", "mispriced", "underappreciated", "market implies", "pricing in", "we expect", "we believe", "our view"];
+    const catalystKeywords = ["catalyst", "trigger", "earnings", "policy", "meeting", "listing", "approval", "rerating", "inflection", "upgrade", "downgrade"];
+    const riskKeywords = ["risk", "downside", "bear case", "pressure", "uncertain", "volatility", "headwind", "execution", "funding"];
+    const valuationKeywords = ["valuation", "target price", "fair value", "multiple", "discount", "premium", "upside", "downside", "spread", "yield"];
+    const materialityKeywords = ["balance sheet", "margin", "cash flow", "earnings", "inflation", "rates", "duration", "default", "liquidity", "capital"];
+    const contrastKeywords = ["however", "but", "despite", "yet", "instead", "although", "while"];
+
+    if (containsAnyKeyword(text, thesisKeywords)) score += 4.1;
+    if (containsAnyKeyword(text, catalystKeywords)) score += 3.2;
+    if (containsAnyKeyword(text, riskKeywords)) score += 2.5;
+    if (containsAnyKeyword(text, valuationKeywords)) score += 2.8;
+    if (containsAnyKeyword(text, materialityKeywords)) score += 2.1;
+    if (containsAnyKeyword(text, contrastKeywords)) score += 1.1;
+
+    if (/[0-9]/.test(text)) score += 0.8;
+    if (/%|\bbps\b|\busd\b|\bgbp\b|\beur\b|\bx\b|\bcagr\b/i.test(text)) score += 0.9;
+    if (wordCount >= 14 && wordCount <= 48) score += 1.2;
+    if (wordCount > 90) score -= 1.6;
+    if (wordCount < 8) score -= 1.1;
+    if (isLowValueSummaryText(text, sectionKey)) score -= 3.3;
+    if (options.isKeyTakeaway) score += 2.7;
+    if (options.isDeck) score += 1.9;
+
+    return score;
+  }
+
+  function buildSummaryCandidate(section, payload, order, extra = {}) {
+    const text = String(payload?.text || "").trim();
+    if (!text) return null;
+
+    return {
+      sectionKey: section.key,
+      sectionLabel: section.label,
+      html: payload.html,
+      text,
+      words: countMeaningfulWords(text),
+      order,
+      score: scoreSummaryText(text, section.key, extra),
+      suppressHeading: Boolean(section.suppressHeading),
+      isKeyTakeaway: Boolean(extra.isKeyTakeaway)
+    };
+  }
+
+  function collectSummaryCandidates(section, startingOrder) {
+    let order = startingOrder;
+    const candidates = [];
+
+    if (Array.isArray(section.items)) {
+      section.items.forEach((item) => {
+        const cleaned = String(item || "").trim();
+        if (!cleaned) return;
+        const candidate = buildSummaryCandidate(
+          section,
+          {
+            text: cleaned,
+            html: `<li>${escapeHtml(cleaned)}</li>`
+          },
+          order,
+          { isKeyTakeaway: true }
+        );
+        order += 1;
+        if (candidate) candidates.push(candidate);
+      });
+      return { candidates, nextOrder: order };
+    }
+
+    (section.blocks || []).forEach((block) => {
+      if (block.type === "spacer") {
+        order += 1;
+        return;
+      }
+
+      if (block.type === "list") {
+        block.items.forEach((item) => {
+          const text = inlineRunsToPlainText(item.runs).trim();
+          const candidate = buildSummaryCandidate(
+            section,
+            {
+              text,
+              html: `<p>${serializeInlineRunsToHtml(item.runs)}</p>`
+            },
+            order,
+            { isKeyTakeaway: section.key === "keyTakeaways" }
+          );
+          order += 1;
+          if (candidate) candidates.push(candidate);
+        });
+        return;
+      }
+
+      const text = inlineRunsToPlainText(block.runs).trim();
+      const candidate = buildSummaryCandidate(
+        section,
+        {
+          text,
+          html: serializeRichTextBlocksToHtml([block])
+        },
+        order,
+        { isDeck: section.key === "deck" }
+      );
+      order += 1;
+      if (candidate) candidates.push(candidate);
+    });
+
+    return { candidates, nextOrder: order };
+  }
+
+  function buildSummaryDraftHtml(data) {
+    const sections = buildSummarySourceSections(data);
+    const totalWords = sections.reduce((sum, section) => {
+      if (section.items) return sum + countMeaningfulWords(section.items.join(" "));
+      return sum + countMeaningfulWords((section.blocks || []).map((block) => {
+        if (block.type === "spacer") return "";
+        if (block.type === "list") {
+          return block.items.map((item) => inlineRunsToPlainText(item.runs)).join(" ");
+        }
+        return inlineRunsToPlainText(block.runs);
+      }).join(" "));
+    }, 0);
+
+    const targetWords = Math.max(90, Math.min(360, Math.round(totalWords * 0.5)));
+    const parts = [];
+    let usedWords = 0;
+    let runningOrder = 0;
+    const usedSummarySignatures = new Set();
+    const rememberSummaryText = (text) => {
+      const signature = normalizeComparableText(text);
+      if (signature) usedSummarySignatures.add(signature);
+    };
+
+    const keyTakeawaysSection = sections.find((section) => section.key === "keyTakeaways" && Array.isArray(section.items) && section.items.length);
+    const deckSection = sections.find((section) => section.key === "deck" && Array.isArray(section.blocks) && section.blocks.length);
+    const detailSections = sections.filter((section) => section.key !== "keyTakeaways" && section.key !== "deck");
+
+    if (deckSection?.blocks?.length) {
+      const openerBlock = deckSection.blocks.find((block) => block.type === "paragraph" || block.type === "list") || deckSection.blocks[0];
+      const openerText = openerBlock.type === "list"
+        ? openerBlock.items.map((item) => inlineRunsToPlainText(item.runs)).join(" ")
+        : inlineRunsToPlainText(openerBlock.runs);
+      if (countMeaningfulWords(openerText)) {
+        parts.push(serializeRichTextBlocksToHtml([openerBlock]));
+        usedWords += countMeaningfulWords(openerText);
+        rememberSummaryText(openerText);
+      }
+    }
+
+    if (keyTakeawaysSection) {
+      const takeawayCandidates = keyTakeawaysSection.items
+        .map((item, index) => buildSummaryCandidate(
+          keyTakeawaysSection,
+          { text: item, html: `<li>${escapeHtml(item)}</li>` },
+          index,
+          { isKeyTakeaway: true }
+        ))
+        .filter(Boolean)
+        .sort((left, right) => right.score - left.score || left.order - right.order)
+        .filter((candidate) => !usedSummarySignatures.has(normalizeComparableText(candidate.text)))
+        .slice(0, Math.min(3, keyTakeawaysSection.items.length))
+        .sort((left, right) => left.order - right.order);
+
+      if (takeawayCandidates.length) {
+        parts.push(`<h3>${escapeHtml(keyTakeawaysSection.label)}</h3>`);
+        parts.push(`<ul>${takeawayCandidates.map((candidate) => candidate.html).join("")}</ul>`);
+        usedWords += takeawayCandidates.reduce((sum, candidate) => sum + candidate.words, 0);
+        takeawayCandidates.forEach((candidate) => rememberSummaryText(candidate.text));
+      }
+    }
+
+    const allCandidates = [];
+    detailSections.forEach((section) => {
+      const collected = collectSummaryCandidates(section, runningOrder);
+      runningOrder = collected.nextOrder;
+      allCandidates.push(...collected.candidates);
+    });
+
+    const selected = [];
+    const perSectionCounts = new Map();
+    const sortedCandidates = allCandidates
+      .filter((candidate) => candidate.score > 2.8)
+      .sort((left, right) => right.score - left.score || left.order - right.order);
+
+    for (const candidate of sortedCandidates) {
+      if (usedWords >= targetWords && selected.length >= 2) break;
+      const sectionCount = perSectionCounts.get(candidate.sectionKey) || 0;
+      const sectionLimit = candidate.sectionKey === "analysis" ? 2 : 1;
+      if (sectionCount >= sectionLimit) continue;
+      if (usedSummarySignatures.has(normalizeComparableText(candidate.text))) continue;
+      if (selected.some((existing) => normalizeComparableText(existing.text) === normalizeComparableText(candidate.text))) continue;
+
+      const projectedWords = usedWords + candidate.words;
+      if (selected.length >= 2 && projectedWords > targetWords * 1.16) continue;
+
+      selected.push(candidate);
+      perSectionCounts.set(candidate.sectionKey, sectionCount + 1);
+      usedWords = projectedWords;
+      rememberSummaryText(candidate.text);
+    }
+
+    if (!selected.length) {
+      const fallback = allCandidates
+        .sort((left, right) => right.score - left.score || left.order - right.order)
+        .slice(0, 2)
+        .sort((left, right) => left.order - right.order);
+      selected.push(...fallback);
+    } else {
+      selected.sort((left, right) => left.order - right.order);
+    }
+
+    const addedHeadings = new Set();
+    selected.forEach((candidate) => {
+      if (!candidate.suppressHeading && !addedHeadings.has(candidate.sectionKey)) {
+        parts.push(`<h3>${escapeHtml(candidate.sectionLabel)}</h3>`);
+        addedHeadings.add(candidate.sectionKey);
+      }
+      parts.push(candidate.html);
+    });
+
+    if (!parts.length && data.topic) {
+      parts.push(`<p>${escapeHtml(data.topic)}</p>`);
+    }
+
+    parts.push("<p><em>To read the full note, visit the Research Library.</em></p>");
+    return parts.join("");
+  }
+
+  function openSummaryModal() {
+    if (!dom.summaryModal || !dom.summaryEditor) return;
+
+    closePreviewModal();
+    const data = collectFormData();
+    const summaryHtml = buildSummaryDraftHtml(data);
+    state.summaryHtml = summaryHtml;
+    dom.summaryNoteTitle.textContent = data.title || "Untitled Research Note";
+    dom.summaryModalSubtitle.textContent = `Editable website summary generated from the current ${data.noteType || "research"} draft.`;
+    dom.summaryEditor.innerHTML = summaryHtml;
+    updateRichEditorEmptyState(dom.summaryEditor);
+    dom.summaryModal.hidden = false;
+  }
+
+  function closeSummaryModal() {
+    if (!dom.summaryModal) return;
+    dom.summaryModal.hidden = true;
+  }
+
+  async function copySummaryToClipboard() {
+    if (!dom.summaryEditor) return;
+    const summaryText = [dom.summaryNoteTitle?.textContent || "", richTextToPlainText(dom.summaryEditor.innerHTML)]
+      .filter(Boolean)
+      .join("\n\n")
+      .trim();
+
+    if (!summaryText) {
+      setMessage("error", "There is no summary copy available yet.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(summaryText);
+      setMessage("success", "Summary copied to clipboard.");
+    } catch (error) {
+      console.error("Summary copy failed:", error);
+      setMessage("error", "Unable to copy the summary from this browser session.");
+    }
+  }
+
+  function publishSummaryToResearchCommentary() {
+    window.open("https://cordobarg.com/wp-admin/post-new.php", "_blank", "noopener");
   }
 
   function buildPreviewEquityCrgRatingDefinitionsPageHtml(data, pageNumber, totalPages) {
@@ -4453,7 +6773,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `<h1 class="preview-export-title">${escapeHtml(data.title || "Untitled Equity Research Note")}</h1>`,
         `<p class="preview-export-deck">${escapeHtml(data.deck || "No deck supplied")}</p>`,
         `<p class="preview-export-topic">${escapeHtml(`${data.topic || data.deskLine || "Equity Research"} | ${formatDocDate(publicationDate)}`)}</p>`,
-        buildPreviewKeyTakeawaysBoxHtml(keyTakeaways?.label || "Key Takeaways", keyTakeaways?.content || data.keyTakeaways),
+        buildPreviewKeyTakeawaysBoxHtml(keyTakeaways?.label || "Key Takeaways", replaceFigureReferenceTokens(keyTakeaways?.content || data.keyTakeaways, data, availablePlacements)),
         `</div>`,
         `<aside class="preview-equity-sidebar">`,
         buildPreviewEquityTearSheetHtml(data, publicationDate),
@@ -4464,24 +6784,40 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       if (data.businessDescription) {
-        previewParts.push(buildPreviewNarrativeHtml("Business Description", data.businessDescription));
+        previewParts.push(buildPreviewNarrativeHtml("Business Description", data.businessDescription, {
+          data,
+          availablePlacements,
+          sectionKey: "businessDescription"
+        }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-businessDescription"));
       }
       if (data.valuationSummary) {
-        previewParts.push(buildPreviewNarrativeHtml("Valuation Summary", data.valuationSummary));
+        previewParts.push(buildPreviewNarrativeHtml("Valuation Summary", data.valuationSummary, {
+          data,
+          availablePlacements,
+          sectionKey: "valuationSummary"
+        }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-valuationSummary"));
       }
       middleSections.forEach((section) => {
-        previewParts.push(buildPreviewNarrativeHtml(section.label, section.content));
+        previewParts.push(buildPreviewNarrativeHtml(section.label, section.content, {
+          data,
+          availablePlacements,
+          sectionKey: section.key
+        }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, `after-${section.key}`));
       });
-      const endFigures = buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "end");
-      if (endFigures) previewParts.push(`<section class="preview-export-section"><h3>Figures / Screenshots</h3>${endFigures}</section>`);
       previewParts.push(buildPreviewSupportHtml(data));
       if (cordobaView?.content) {
-        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content));
+        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content, {
+          data,
+          availablePlacements,
+          sectionKey: "cordobaView"
+        }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-cordobaView"));
       }
+      const endFigures = buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "end");
+      if (endFigures) previewParts.push(endFigures);
     } else {
       previewParts.push(
         buildPreviewDisplayLineHtml(data),
@@ -4490,8 +6826,8 @@ document.addEventListener("DOMContentLoaded", () => {
         `<h1 class="preview-export-title">${escapeHtml(data.title || "Untitled Research Note")}</h1>`,
         `<p class="preview-export-deck">${escapeHtml(data.deck || "No deck supplied")}</p>`,
         `<p class="preview-export-topic">${escapeHtml(`${data.topic || "Topic pending"} | ${formatDocDate(publicationDate)}`)}</p>`,
-        `${data.noteType === "Macro Research" || (isMacroFiNoteType(data.noteType) && (data.coverageCountry || data.issuerId))
-          ? `<p class="preview-export-meta-line">${escapeHtml(`Coverage Country: ${data.coverageCountry ? getCoverageCountryLabel(data.coverageCountry) : "N/A"} | Issuer Number: ${data.issuerId || "N/A"}`)}</p>`
+        `${data.noteType === "Macro Research" || (isMacroFiNoteType(data.noteType) && buildMacroFiMetadataItems(data).length)
+          ? `<p class="preview-export-meta-line">${escapeHtml(buildMacroFiMetadataItems(data).slice(0, 4).map((item) => `${item.label}: ${item.value}`).join(" | "))}</p>`
           : ""}`,
         `</div>`,
         `<aside class="preview-generic-side">${buildPreviewAnalystPanelHtml(data.deskLine || strategyLabelForNoteType(data.noteType) || "Global Research Strategy", analystContacts)}</aside>`,
@@ -4503,21 +6839,29 @@ document.addEventListener("DOMContentLoaded", () => {
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-macroFiProfile"));
       }
 
-      previewParts.push(buildPreviewKeyTakeawaysBoxHtml(keyTakeaways?.label || "Key Takeaways", keyTakeaways?.content || data.keyTakeaways));
+      previewParts.push(buildPreviewKeyTakeawaysBoxHtml(keyTakeaways?.label || "Key Takeaways", replaceFigureReferenceTokens(keyTakeaways?.content || data.keyTakeaways, data, availablePlacements)));
       previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-keyTakeaways"));
 
       middleSections.forEach((section) => {
-        previewParts.push(buildPreviewNarrativeHtml(section.label, section.content));
+        previewParts.push(buildPreviewNarrativeHtml(section.label, section.content, {
+          data,
+          availablePlacements,
+          sectionKey: section.key
+        }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, `after-${section.key}`));
       });
 
       if (cordobaView?.content) {
-        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content));
+        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content, {
+          data,
+          availablePlacements,
+          sectionKey: "cordobaView"
+        }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-cordobaView"));
       }
 
       const endFigures = buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "end");
-      if (endFigures) previewParts.push(`<section class="preview-export-section"><h3>Figures / Screenshots</h3>${endFigures}</section>`);
+      if (endFigures) previewParts.push(endFigures);
       previewParts.push(buildPreviewSupportHtml(data));
     }
 
@@ -4567,6 +6911,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function openPreviewModal() {
     if (!dom.previewModal || !dom.previewModalBody) return;
 
+    closeSummaryModal();
     cleanupPreviewAssets();
     const data = collectFormData();
     data.noteId = buildPreviewNoteId(data);
@@ -4620,10 +6965,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const analystContacts = collectAnalystContacts(data);
     const { keyTakeaways, middle, cordobaView } = getNarrativeSectionPartitions(data);
     const figureCounterRef = { value: 1 };
-    const availablePlacements = new Set(["end", "after-keyTakeaways"]);
-    if (isMacroFiNoteType(data.noteType)) availablePlacements.add("after-macroFiProfile");
-    middle.forEach((section) => availablePlacements.add(`after-${section.key}`));
-    if (cordobaView?.content) availablePlacements.add("after-cordobaView");
+    const availablePlacements = new Set(getFigurePlacementOptions(data.noteType).map((option) => option.value));
 
     if (data.noteType === "Equity Research") {
       return createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystContacts, {
@@ -4665,7 +7007,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     documentChildren.push(
-      buildKeyTakeawaysBox(docxLib, colors, lineItems(keyTakeaways.content), keyTakeaways.label)
+      buildKeyTakeawaysBox(docxLib, colors, lineItems(replaceFigureReferenceTokens(keyTakeaways.content, data, availablePlacements)), keyTakeaways.label)
     );
     await appendPlacedFigures(
       documentChildren,
@@ -4677,7 +7019,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     for (const section of middle) {
-      documentChildren.push(...buildNarrativeSectionBlocks(docxLib, colors, [section]));
+      await appendNarrativeSectionWithFigures(documentChildren, docxLib, colors, section, data, availablePlacements, figureCounterRef);
       await appendPlacedFigures(
         documentChildren,
         docxLib,
@@ -4689,7 +7031,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (cordobaView?.content) {
-      documentChildren.push(...buildNarrativeSectionBlocks(docxLib, colors, [cordobaView]));
+      await appendNarrativeSectionWithFigures(documentChildren, docxLib, colors, cordobaView, data, availablePlacements, figureCounterRef);
       await appendPlacedFigures(
         documentChildren,
         docxLib,
@@ -4703,8 +7045,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const endFigures = getFigureFilesForPlacement(data, "end", availablePlacements);
     if (endFigures.length) {
       await appendPlacedFigures(documentChildren, docxLib, colors, endFigures, figureCounterRef, {
-        withHeading: true,
-        heading: "Figures / Screenshots",
         figureDetails: data.figureDetails
       });
     }
@@ -4777,11 +7117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystContacts, narrativeSections, figureCounterRef) {
     const { keyTakeaways, middle, cordobaView } = narrativeSections;
-    const availablePlacements = new Set(["end"]);
-    if (data.businessDescription) availablePlacements.add("after-businessDescription");
-    if (data.valuationSummary) availablePlacements.add("after-valuationSummary");
-    middle.forEach((section) => availablePlacements.add(`after-${section.key}`));
-    if (cordobaView?.content) availablePlacements.add("after-cordobaView");
+    const availablePlacements = new Set(getFigurePlacementOptions(data.noteType).map((option) => option.value));
     const children = [
       new docxLib.Paragraph({
         children: [
@@ -4799,10 +7135,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     if (data.businessDescription) {
-      children.push(
-        buildNomuraSubhead(docxLib, colors, "Business Description"),
-        ...buildNomuraBodyParagraphs(docxLib, data.businessDescription)
-      );
+      await appendNarrativeSectionWithFigures(children, docxLib, colors, {
+        key: "businessDescription",
+        label: "Business Description",
+        content: data.businessDescription
+      }, data, availablePlacements, figureCounterRef);
       await appendPlacedFigures(
         children,
         docxLib,
@@ -4814,10 +7151,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (data.valuationSummary) {
-      children.push(
-        buildNomuraSubhead(docxLib, colors, "Valuation Summary"),
-        ...buildNomuraBodyParagraphs(docxLib, data.valuationSummary)
-      );
+      await appendNarrativeSectionWithFigures(children, docxLib, colors, {
+        key: "valuationSummary",
+        label: "Valuation Summary",
+        content: data.valuationSummary
+      }, data, availablePlacements, figureCounterRef);
       await appendPlacedFigures(
         children,
         docxLib,
@@ -4829,7 +7167,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     for (const section of middle) {
-      children.push(...buildNarrativeSectionBlocks(docxLib, colors, [section]));
+      await appendNarrativeSectionWithFigures(children, docxLib, colors, section, data, availablePlacements, figureCounterRef);
       await appendPlacedFigures(
         children,
         docxLib,
@@ -4840,22 +7178,13 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    const endFigures = getFigureFilesForPlacement(data, "end", availablePlacements);
-    if (endFigures.length) {
-      await appendPlacedFigures(children, docxLib, colors, endFigures, figureCounterRef, {
-        withHeading: true,
-        heading: "Figures / Screenshots",
-        figureDetails: data.figureDetails
-      });
-    }
-
     const supportParagraphs = buildSupportingMaterialParagraphs(docxLib, colors, data);
     if (supportParagraphs.length) {
       children.push(buildNomuraSubhead(docxLib, colors, "Model Files"), ...supportParagraphs);
     }
 
     if (cordobaView?.content) {
-      children.push(...buildNarrativeSectionBlocks(docxLib, colors, [cordobaView]));
+      await appendNarrativeSectionWithFigures(children, docxLib, colors, cordobaView, data, availablePlacements, figureCounterRef);
       await appendPlacedFigures(
         children,
         docxLib,
@@ -4864,6 +7193,13 @@ document.addEventListener("DOMContentLoaded", () => {
         figureCounterRef,
         { figureDetails: data.figureDetails }
       );
+    }
+
+    const endFigures = getFigureFilesForPlacement(data, "end", availablePlacements);
+    if (endFigures.length) {
+      await appendPlacedFigures(children, docxLib, colors, endFigures, figureCounterRef, {
+        figureDetails: data.figureDetails
+      });
     }
 
     return buildResearchDocumentShell(
@@ -4950,6 +7286,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function buildEquityFrontPageTable(docxLib, colors, data, publicationDate, analystContacts, keyTakeawaysSection) {
+    const availablePlacements = new Set(getFigurePlacementOptions(data.noteType).map((option) => option.value));
     const leftColumnChildren = [
       new docxLib.Paragraph({
         children: [
@@ -4989,7 +7326,7 @@ document.addEventListener("DOMContentLoaded", () => {
       buildKeyTakeawaysBox(
         docxLib,
         colors,
-        lineItems(keyTakeawaysSection?.content || data.keyTakeaways),
+        lineItems(replaceFigureReferenceTokens(keyTakeawaysSection?.content || data.keyTakeaways, data, availablePlacements)),
         keyTakeawaysSection?.label || "Key Takeaways"
       )
     ];
@@ -5339,7 +7676,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   alignment: docxLib.AlignmentType.CENTER,
                   children: [
                     new docxLib.TextRun({
-                      text: formatFinancialCellForExport(value, row.label),
+                      text: formatFinancialCellForExport(value, row),
                       size: 11,
                       color: colors.black,
                       font: "Arial"
@@ -5378,9 +7715,29 @@ document.addEventListener("DOMContentLoaded", () => {
             font: "Arial"
           })
         ],
-        spacing: { before: 18, after: 65 }
-      })
+        spacing: { before: 18, after: data.financialTableNotes ? 16 : 65 }
+      }),
+      ...(data.financialTableNotes
+        ? buildFinancialTableNoteParagraphs(docxLib, colors, data.financialTableNotes)
+        : [])
     ];
+  }
+
+  function buildFinancialTableNoteParagraphs(docxLib, colors, text) {
+    const blocks = paragraphBlocks(text);
+    return blocks.map((block, index) =>
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.TextRun({
+            text: block.replace(/\s*\n\s*/g, " "),
+            size: 11,
+            color: colors.muted,
+            font: "Arial"
+          })
+        ],
+        spacing: { after: index === blocks.length - 1 ? 65 : 18 }
+      })
+    );
   }
 
   function pruneEmptyFinancialRows(matrix) {
@@ -5431,6 +7788,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .slice(hasExplicitHeader ? 1 : 0)
       .map((cells) => ({
         label: cells[0] || "",
+        format: "auto",
         values: normalizeFinancialValues(cells.slice(1), headers.length)
       }))
       .filter((row) => row.label || row.values.some((value) => String(value || "").trim()));
@@ -5446,6 +7804,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rows = rawRows
       .map((row) => ({
         label: String(row?.label || ""),
+        format: normalizeFinancialRowFormat(row?.format),
         values: normalizeFinancialValues(Array.isArray(row?.values) ? row.values : [], normalizedHeaders.length)
       }));
 
@@ -5481,6 +7840,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return metrics.map((label) => ({
       label,
+      format: "auto",
       values: Array.from({ length: columnCount }, () => "")
     }));
   }
@@ -5548,8 +7908,8 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  function formatFinancialCellForExport(value, rowLabel) {
-    const formatted = formatFinancialValueForDisplay(value, rowLabel);
+  function formatFinancialCellForExport(value, rowOrLabel) {
+    const formatted = formatFinancialValueForDisplay(value, rowOrLabel);
     return formatted || "-";
   }
 
@@ -5681,9 +8041,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function buildMacroFiProfileTable(docxLib, colors, data) {
     const heading = data.macroFiHeading || (data.noteType === "Fixed Income Research" ? "Ratings Overview" : "Sovereign Ratings");
-    const countryLabel = getCoverageCountryLabel(data.coverageCountry);
-    const issuerNumber = data.issuerId || "N/A";
-    const showMetadataTable = data.noteType === "Macro Research" || Boolean(data.coverageCountry || data.issuerId);
+    const metadataItems = buildMacroFiMetadataItems(data);
+    const metadataRows = [];
+    for (let index = 0; index < metadataItems.length; index += 2) {
+      metadataRows.push(metadataItems.slice(index, index + 2));
+    }
+    const showMetadataTable = data.noteType === "Macro Research" || metadataItems.length;
     const ratings = (Array.isArray(data.ratingsProfile) && data.ratingsProfile.length
       ? data.ratingsProfile
       : [{
@@ -5703,13 +8066,12 @@ document.addEventListener("DOMContentLoaded", () => {
         insideHorizontal: { style: docxLib.BorderStyle.NONE },
         insideVertical: { style: docxLib.BorderStyle.NONE }
       },
-      rows: [
+      rows: (metadataRows.length ? metadataRows : [[
+        { label: "Coverage Country", value: "N/A" },
+        { label: "Issuer Number", value: "N/A" }
+      ]]).map((row) =>
         new docxLib.TableRow({
-          children: [
-            ...[
-              { label: "Coverage Country", value: countryLabel },
-              { label: "Issuer Number", value: issuerNumber }
-            ].map((cell) =>
+          children: (row.length === 1 ? [...row, { label: "", value: "" }] : row).map((cell) =>
               new docxLib.TableCell({
                 width: { size: 50, type: docxLib.WidthType.PERCENTAGE },
                 borders: {
@@ -5745,10 +8107,9 @@ document.addEventListener("DOMContentLoaded", () => {
                   })
                 ]
               })
-            )
-          ]
+          )
         })
-      ]
+      )
     });
 
     const ratingsTable = new docxLib.Table({
@@ -5850,8 +8211,26 @@ document.addEventListener("DOMContentLoaded", () => {
           new docxLib.Paragraph({ spacing: { after: 24 } })
         ]
         : []),
-      ratingsTable
+      ratingsTable,
+      ...(data.ratingsProfileNotes ? buildRatingsTableNoteParagraphs(docxLib, colors, data.ratingsProfileNotes) : [])
     ];
+  }
+
+  function buildRatingsTableNoteParagraphs(docxLib, colors, text) {
+    const blocks = paragraphBlocks(text);
+    return blocks.map((block, index) =>
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.TextRun({
+            text: block.replace(/\s*\n\s*/g, " "),
+            size: 11,
+            color: colors.muted,
+            font: "Arial"
+          })
+        ],
+        spacing: { before: index === 0 ? 18 : 0, after: index === blocks.length - 1 ? 42 : 12 }
+      })
+    );
   }
 
   async function buildEquityOnlyImageParagraphs(docxLib, colors, files, figureDetails = {}) {
@@ -6176,9 +8555,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function buildNomuraTitlePanel(docxLib, colors, data, analystContacts, publicationDate) {
     const analystDesk = data.deskLine || getDeskLine();
-    const showCoverageMeta = data.noteType === "Macro Research" || (isMacroFiNoteType(data.noteType) && (data.coverageCountry || data.issuerId));
+    const macroMetadataItems = buildMacroFiMetadataItems(data).slice(0, 4);
+    const showCoverageMeta = data.noteType === "Macro Research" || (isMacroFiNoteType(data.noteType) && macroMetadataItems.length);
     const coverageMeta = showCoverageMeta
-      ? `Coverage Country: ${getCoverageCountryLabel(data.coverageCountry)} | Issuer Number: ${data.issuerId || "N/A"}`
+      ? macroMetadataItems.map((item) => `${item.label}: ${item.value}`).join(" | ")
       : "";
 
     return new docxLib.Table({
@@ -6385,27 +8765,109 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function buildNomuraBodyParagraphs(docxLib, text) {
-    const blocks = paragraphBlocks(text);
+    const blocks = Array.isArray(text) ? text : parseRichTextBlocks(text);
     if (!blocks.length) {
       return [new docxLib.Paragraph({ text: "No content supplied.", spacing: { after: 44 } })];
     }
 
-    return blocks.flatMap((block, index) => {
-      const paragraphs = [
-        new docxLib.Paragraph({
-          children: [
-            new docxLib.TextRun({
-              text: block.replace(/\s*\n\s*/g, " "),
-              font: "Arial",
-              size: 18,
-              color: "1B1F24"
-            })
-          ],
-          spacing: { after: 0 }
-        })
-      ];
+    const alignmentMap = {
+      left: docxLib.AlignmentType?.LEFT || "left",
+      center: docxLib.AlignmentType?.CENTER || "center",
+      right: docxLib.AlignmentType?.RIGHT || "right",
+      justify: docxLib.AlignmentType?.JUSTIFIED || "both"
+    };
 
-      if (index < blocks.length - 1) {
+    const getBlockFormat = (block) => {
+      const style = normalizeParagraphStyle(block?.style);
+      const align = normalizeParagraphAlignment(block?.align);
+
+      if (style === "subheading") {
+        return {
+          size: 20,
+          color: "845F0F",
+          bold: true,
+          italics: false,
+          indent: undefined,
+          alignment: alignmentMap[align]
+        };
+      }
+
+      if (style === "quote") {
+        return {
+          size: 17,
+          color: "5D6470",
+          bold: false,
+          italics: true,
+          indent: { left: 220, right: 120 },
+          alignment: alignmentMap[align]
+        };
+      }
+
+      if (style === "source-note") {
+        return {
+          size: 14,
+          color: "6B7280",
+          bold: false,
+          italics: false,
+          indent: undefined,
+          alignment: alignmentMap[align]
+        };
+      }
+
+      return {
+        size: 18,
+        color: "1B1F24",
+        bold: false,
+        italics: false,
+        indent: undefined,
+        alignment: alignmentMap[align]
+      };
+    };
+
+    const makeRuns = (runs, baseFormat, withPrefix = null) => {
+      const children = [];
+
+      if (withPrefix) {
+        children.push(
+          new docxLib.TextRun({
+            text: withPrefix,
+            bold: true,
+            font: "Arial",
+            size: baseFormat.size,
+            color: baseFormat.color
+          })
+        );
+      }
+
+      runs.forEach((run) => {
+        if (run.break) {
+          children.push(new docxLib.TextRun({ text: "", break: 1 }));
+          return;
+        }
+
+        children.push(
+          new docxLib.TextRun({
+            text: run.text,
+            bold: Boolean(run.bold) || baseFormat.bold,
+            italics: Boolean(run.italic) || baseFormat.italics,
+            underline: run.underline ? { type: docxLib.UnderlineType?.SINGLE || "single" } : undefined,
+            font: "Arial",
+            size: baseFormat.size,
+            color: baseFormat.color
+          })
+        );
+      });
+
+      return children;
+    };
+
+    return blocks.flatMap((block, index) => {
+      const paragraphs = [];
+      const baseFormat = getBlockFormat(block);
+      const hasNextVisibleBlock = blocks.slice(index + 1).some((entry) => entry.type !== "spacer");
+
+      if (block.type === "spacer") {
+        if (!hasNextVisibleBlock || index === 0) return paragraphs;
         paragraphs.push(
           new docxLib.Paragraph({
             children: [
@@ -6416,6 +8878,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 color: "1B1F24"
               })
             ],
+            spacing: { after: 0 }
+          })
+        );
+        return paragraphs;
+      }
+
+      if (block.type === "list") {
+        block.items.forEach((item, itemIndex) => {
+          const prefix = block.ordered ? `${itemIndex + 1}. ` : "• ";
+          paragraphs.push(
+            new docxLib.Paragraph({
+              indent: { left: 180, hanging: 120 },
+              alignment: baseFormat.alignment,
+              children: makeRuns(item.runs, baseFormat, prefix),
+              spacing: { after: itemIndex === block.items.length - 1 ? 0 : 18 }
+            })
+          );
+        });
+      } else {
+        paragraphs.push(
+          new docxLib.Paragraph({
+            alignment: baseFormat.alignment,
+            indent: baseFormat.indent,
+            children: makeRuns(block.runs, baseFormat),
             spacing: { after: 0 }
           })
         );
@@ -6482,7 +8968,7 @@ document.addEventListener("DOMContentLoaded", () => {
           alignment: docxLib.AlignmentType.CENTER,
           children: [
             new docxLib.TextRun({
-              text: `Figure 1. ${(data.ticker || "Security").toUpperCase()} price performance`,
+              text: `Figure 1: ${(data.ticker || "Security").toUpperCase()} price performance`,
               italics: true,
               color: colors.muted,
               size: 15,
@@ -6649,45 +9135,248 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function buildImageParagraphs(docxLib, files, colors, startIndex = 1, figureDetails = {}) {
     const output = [];
+    const numberLookup = Object.fromEntries(files.map((file, index) => [figureFileKey(file), startIndex + index]));
+    const consumed = new Set();
 
-    for (let index = 0; index < files.length; index += 1) {
-      const file = files[index];
-      const buffer = await file.arrayBuffer();
-      const size = await getImageFit(file, 560, 320);
-      const figureKey = figureFileKey(file);
-      const detail = figureDetails[figureKey] || {};
-      const labelType = detail.labelType || defaultFigureLabelType(file);
-      const labelNumber = sanitizeFigureNumber(detail.labelNumber, startIndex + index);
-      const caption = detail.caption || defaultFigureCaption(file);
+    for (const file of files) {
+      const key = figureFileKey(file);
+      if (consumed.has(key)) continue;
+      const autoNumber = numberLookup[key] || startIndex;
+      const detail = resolveFigureDetailForOutput(file, autoNumber, figureDetails);
+      const pair = findFigurePairForFile(file, files, figureDetails, numberLookup, consumed);
 
-      output.push(
-        new docxLib.Paragraph({
-          children: [
-            new docxLib.ImageRun({
-              data: buffer,
-              transformation: size
-            })
-          ],
-          alignment: docxLib.AlignmentType.CENTER,
-          spacing: { before: 45, after: 45 }
-        }),
-        new docxLib.Paragraph({
-          alignment: docxLib.AlignmentType.CENTER,
-          children: [
-            new docxLib.TextRun({
-              text: `${labelType} ${labelNumber}. ${caption}`,
-              italics: true,
-              color: colors.muted,
-              size: 15,
-              font: "Arial"
-            })
-          ],
-          spacing: { after: 85 }
-        })
-      );
+      if (pair) {
+        const firstKey = figureFileKey(pair.first);
+        const secondKey = figureFileKey(pair.second);
+        const firstNumber = numberLookup[firstKey] || autoNumber;
+        const secondNumber = numberLookup[secondKey] || autoNumber + 1;
+        const firstDetail = resolveFigureDetailForOutput(pair.first, firstNumber, figureDetails);
+        const secondDetail = resolveFigureDetailForOutput(pair.second, secondNumber, figureDetails);
+        output.push(await buildFigurePairTable(docxLib, colors, pair.first, firstDetail, firstNumber, pair.second, secondDetail, secondNumber));
+        output.push(new docxLib.Paragraph({ spacing: { after: 72 } }));
+        consumed.add(firstKey);
+        consumed.add(secondKey);
+        continue;
+      }
+
+      output.push(...await buildFigureDocxBlocks(docxLib, colors, file, detail, autoNumber));
+      consumed.add(key);
     }
 
     return output;
+  }
+
+  async function buildFigureDocxBlocks(docxLib, colors, file, detail, autoNumber, options = {}) {
+    const paired = Boolean(options.paired);
+    const label = buildFigureLabel(detail, autoNumber);
+    const title = buildFigureTitleText(detail, file);
+    const displayTitle = `${label}: ${title}`;
+    const subtitle = String(detail.subtitle || "").trim();
+    const takeaway = String(detail.takeaway || "").trim();
+    const footerText = buildFigureFooterText(detail.source, detail.notes);
+    const imageAsset = await getFigureImageAsset(file, detail, { paired });
+    const center = docxLib.AlignmentType.CENTER;
+    const titleSize = paired ? 15 : 18;
+    const subtitleSize = paired ? 12 : 14;
+
+    return [
+      new docxLib.Paragraph({
+        alignment: center,
+        children: [
+          new docxLib.TextRun({
+            text: displayTitle,
+            bold: true,
+            color: colors.black,
+            size: titleSize,
+            font: "Arial"
+          })
+        ],
+        keepNext: true,
+        spacing: { before: paired ? 16 : 58, after: subtitle || takeaway ? 4 : 16 }
+      }),
+      ...(subtitle ? [new docxLib.Paragraph({
+        alignment: center,
+        children: [
+          new docxLib.TextRun({
+            text: subtitle,
+            color: colors.muted,
+            size: subtitleSize,
+            font: "Arial"
+          })
+        ],
+        keepNext: true,
+        spacing: { after: takeaway ? 3 : 14 }
+      })] : []),
+      ...(takeaway ? [new docxLib.Paragraph({
+        alignment: center,
+        children: [
+          new docxLib.TextRun({
+            text: takeaway,
+            bold: true,
+            color: colors.redDark,
+            size: paired ? 11 : 13,
+            font: "Arial"
+          })
+        ],
+        keepNext: true,
+        spacing: { after: 14 }
+      })] : []),
+      new docxLib.Paragraph({
+        children: [
+          new docxLib.ImageRun({
+            data: imageAsset.data,
+            transformation: imageAsset.transformation
+          })
+        ],
+        alignment: center,
+        keepNext: Boolean(footerText),
+        spacing: { before: 0, after: footerText ? 14 : (paired ? 26 : 82) }
+      }),
+      ...(footerText
+        ? [new docxLib.Paragraph({
+          alignment: center,
+          children: [
+            new docxLib.TextRun({
+              text: footerText,
+              color: colors.muted,
+              size: paired ? 10 : 12,
+              font: "Arial"
+            })
+          ],
+          spacing: { before: 8, after: paired ? 18 : 82 }
+        })]
+        : [])
+    ];
+  }
+
+  async function buildFigurePairTable(docxLib, colors, leftFile, leftDetail, leftNumber, rightFile, rightDetail, rightNumber) {
+    const borders = buildNoBorderTableBorders(docxLib);
+    return new docxLib.Table({
+      width: { size: 100, type: docxLib.WidthType.PERCENTAGE },
+      borders,
+      rows: [
+        new docxLib.TableRow({
+          children: [
+            new docxLib.TableCell({
+              width: { size: 50, type: docxLib.WidthType.PERCENTAGE },
+              margins: { top: 0, bottom: 0, left: 0, right: 70 },
+              borders,
+              children: await buildFigureDocxBlocks(docxLib, colors, leftFile, leftDetail, leftNumber, { paired: true })
+            }),
+            new docxLib.TableCell({
+              width: { size: 50, type: docxLib.WidthType.PERCENTAGE },
+              margins: { top: 0, bottom: 0, left: 70, right: 0 },
+              borders,
+              children: await buildFigureDocxBlocks(docxLib, colors, rightFile, rightDetail, rightNumber, { paired: true })
+            })
+          ]
+        })
+      ]
+    });
+  }
+
+  function buildNoBorderTableBorders(docxLib) {
+    return {
+      top: { style: docxLib.BorderStyle.NONE },
+      bottom: { style: docxLib.BorderStyle.NONE },
+      left: { style: docxLib.BorderStyle.NONE },
+      right: { style: docxLib.BorderStyle.NONE },
+      insideHorizontal: { style: docxLib.BorderStyle.NONE },
+      insideVertical: { style: docxLib.BorderStyle.NONE }
+    };
+  }
+
+  async function getFigureImageAsset(file, detail = {}, options = {}) {
+    const cropMode = sanitizeFigureCropMode(detail.cropMode);
+    const [maxWidth, maxHeight] = getFigureExportBounds(detail, options);
+
+    if (cropMode === "fill" || cropMode === "fixed") {
+      const data = await buildFigureCanvasBuffer(file, maxWidth, maxHeight, cropMode === "fill" ? "cover" : "contain");
+      if (data) return { data, transformation: { width: maxWidth, height: maxHeight } };
+    }
+
+    return {
+      data: await file.arrayBuffer(),
+      transformation: await getImageFit(file, maxWidth, maxHeight)
+    };
+  }
+
+  function buildFigureCanvasBuffer(file, width, height, mode) {
+    return new Promise((resolve) => {
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      image.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Canvas context unavailable");
+
+          context.fillStyle = "#ffffff";
+          context.fillRect(0, 0, width, height);
+
+          const imageRatio = image.naturalWidth / image.naturalHeight;
+          const canvasRatio = width / height;
+          let drawWidth = width;
+          let drawHeight = height;
+          let drawX = 0;
+          let drawY = 0;
+
+          if (mode === "cover" ? imageRatio > canvasRatio : imageRatio < canvasRatio) {
+            drawHeight = height;
+            drawWidth = height * imageRatio;
+            drawX = (width - drawWidth) / 2;
+          } else {
+            drawWidth = width;
+            drawHeight = width / imageRatio;
+            drawY = (height - drawHeight) / 2;
+          }
+
+          context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+          canvas.toBlob(async (blob) => {
+            URL.revokeObjectURL(objectUrl);
+            resolve(blob ? await blob.arrayBuffer() : null);
+          }, "image/png", 0.92);
+        } catch (error) {
+          URL.revokeObjectURL(objectUrl);
+          console.warn("Unable to render cropped figure image:", error);
+          resolve(null);
+        }
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(null);
+      };
+
+      image.src = objectUrl;
+    });
+  }
+
+  function getFigureExportBounds(detail = {}, options = {}) {
+    const displayMode = options.paired ? "inline" : sanitizeFigureDisplayMode(detail.displayMode);
+    const size = options.paired ? "small" : sanitizeFigureSize(detail.size);
+    const bounds = {
+      full: {
+        small: [455, 250],
+        medium: [520, 300],
+        large: [560, 330]
+      },
+      inline: {
+        small: [260, 168],
+        medium: [360, 220],
+        large: [430, 260]
+      }
+    };
+    const selected = bounds[displayMode]?.[size] || bounds.full.medium;
+
+    if (sanitizeFigureCropMode(detail.cropMode) === "fixed") {
+      return [selected[0], Math.round(selected[0] * 0.5625)];
+    }
+
+    return selected;
   }
 
   function formatProductionTimestamp(date) {
@@ -6746,6 +9435,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
 
       image.src = objectUrl;
+
     });
   }
 });
