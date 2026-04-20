@@ -8770,9 +8770,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return [new docxLib.Paragraph({ text: "No content supplied.", spacing: { after: 44 } })];
     }
 
-    const paragraphSpacingAfter = 84;
-    const compactSpacingAfter = 46;
-    const spacerParagraphSpacingAfter = 112;
+    const paragraphSpacingAfter = 48;
+    const compactSpacingAfter = 28;
+    const spacerParagraphSpacingAfter = 54;
 
     const alignmentMap = {
       left: docxLib.AlignmentType?.LEFT || "left",
@@ -8896,7 +8896,7 @@ document.addEventListener("DOMContentLoaded", () => {
               indent: { left: 180, hanging: 120 },
               alignment: baseFormat.alignment,
               children: makeRuns(item.runs, baseFormat, prefix),
-              spacing: { after: itemIndex === block.items.length - 1 ? paragraphSpacingAfter : 18, line: 220 }
+              spacing: { after: itemIndex === block.items.length - 1 ? paragraphSpacingAfter : 10, line: 220 }
             })
           );
         });
@@ -8907,7 +8907,7 @@ document.addEventListener("DOMContentLoaded", () => {
             indent: baseFormat.indent,
             children: makeRuns(block.runs, baseFormat),
             spacing: {
-              before: normalizeParagraphStyle(block.style) === "subheading" ? 42 : 0,
+              before: normalizeParagraphStyle(block.style) === "subheading" ? 24 : 0,
               after: normalizeParagraphStyle(block.style) === "source-note" ? compactSpacingAfter : paragraphSpacingAfter,
               line: 220
             }
