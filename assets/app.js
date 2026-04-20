@@ -5802,7 +5802,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function serializeRichTextBlocksToPreviewHtml(blocks) {
     return (blocks || []).map((block) => {
-      if (block.type === "spacer") return "";
+      if (block.type === "spacer") return '<p class="preview-rich-spacer"><br></p>';
       if (block.type === "list") {
         const tag = block.ordered ? "ol" : "ul";
         const align = normalizeParagraphAlignment(block.align);
@@ -8770,6 +8770,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return [new docxLib.Paragraph({ text: "No content supplied.", spacing: { after: 44 } })];
     }
 
+    const paragraphSpacingAfter = 84;
+    const compactSpacingAfter = 46;
+    const spacerParagraphSpacingAfter = 112;
+
     const alignmentMap = {
       left: docxLib.AlignmentType?.LEFT || "left",
       center: docxLib.AlignmentType?.CENTER || "center",
@@ -8867,7 +8871,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const hasNextVisibleBlock = blocks.slice(index + 1).some((entry) => entry.type !== "spacer");
 
       if (block.type === "spacer") {
-        if (!hasNextVisibleBlock || index === 0) return paragraphs;
+        if ((!hasNextVisibleBlock || index === 0) && blocks.length > 1) return paragraphs;
         paragraphs.push(
           new docxLib.Paragraph({
             children: [
@@ -8878,7 +8882,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 color: "1B1F24"
               })
             ],
-            spacing: { after: 0 }
+            spacing: { before: 0, after: spacerParagraphSpacingAfter }
           })
         );
         return paragraphs;
@@ -8892,7 +8896,7 @@ document.addEventListener("DOMContentLoaded", () => {
               indent: { left: 180, hanging: 120 },
               alignment: baseFormat.alignment,
               children: makeRuns(item.runs, baseFormat, prefix),
-              spacing: { after: itemIndex === block.items.length - 1 ? 0 : 18 }
+              spacing: { after: itemIndex === block.items.length - 1 ? paragraphSpacingAfter : 18, line: 220 }
             })
           );
         });
@@ -8902,7 +8906,11 @@ document.addEventListener("DOMContentLoaded", () => {
             alignment: baseFormat.alignment,
             indent: baseFormat.indent,
             children: makeRuns(block.runs, baseFormat),
-            spacing: { after: 0 }
+            spacing: {
+              before: normalizeParagraphStyle(block.style) === "subheading" ? 42 : 0,
+              after: normalizeParagraphStyle(block.style) === "source-note" ? compactSpacingAfter : paragraphSpacingAfter,
+              line: 220
+            }
           })
         );
       }
