@@ -1753,10 +1753,9 @@ document.addEventListener("DOMContentLoaded", () => {
       content: data.keyTakeaways
     };
 
-    const cordobaView = layout.find((entry) => entry.key === "cordobaView" && entry.content);
-    const middle = layout.filter((entry) => entry.key !== "keyTakeaways" && entry.key !== "cordobaView");
+    const middle = layout.filter((entry) => entry.key !== "keyTakeaways");
 
-    return { keyTakeaways, middle, cordobaView };
+    return { keyTakeaways, middle };
   }
 
   function buildNarrativeSectionBlocks(docxLib, colors, sections) {
@@ -3845,8 +3844,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const options = [];
     const layout = collectBodySectionLayout().filter((entry) => !entry.hidden);
     const keyTakeaways = layout.find((entry) => entry.key === "keyTakeaways");
-    const cordobaView = layout.find((entry) => entry.key === "cordobaView");
-    const middle = layout.filter((entry) => entry.key !== "keyTakeaways" && entry.key !== "cordobaView");
+    const middle = layout.filter((entry) => entry.key !== "keyTakeaways");
 
     if (noteType === "Equity Research") {
       appendFigureParagraphAnchorOptions(options, "businessDescription", "Business Description", dom.businessDescription?.value || "");
@@ -3860,8 +3858,6 @@ document.addEventListener("DOMContentLoaded", () => {
         appendFigureParagraphAnchorOptions(options, entry.key, entry.label, entry.content);
         options.push({ value: `after-${entry.key}`, label: `After ${entry.label}` });
       });
-      if (cordobaView) appendFigureParagraphAnchorOptions(options, "cordobaView", cordobaView.label, cordobaView.content);
-      if (cordobaView) options.push({ value: "after-cordobaView", label: `After ${cordobaView.label}` });
 
       options.push({ value: "end", label: "End of Note" });
       return options;
@@ -3877,8 +3873,6 @@ document.addEventListener("DOMContentLoaded", () => {
       appendFigureParagraphAnchorOptions(options, entry.key, entry.label, entry.content);
       options.push({ value: `after-${entry.key}`, label: `After ${entry.label}` });
     });
-    if (cordobaView) appendFigureParagraphAnchorOptions(options, "cordobaView", cordobaView.label, cordobaView.content);
-    if (cordobaView) options.push({ value: "after-cordobaView", label: `After ${cordobaView.label}` });
 
     options.push({ value: "end", label: "End of Note" });
     return options;
@@ -6759,9 +6753,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function buildPreviewMainPageHtml(data, publicationDate, analystContacts, availablePlacements, sections, pageNumber, totalPages) {
-    const middleSections = sections.filter((entry) => entry.key !== "keyTakeaways" && entry.key !== "cordobaView");
+    const middleSections = sections.filter((entry) => entry.key !== "keyTakeaways");
     const keyTakeaways = sections.find((entry) => entry.key === "keyTakeaways");
-    const cordobaView = sections.find((entry) => entry.key === "cordobaView");
     const previewParts = [`<article class="preview-export-page">`, buildPreviewBannerHtml(data, publicationDate)];
 
     if (data.noteType === "Equity Research") {
@@ -6799,7 +6792,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-valuationSummary"));
       }
+      let supportInsertedBeforeCordoba = false;
       middleSections.forEach((section) => {
+        if (section.key === "cordobaView" && !supportInsertedBeforeCordoba) {
+          previewParts.push(buildPreviewSupportHtml(data));
+          supportInsertedBeforeCordoba = true;
+        }
         previewParts.push(buildPreviewNarrativeHtml(section.label, section.content, {
           data,
           availablePlacements,
@@ -6807,15 +6805,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, `after-${section.key}`));
       });
-      previewParts.push(buildPreviewSupportHtml(data));
-      if (cordobaView?.content) {
-        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content, {
-          data,
-          availablePlacements,
-          sectionKey: "cordobaView"
-        }));
-        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-cordobaView"));
-      }
+      if (!supportInsertedBeforeCordoba) previewParts.push(buildPreviewSupportHtml(data));
       const endFigures = buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "end");
       if (endFigures) previewParts.push(endFigures);
     } else {
@@ -6850,15 +6840,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
         previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, `after-${section.key}`));
       });
-
-      if (cordobaView?.content) {
-        previewParts.push(buildPreviewNarrativeHtml(cordobaView.label, cordobaView.content, {
-          data,
-          availablePlacements,
-          sectionKey: "cordobaView"
-        }));
-        previewParts.push(buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "after-cordobaView"));
-      }
 
       const endFigures = buildPreviewFigureMarkup(data.imageFiles, data, availablePlacements, "end");
       if (endFigures) previewParts.push(endFigures);
@@ -6963,15 +6944,14 @@ document.addEventListener("DOMContentLoaded", () => {
       publicationDate
     });
     const analystContacts = collectAnalystContacts(data);
-    const { keyTakeaways, middle, cordobaView } = getNarrativeSectionPartitions(data);
+    const { keyTakeaways, middle } = getNarrativeSectionPartitions(data);
     const figureCounterRef = { value: 1 };
     const availablePlacements = new Set(getFigurePlacementOptions(data.noteType).map((option) => option.value));
 
     if (data.noteType === "Equity Research") {
       return createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystContacts, {
         keyTakeaways,
-        middle,
-        cordobaView
+        middle
       }, figureCounterRef);
     }
 
@@ -7025,18 +7005,6 @@ document.addEventListener("DOMContentLoaded", () => {
         docxLib,
         colors,
         getFigureFilesForPlacement(data, `after-${section.key}`, availablePlacements),
-        figureCounterRef,
-        { figureDetails: data.figureDetails }
-      );
-    }
-
-    if (cordobaView?.content) {
-      await appendNarrativeSectionWithFigures(documentChildren, docxLib, colors, cordobaView, data, availablePlacements, figureCounterRef);
-      await appendPlacedFigures(
-        documentChildren,
-        docxLib,
-        colors,
-        getFigureFilesForPlacement(data, "after-cordobaView", availablePlacements),
         figureCounterRef,
         { figureDetails: data.figureDetails }
       );
@@ -7116,7 +7084,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function createEquityResearchDocument(docxLib, colors, data, publicationDate, bannerBytes, analystContacts, narrativeSections, figureCounterRef) {
-    const { keyTakeaways, middle, cordobaView } = narrativeSections;
+    const { keyTakeaways, middle } = narrativeSections;
     const availablePlacements = new Set(getFigurePlacementOptions(data.noteType).map((option) => option.value));
     const children = [
       new docxLib.Paragraph({
@@ -7166,7 +7134,14 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
+    const supportParagraphs = buildSupportingMaterialParagraphs(docxLib, colors, data);
+    let supportInsertedBeforeCordoba = false;
+
     for (const section of middle) {
+      if (section.key === "cordobaView" && supportParagraphs.length && !supportInsertedBeforeCordoba) {
+        children.push(buildNomuraSubhead(docxLib, colors, "Model Files"), ...supportParagraphs);
+        supportInsertedBeforeCordoba = true;
+      }
       await appendNarrativeSectionWithFigures(children, docxLib, colors, section, data, availablePlacements, figureCounterRef);
       await appendPlacedFigures(
         children,
@@ -7178,21 +7153,8 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     }
 
-    const supportParagraphs = buildSupportingMaterialParagraphs(docxLib, colors, data);
-    if (supportParagraphs.length) {
+    if (supportParagraphs.length && !supportInsertedBeforeCordoba) {
       children.push(buildNomuraSubhead(docxLib, colors, "Model Files"), ...supportParagraphs);
-    }
-
-    if (cordobaView?.content) {
-      await appendNarrativeSectionWithFigures(children, docxLib, colors, cordobaView, data, availablePlacements, figureCounterRef);
-      await appendPlacedFigures(
-        children,
-        docxLib,
-        colors,
-        getFigureFilesForPlacement(data, "after-cordobaView", availablePlacements),
-        figureCounterRef,
-        { figureDetails: data.figureDetails }
-      );
     }
 
     const endFigures = getFigureFilesForPlacement(data, "end", availablePlacements);
