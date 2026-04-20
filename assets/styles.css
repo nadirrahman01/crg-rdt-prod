@@ -1094,6 +1094,14 @@ input[type="file"]::file-selector-button {
   margin: 0;
 }
 
+.rich-editor-surface p + p,
+.rich-editor-surface p + ul,
+.rich-editor-surface p + ol,
+.rich-editor-surface ul + p,
+.rich-editor-surface ol + p {
+  margin-top: 10px;
+}
+
 .rich-editor-surface ul,
 .rich-editor-surface ol {
   padding-left: 22px;
@@ -2272,9 +2280,16 @@ input[type="file"]::file-selector-button {
   margin: 0 0 11px;
 }
 
-.preview-export-section ul {
-  margin: 0;
+.preview-export-section ul,
+.preview-export-section ol {
+  margin: 0 0 11px;
   padding-left: 18px;
+}
+
+.preview-rich-spacer,
+.preview-export-section .preview-rich-spacer {
+  min-height: 1.05em;
+  margin: 0 0 15px;
 }
 
 .preview-export-section .rich-text-subheading {
